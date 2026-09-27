@@ -142,10 +142,27 @@ export const INTERNAL_CHANNELS = {
    * electron-log's own preload provided in the vendor app) for the main log (src/main/renderer-log.ts).
    */
   rendererLog: 'evnia:renderer-log',
+  /**
+   * invoke: (enabled: boolean) → ExperimentalState. window.__EVNIA__.experimental.setEneFrameBurst, the Ambiglow
+   * page's "Fast LED upload (experimental)" checkbox (scripts/ui-patches.mjs FAST-LED-UPLOAD): main validates the
+   * type, stores config.json linuxExperimental.eneFrameBurst and switches the backend (ENE frame burst). Main window only.
+   */
+  experimentalSet: 'evnia:experimental-set',
   /** capture window → main (src/capture/protocol.ts). */
   captureFrame: 'evnia:capture-frame',
   captureStatus: 'evnia:capture-status',
 } as const;
+
+/** window.__EVNIA__.experimental.get(): the port's opt-in experiments (config.json linuxExperimental). */
+export interface ExperimentalState {
+  /** The "Fast LED upload (experimental)" setting: config.json linuxExperimental.eneFrameBurst (missing = false). */
+  eneFrameBurst: boolean;
+  /** EVNIA_ENE_FRAME_BURST=1 in the app's environment: the frame burst is on whatever the setting. */
+  forcedByEnv: boolean;
+}
+
+/** What windows other than the main window (and refused senders) see. */
+export const EXPERIMENTAL_NONE: Readonly<ExperimentalState> = Object.freeze({ eneFrameBurst: false, forcedByEnv: false });
 
 /** The vendor electron-store sync channel (01 §10.1 #50), kept for compatibility. */
 export const ELECTRON_STORE_SYNC_CHANNEL = 'electron-store-get-data';
@@ -155,6 +172,8 @@ export interface BootstrapData {
   store: Record<string, unknown>;
   /** Per-launch hub token for the main window, '' for other windows. */
   hubToken: string;
+  /** The experiments' state at load for the main window (window.__EVNIA__.experimental.get()); EXPERIMENTAL_NONE otherwise. */
+  experimental: ExperimentalState;
 }
 
 /** Result envelope of the synchronous nodeApi channels (errors cannot cross sendSync as throws). */

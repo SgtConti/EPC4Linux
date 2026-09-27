@@ -184,3 +184,37 @@ test('stop() during the start waits for it and stops the backend; no hub is left
   assert.equal(bh.port, null);
   assert.equal(await bh.ensureStarted(), -1, 'no restart after stop');
 });
+
+test('the "Fast LED upload" setting: the backend is created with the stored value, and later changes reach its ambiglow service', async () => {
+  const host = mainHost(dir);
+  assert.deepEqual(backendConfiguration({ host, mockMonitor: '34M2C8600', eneFrameBurst: true }).overrides, { ambiglow: { eneFrameBurst: true } });
+  assert.deepEqual(backendConfiguration({ host, mockMonitor: '34M2C8600', eneFrameBurst: false }).overrides, {}, 'off is the default: nothing passed');
+
+  let stored = true;
+  const seen: Array<boolean | undefined> = [];
+  const switched: boolean[] = [];
+  const backend = fakeBackend();
+  (backend as { services: unknown }).services = { ambiglow: { setEneFrameBurst: (on: boolean) => void switched.push(on) } };
+  const bh = new BackendHost({
+    host,
+    log,
+    token: generateHubToken(),
+    mockMonitor: '34M2C8600',
+    eneFrameBurst: () => stored,
+    createBackend: (_options, overrides) => {
+      seen.push(overrides.ambiglow?.eneFrameBurst);
+      return backend;
+    },
+  });
+  bh.setEneFrameBurst(false); // before the backend exists: nothing to switch, the creation reads the setting
+  stored = false;
+  assert.ok((await bh.ensureStarted()) > 0);
+  assert.deepEqual(seen, [undefined], 'created with the stored (now off) setting');
+  bh.setEneFrameBurst(true);
+  bh.setEneFrameBurst(false);
+  assert.deepEqual(switched, [true, false]);
+  // An ambiglow service without the optional member (an older stand-in) is left alone.
+  (backend as { services: unknown }).services = { ambiglow: {} };
+  bh.setEneFrameBurst(true);
+  await bh.stop();
+});

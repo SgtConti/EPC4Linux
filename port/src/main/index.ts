@@ -10,6 +10,7 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { app, BrowserWindow, dialog, ipcMain, Menu, nativeTheme, powerMonitor, protocol, screen, session, type Display } from 'electron';
+import { eneFrameBurstFromEnv } from '../backend/ambiglow/ene.ts';
 import { generateHubToken } from '../backend/index.ts';
 import { createLogger, type LogLevel } from '../backend/core/log.ts';
 import { defaultAppTempDir } from '../backend/theme/paths.ts';
@@ -36,6 +37,8 @@ import { installMockProbe } from './mock-probe.ts';
 import { buildMonitorJsonConfig, loadMonitorInfo, type MonitorJsonConfig } from './monitor-info.ts';
 import { installNetworkGuard, redactUrl } from './network-guard.ts';
 import { type AppPaths, clearDebugFlag, debugFlagSet, resolveAppPaths, selfDesktopFile, USER_DATA_NAME, userRuntimeDir } from './paths.ts';
+import { ExperimentalSettings } from './experimental.ts';
+import type { ExperimentalState } from './shared/channels.ts';
 import { VENDOR_APP_VERSION } from './shared/store-schema.ts';
 import { ConfigStore } from './store.ts';
 import { TrayController } from './tray.ts';
@@ -66,6 +69,8 @@ class EvniaApp implements IpcHost {
   readonly #displayModes: DisplayModeProvider | null;
   /** PATH_APP_TEMP: Comm_GenAppIcon writes there (backend), local: serves it (main). */
   readonly #appTempDir = defaultAppTempDir(process.env);
+  /** The port's experiments (config.json linuxExperimental): the "Fast LED upload (experimental)" checkbox. */
+  readonly #experimental: ExperimentalSettings;
   #language: string;
   #monitorConfig: MonitorJsonConfig | null = null;
   #appReady = false;
@@ -151,6 +156,15 @@ class EvniaApp implements IpcHost {
       usb: this.#usb,
       mockMonitor,
       appTempDir: this.#appTempDir,
+      // The Ambiglow page's "Fast LED upload (experimental)" checkbox, as stored: the backend starts with it.
+      eneFrameBurst: () => this.#experimental.eneFrameBurst,
+    });
+    // ...and follows every change of the stored setting (experimental.ts): config.json is the one source of truth.
+    this.#experimental = new ExperimentalSettings({
+      store: this.store,
+      backend: this.#backend,
+      forcedByEnv: eneFrameBurstFromEnv(process.env),
+      log: log.child('experimental'),
     });
     if (mockMonitor) log.info(`EVNIA_MOCK_MONITOR=${mockMonitor}: simulated monitor, no hardware access`);
   }
@@ -314,6 +328,14 @@ class EvniaApp implements IpcHost {
     if (flags.exitDisabled !== undefined) this.#trayExitDisabled = flags.exitDisabled;
     if (flags.functionDisabled !== undefined) this.#trayFunctionDisabled = flags.functionDisabled;
     this.#tray.refresh();
+  }
+
+  experimental(): ExperimentalState {
+    return this.#experimental.state();
+  }
+
+  setEneFrameBurst(enabled: boolean): ExperimentalState {
+    return this.#experimental.setEneFrameBurst(enabled);
   }
 
   // ───────────── exit ─────────────

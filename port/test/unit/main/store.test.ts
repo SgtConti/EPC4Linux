@@ -6,6 +6,7 @@ import { afterEach, beforeEach, test } from 'node:test';
 import { createLogger, silentSink } from '../../../src/backend/core/log.ts';
 import {
   deletePath,
+  ENE_FRAME_BURST_KEY,
   getPath,
   normalizeStoreData,
   serializeStore,
@@ -29,7 +30,9 @@ test('schema reproduces the vendor keys and defaults (01 §6) with update/login 
     'language', 'dashboardPreview', 'dashboardPreviewEnable', 'dashboardLocation', 'autoStartup', 'autoStartupMinimize',
     'noticeSwitch', 'noticeSound', 'noticeStyle', 'autoUpdate', 'latestSoftwareInfo', 'ignoreVersion', 'automaticUpdate',
     'tutorials', 'userInfo', 'email', 'password', 'skipLoginState', 'mainWindowBounds', 'overviewType', 'ambiScapeEnable',
+    'linuxExperimental', // port-only: the opt-in experiments ("Fast LED upload")
   ]);
+  assert.equal(STORE_SCHEMA.linuxExperimental.default, undefined, 'no default: a config.json without it is not rewritten');
   assert.equal(STORE_SCHEMA.autoStartup.default, false, 'Linux default (01 port plan 6): no login autostart until enabled');
   assert.equal(STORE_SCHEMA.autoStartupMinimize.default, true);
   assert.equal(STORE_SCHEMA.overviewType.default, 'category');
@@ -48,6 +51,20 @@ test("the user's real Windows config.json loads unchanged except for the pinned 
   assert.deepEqual(Object.keys(data), Object.keys(original));
   assert.equal(data.languageTemp, 'en');
   assert.equal(data.autoStartup, true, "the user's explicit choice survives the Linux default");
+});
+
+test('linuxExperimental (port-only): an object, no default; linuxExperimental.eneFrameBurst is the "Fast LED upload" setting', () => {
+  assert.equal(ENE_FRAME_BURST_KEY, 'linuxExperimental.eneFrameBurst');
+  assert.equal(writeError(ENE_FRAME_BURST_KEY, true), null);
+  assert.equal(writeError('linuxExperimental', { eneFrameBurst: false }), null);
+  assert.match(writeError('linuxExperimental', true)!, /must be object/);
+  const data: Record<string, unknown> = { linuxExperimental: 'on' };
+  assert.ok(normalizeStoreData(data).includes('dropped linuxExperimental (not a object)'));
+  assert.equal('linuxExperimental' in data, false, 'dropped, and not re-added as a default');
+  const store = new ConfigStore(join(dir, 'config.json'), log);
+  store.set(ENE_FRAME_BURST_KEY, true);
+  assert.deepEqual(JSON.parse(readFileSync(join(dir, 'config.json'), 'utf8')).linuxExperimental, { eneFrameBurst: true });
+  assert.equal(new ConfigStore(join(dir, 'config.json'), log).get(ENE_FRAME_BURST_KEY), true, 'kept across loads');
 });
 
 test('a fresh config does not enable login autostart', () => {

@@ -11,6 +11,10 @@
 //   - autoStartup defaults to false (01 port plan 6): a fresh install does not add itself to the
 //     session autostart until the user enables it; an explicit value from an existing file is kept.
 //   - userInfo / email / password / latestSoftwareInfo are cloud-only and never persisted (01 port plan 1).
+//   - linuxExperimental (port-only, not in `Qd`): the port's opt-in experiments, {"eneFrameBurst": boolean} = the
+//     Ambiglow page's "Fast LED upload (experimental)" checkbox. Typed as an object, no default: a file without it
+//     loads unchanged and means "off". The Windows app ignores it (electron-store keeps unknown keys, like the
+//     installer's languageTemp).
 
 export type StoreValueType = 'string' | 'number' | 'boolean' | 'object';
 
@@ -46,7 +50,14 @@ export const STORE_SCHEMA: Readonly<Record<string, StoreKeySpec>> = {
   mainWindowBounds: { type: 'object' },
   overviewType: { type: 'string', default: 'category' },
   ambiScapeEnable: { type: 'boolean', default: false },
+  // Linux port only (see the header); no default, so an existing config.json is not rewritten for it.
+  linuxExperimental: { type: 'object' },
 };
+
+/** config.json key of the port's experiments ({"eneFrameBurst": boolean}); not a vendor key. */
+export const EXPERIMENTAL_KEY = 'linuxExperimental';
+/** The "Fast LED upload (experimental)" setting (ENE frame burst, impl-usb-ene §2.2): true = on; missing = off. */
+export const ENE_FRAME_BURST_KEY = `${EXPERIMENTAL_KEY}.eneFrameBurst`;
 
 /** Keys pinned to a fixed value on Linux: no self-updater and no cloud account exist. */
 export const FORCED_VALUES: Readonly<Record<string, unknown>> = {

@@ -69,7 +69,7 @@ test('load with the ENE present: checkEne → ENE mode, the stored FollowVideo i
   }
 });
 
-test('Effect_GetMenu with the ENE = 20-enum §6.1 byte for byte, except the FollowVideo Speed slider (deviation 17)', async () => {
+test('Effect_GetMenu with the ENE = 20-enum §6.1 byte for byte, except the FollowVideo Speed and Brightness sliders (deviation 17)', async () => {
   const r = await rig();
   try {
     const reply = await r.call('Effect_GetMenu', [100000]);
@@ -79,6 +79,7 @@ test('Effect_GetMenu with the ENE = 20-enum §6.1 byte for byte, except the Foll
     assert.equal(sha256(vendorMenuText(tag)), '516cd5fad0f6938f314663ae956a79b845a816d272b7446b6bf605f77b290af2');
     const followVideo = reply.Tag.EffectList.find((i: { Effect: { Name: string } }) => i.Effect.Name === 'FollowVideo');
     assert.deepEqual([followVideo.SupSpeed, followVideo.MinSpeed, followVideo.MaxSpeed, followVideo.SpeedStep], [true, 1, 3, 1]);
+    assert.deepEqual([followVideo.SupBrightness, followVideo.MinBrightness, followVideo.MaxBrightness, followVideo.BrightnessStep], [true, 1, 3, 1]);
   } finally {
     await r.cleanup();
   }
@@ -147,11 +148,16 @@ test('Effect_SpeedChange / Effect_BrightnessChange: stored, but no ParameterSet 
   }
 });
 
-/** The FollowVideo entry's Speed in the saved display section (Theme/<T>/<P>.pcenter ProfileContent). */
-function storedFollowVideoSpeed(r: Rig): number | undefined {
-  const content = JSON.parse(r.themes.contents.get('100000|PHL 34M2C8600')!) as { EffectInfo: { EffectList: Array<{ Effect: { Value: number }; Speed: number }> } };
-  return content.EffectInfo.EffectList.find((d) => d.Effect.Value === 1)?.Speed;
+/** The FollowVideo entry's Speed (or Brightness) in the saved display section (Theme/<T>/<P>.pcenter ProfileContent). */
+function storedFollowVideoSpeed(r: Rig, member: 'Speed' | 'Brightness' = 'Speed'): number | undefined {
+  const content = JSON.parse(r.themes.contents.get('100000|PHL 34M2C8600')!) as {
+    EffectInfo: { EffectList: Array<{ Effect: { Value: number }; Speed: number; Brightness: number }> };
+  };
+  return content.EffectInfo.EffectList.find((d) => d.Effect.Value === 1)?.[member];
 }
+
+/** LED 45's colour (the last bottom LED; every LED samples the same colour of a solid frame) on the MCU. */
+const lastLed = (r: Rig) => [...r.mock!.state().frame.subarray(135, 138)];
 
 test('Effect_SpeedChange on FollowVideo retunes the running capture in place (High 40 ms, Low 300 + 100 ms tick): no new session, no ParameterSet, saved', async () => {
   const r = await rig();
@@ -236,6 +242,96 @@ test('a profile apply or theme switch applies the new profile\'s FollowVideo spe
     await flush();
     assert.equal(r.service.followVideo.cadence.name, 'Low');
     assert.deepEqual(r.capture.videoIntervals, [40, 300]);
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS]);
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('FollowVideo Brightness (deviation 17): Effect_BrightnessChange dims the frames on the host at once, the LEDs and the Effect_GetLEDs mirror alike; same capture session, no ParameterSet, saved', async () => {
+  const r = await rig();
+  try {
+    const preview = async () => (await r.call('Effect_GetLEDs', [100000])).Tag[45];
+    assert.equal(r.service.followVideo.brightness, 3, "the user's profile: FollowVideo Brightness 3, the colours as captured");
+    r.capture.frame(rgbaFrame(() => [90, 151, 255], 1));
+    await flush();
+    assert.deepEqual(lastLed(r), [90, 151, 255]);
+
+    const m = r.eneMark();
+    const saves = r.themes.saves;
+    const reply = await r.call('Effect_BrightnessChange', [100000, 2]);
+    assert.equal(reply.err_code, 0);
+    assert.equal(reply.Tag.EffectDetail.Brightness, 2);
+    await flush();
+    // x 2/3, rounded: 90 → 60, 151 → 100.67 → 101, 255 → 170. No new screen frame was needed.
+    assert.deepEqual(lastLed(r), [60, 101, 170], 'the newest frame re-sent at Brighter');
+    assert.deepEqual(await preview(), { R: 60, G: 101, B: 170 }, 'the preview mirror shows what the LEDs show');
+    const writes = writesOnly(r.eneSince(m));
+    assert.equal(writes.length, 6, `one frame, no ParameterSet (the ENE cannot dim mode 14):\n${writes.join('\n')}`);
+    assert.ok(writes.every((x) => x.startsWith('40 80 0000 E3')), writes.join('\n'));
+    assert.ok(r.themes.saves > saves);
+    assert.equal(storedFollowVideoSpeed(r, 'Brightness'), 2, 'EffectDetail.Brightness of the FollowVideo entry, saved in the profile');
+    assert.deepEqual([r.capture.videoStarts, r.capture.videoIntervals, r.capture.videoStops], [[NORMAL_MS], [], 0], 'the same capture session, not even retuned');
+
+    // Frames that follow are dimmed as well; Bright = 1/3.
+    r.capture.frame(rgbaFrame(() => [30, 3, 1], 2));
+    await flush();
+    assert.deepEqual(lastLed(r), [20, 2, 1], '30 → 20, 3 → 2, 1 → 0.67 → 1');
+    await r.call('Effect_BrightnessChange', [100000, 1]);
+    await flush();
+    assert.deepEqual(lastLed(r), [10, 1, 0], '30 → 10, 3 → 1, 1 → 0.33 → 0');
+    assert.deepEqual(await preview(), { R: 10, G: 1, B: 0 });
+
+    // 0 or anything out of range is full brightness (a profile from before the slider has 3 anyway).
+    await r.call('Effect_BrightnessChange', [100000, 0]);
+    await flush();
+    assert.equal(r.service.followVideo.brightness, 3);
+    assert.deepEqual(lastLed(r), [30, 3, 1]);
+    const uploads = r.service.followVideo.uploads;
+    await r.call('Effect_BrightnessChange', [100000, 7]);
+    await flush();
+    assert.equal(r.service.followVideo.uploads, uploads, 'still full: nothing to re-send');
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS]);
+    assert.deepEqual(r.mock!.violations, []);
+
+    // Another effect's brightness is the ENE's (a ParameterSet) and does not touch the FollowVideo level.
+    await r.call('Effect_BrightnessChange', [100000, 2]);
+    await r.call('Effect_Change', [100000, 3]); // ColorShift
+    const n = r.eneMark();
+    await r.call('Effect_BrightnessChange', [100000, 1]);
+    assert.ok(writesOnly(r.eneSince(n)).includes(w(0xe029, 0x04)), 'ColorShift Bright = 0x04 in its ParameterSet');
+    assert.equal(r.service.followVideo.brightness, 2);
+    await r.call('Effect_Change', [100000, 1]); // FollowVideo again: its stored Brightness 2
+    r.capture.frame(rgbaFrame(() => [90, 151, 255], 3));
+    await flush();
+    assert.deepEqual(lastLed(r), [60, 101, 170]);
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('a profile apply or theme switch applies the new profile\'s FollowVideo brightness to the next upload (the newest frame re-sent, same session)', async () => {
+  const r = await rig();
+  try {
+    r.capture.frame(rgbaFrame(() => [99, 60, 3], 1));
+    await flush();
+    assert.deepEqual(lastLed(r), [99, 60, 3]);
+    const content = JSON.parse(r.display.purify()) as { EffectInfo: { EffectList: Array<{ Effect: { Value: number }; Brightness: number }> } };
+    content.EffectInfo.EffectList.find((d) => d.Effect.Value === 1)!.Brightness = 1;
+    await r.display.applyProfileContent(JSON.stringify(content));
+    await r.service.settled();
+    await flush();
+    r.timers.advance(20); // a frame held back by the apply's ParameterSet is retried shortly
+    await flush();
+    assert.equal(r.service.followVideo.brightness, 1);
+    assert.deepEqual(lastLed(r), [33, 20, 1], 'x 1/3');
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS], 'no new capture session');
+
+    r.display.profile()!.EffectInfo!.getEffectDetail(1).Brightness = 3;
+    r.themes.emitSwitched('switch');
+    await flush();
+    assert.equal(r.service.followVideo.brightness, 3);
+    assert.deepEqual(lastLed(r), [99, 60, 3]);
     assert.deepEqual(r.capture.videoStarts, [NORMAL_MS]);
   } finally {
     await r.cleanup();
@@ -764,7 +860,17 @@ test('stop() while the capture start is pending (portal dialog open): withdrawn,
   }
 });
 
-test('experimental frame burst (eneFrameBurst / EVNIA_ENE_FRAME_BURST=1): announced once at startup; frames reach the MCU as one transfer', async () => {
+/** The six segment writes of a 34M2C8600 frame (09 §7.3) as MockEneDevice.recentFrameWrites() lists them. */
+const SIX_WRITES: Array<[number, number]> = [
+  [0xe300, 9],
+  [0xe309, 12],
+  [0xe315, 12],
+  [0xe321, 9],
+  [0xe32a, 54],
+  [0xe360, 42],
+];
+
+test('experimental frame burst (the "Fast LED upload" setting at start, or EVNIA_ENE_FRAME_BURST=1): announced once at startup; frames reach the MCU as one transfer', async () => {
   const { log, lines } = captureLogger('backend');
   const core = {
     log,
@@ -773,13 +879,19 @@ test('experimental frame burst (eneFrameBurst / EVNIA_ENE_FRAME_BURST=1): announ
     events: new EventBus(),
     options: { noHardware: true },
   } as unknown as CoreServices;
-  createAmbiglowService(core, {}, { usb: null, eneFrameBurst: true });
-  createAmbiglowService(core, {}, { usb: null, eneFrameBurst: false });
-  createAmbiglowService(core, {}, { usb: null }); // the test environment has no EVNIA_ENE_FRAME_BURST
+  const fromSetting = createAmbiglowService(core, {}, { usb: null, eneFrameBurst: true });
+  const off = createAmbiglowService(core, {}, { usb: null, eneFrameBurst: false });
+  const byDefault = createAmbiglowService(core, {}, { usb: null }); // the test environment has no EVNIA_ENE_FRAME_BURST
+  const forced = createAmbiglowService(core, {}, { usb: null, eneFrameBurst: false, eneFrameBurstForced: true });
   const announced = lines.filter((l) => l.text.includes('ENE frame burst'));
-  assert.equal(announced.length, 1, lines.map((l) => l.text).join('\n'));
-  assert.equal(announced[0].level, 'warn');
-  assert.match(announced[0].text, /EVNIA_ENE_FRAME_BURST/);
+  assert.equal(announced.length, 2, lines.map((l) => l.text).join('\n'));
+  assert.ok(announced.every((l) => l.level === 'warn'));
+  assert.match(announced[0].text, /"Fast LED upload \(experimental\)"\): .*untick it on the Ambiglow page/);
+  assert.match(announced[1].text, /EVNIA_ENE_FRAME_BURST=1, whatever the "Fast LED upload \(experimental\)" setting/);
+  assert.deepEqual(fromSetting.eneFrameBurst, { setting: true, forcedByEnv: false, enabled: true });
+  assert.deepEqual(off.eneFrameBurst, { setting: false, forcedByEnv: false, enabled: false });
+  assert.deepEqual(byDefault.eneFrameBurst, { setting: false, forcedByEnv: false, enabled: false }, 'off by default');
+  assert.deepEqual(forced.eneFrameBurst, { setting: false, forcedByEnv: true, enabled: true });
 
   const r = await rig({ service: { eneFrameBurst: true } });
   try {
@@ -791,6 +903,173 @@ test('experimental frame burst (eneFrameBurst / EVNIA_ENE_FRAME_BURST=1): announ
     assert.ok(writes[0].startsWith('40 80 0000 E300 008A | 0A 14 1E'), writes[0]);
     assert.deepEqual([...r.mock!.state().frame.subarray(135, 138)], [10, 20, 30]);
     assert.deepEqual(r.mock!.violations, []);
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('setEneFrameBurst (the "Fast LED upload" checkbox): six writes ↔ one transfer from the next frame, no capture restart, no ParameterSet; each change logged once', async () => {
+  const { log, lines } = captureLogger('backend');
+  const r = await rig({ log });
+  try {
+    const mock = r.mock!;
+    const upload = async (colour: readonly [number, number, number], ts: number) => {
+      const count = mock.frameWriteCount;
+      const mark = r.eneMark();
+      r.capture.frame(rgbaFrame(() => colour, ts));
+      await flush();
+      return { transfers: mock.frameWriteCount - count, recent: mock.recentFrameWrites(), writes: writesOnly(r.eneSince(mark)) };
+    };
+    assert.deepEqual(r.service.eneFrameBurst, { setting: false, forcedByEnv: false, enabled: false });
+    let u = await upload([10, 20, 30], 1);
+    assert.equal(u.transfers, 6, "off (the default): the vendor's six paced writes");
+    assert.deepEqual(u.recent.slice(-6), SIX_WRITES);
+
+    const settingLines = () => lines.filter((l) => l.text.includes('"Fast LED upload (experimental)"')).map((l) => l.text);
+    r.service.setEneFrameBurst(true);
+    r.service.setEneFrameBurst(true); // the same value again: nothing
+    assert.equal(r.service.ene!.frameBurst, true, 'the ENE in use switches at once');
+    u = await upload([11, 21, 31], 2);
+    assert.equal(u.transfers, 1, 'the next frame is one transfer');
+    assert.deepEqual(u.recent.at(-1), [0xe300, 138]);
+    assert.equal(u.writes.length, 1, 'no ParameterSet');
+    assert.deepEqual(lastLed(r), [11, 21, 31]);
+
+    r.service.setEneFrameBurst(false);
+    u = await upload([12, 22, 32], 3);
+    assert.equal(u.transfers, 6, 'and back to the six writes');
+    assert.deepEqual(u.recent.slice(-6), SIX_WRITES);
+    assert.equal(u.writes.length, 6);
+    assert.deepEqual(lastLed(r), [12, 22, 32]);
+
+    assert.deepEqual(
+      [r.capture.videoStarts, r.capture.videoIntervals, r.capture.videoStops, r.service.followVideo.state],
+      [[NORMAL_MS], [], 0, 'running'],
+      'the capture session is not touched',
+    );
+    const changes = settingLines();
+    assert.equal(changes.length, 2, changes.join('\n'));
+    assert.match(changes[0], /on: Follow video frames go to the ENE as one control transfer at 0xE300 from the next frame/);
+    assert.match(changes[1], /off: Follow video frames use the six paced writes from the next frame/);
+
+    // Not a boolean: refused (main validates too), nothing changes.
+    r.service.setEneFrameBurst('yes' as unknown as boolean);
+    assert.equal(r.service.eneFrameBurst.setting, false);
+    assert.ok(lines.some((l) => l.level === 'warn' && l.text.includes('setEneFrameBurst: ignored a non-boolean value')));
+
+    // An ENE opened later takes the setting: a re-plug of the ENE while it is on.
+    r.service.setEneFrameBurst(true);
+    r.t.bundle.usb.detach(r.eneInfo!);
+    const again = r.t.bundle.usb.attach(mock.spec({ busNumber: 3, portNumbers: [2, 1], deviceAddress: 10 }));
+    r.t.display.setEneDevice(again);
+    await r.service.attach(r.display);
+    await flush();
+    assert.notEqual(r.service.ene, null);
+    assert.equal(r.service.ene!.frameBurst, true, 'the re-opened ENE uses the burst');
+    assert.deepEqual(mock.violations, []);
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('setEneFrameBurst while the ENE is being opened (a replug, a monitor wake): the new device takes the setting as it stands when the open ends, both ways', async () => {
+  for (const [initial, changed] of [
+    [false, true],
+    [true, false],
+  ] as const) {
+    const r = await rig({ load: false, service: { eneFrameBurst: initial } });
+    try {
+      const mock = r.mock!;
+      // The checkbox changes during the open's first read of the MCU (EneDevice.open is still pending: no #ene yet).
+      const read = mock.controlIn.bind(mock);
+      let toggled = false;
+      mock.controlIn = (setup, length) => {
+        if (!toggled) {
+          toggled = true;
+          assert.equal(r.service.ene, null, 'the open is pending');
+          r.service.setEneFrameBurst(changed);
+        }
+        return read(setup, length);
+      };
+      await r.display.connect();
+      await r.display.ready();
+      await r.service.settled();
+      await flush();
+      assert.ok(toggled, 'the setting changed during the open');
+      assert.notEqual(r.service.ene, null);
+      assert.deepEqual(r.service.eneFrameBurst, { setting: changed, forcedByEnv: false, enabled: changed });
+      assert.equal(r.service.ene!.frameBurst, changed, `setting ${initial} → ${changed} during the open: the opened ENE follows it`);
+      const count = mock.frameWriteCount;
+      r.capture.frame(rgbaFrame(() => [40, 50, 60], 1));
+      await flush();
+      assert.equal(mock.frameWriteCount - count, changed ? 1 : 6, changed ? 'one transfer' : 'the six paced writes');
+      assert.deepEqual(lastLed(r), [40, 50, 60]);
+      assert.deepEqual(mock.violations, []);
+    } finally {
+      await r.cleanup();
+    }
+  }
+});
+
+test('EVNIA_ENE_FRAME_BURST=1 keeps the frame burst on whatever the setting (the checkbox is shown ticked and disabled)', async () => {
+  const { log, lines } = captureLogger('backend');
+  const r = await rig({ log, service: { eneFrameBurstForced: true } });
+  try {
+    const mock = r.mock!;
+    const transfers = async (ts: number) => {
+      const count = mock.frameWriteCount;
+      r.capture.frame(rgbaFrame(() => [ts, ts, ts], ts));
+      await flush();
+      return mock.frameWriteCount - count;
+    };
+    assert.deepEqual(r.service.eneFrameBurst, { setting: false, forcedByEnv: true, enabled: true });
+    assert.equal(await transfers(1), 1);
+    r.service.setEneFrameBurst(true);
+    r.service.setEneFrameBurst(false);
+    assert.equal(await transfers(2), 1, 'still one transfer: the environment wins');
+    assert.equal(r.service.ene!.frameBurst, true);
+    const changes = lines.filter((l) => l.text.includes('the frame burst stays on (EVNIA_ENE_FRAME_BURST=1)'));
+    assert.equal(changes.length, 2, 'both changes of the setting are logged, with the reason nothing changed');
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('a burst the ENE refuses falls back to the six writes in the driver (logged); the "Fast LED upload" setting stays on and re-ticking tries again', async () => {
+  const { log, lines } = captureLogger('backend');
+  const r = await rig({ log, service: { eneFrameBurst: true } });
+  try {
+    const mock = r.mock!;
+    // A firmware that stalls every EP0 data stage longer than one 64-byte packet (the vendor never sends one).
+    const accept = mock.controlOut.bind(mock);
+    let refuse = true;
+    mock.controlOut = (setup, data) => {
+      if (refuse && data.length > 64) throw new Error('EP0 data stage stalled');
+      accept(setup, data);
+    };
+    for (let i = 1; i <= 3; i++) {
+      r.capture.frame(rgbaFrame(() => [i, i, i], i));
+      await flush();
+    }
+    assert.ok(lines.some((l) => l.level === 'warn' && l.text.includes('switched off, Follow video frames use the six paced writes')), lines.map((l) => l.text).join('\n'));
+    assert.equal(r.service.ene!.frameBurst, false, 'the driver gave up');
+    assert.deepEqual(r.service.eneFrameBurst, { setting: true, forcedByEnv: false, enabled: true }, 'the setting stays on');
+    let count = mock.frameWriteCount;
+    r.capture.frame(rgbaFrame(() => [4, 5, 6], 4));
+    await flush();
+    assert.equal(mock.frameWriteCount - count, 6);
+    assert.deepEqual(lastLed(r), [4, 5, 6], 'the LEDs keep following the screen');
+
+    // The user unticks and ticks it again (a firmware update, say): tried again.
+    refuse = false;
+    r.service.setEneFrameBurst(false);
+    r.service.setEneFrameBurst(true);
+    count = mock.frameWriteCount;
+    r.capture.frame(rgbaFrame(() => [7, 8, 9], 5));
+    await flush();
+    assert.equal(mock.frameWriteCount - count, 1);
+    assert.deepEqual(lastLed(r), [7, 8, 9]);
+    assert.equal(r.service.ene!.lost, false);
   } finally {
     await r.cleanup();
   }

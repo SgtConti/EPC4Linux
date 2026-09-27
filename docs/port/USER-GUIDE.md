@@ -58,7 +58,7 @@ The app reaches the monitor in two ways. It prefers the first one.
 Download or build the package (see [Building from source](#building-from-source)), then install it with `apt`, which also installs the libraries it needs:
 
 ```sh
-sudo apt install ./evnia-precision-center_1.13.0-linux.2_amd64.deb
+sudo apt install ./evnia-precision-center_1.13.0-linux.3_amd64.deb
 ```
 
 - Keep the `./`. Without it, apt looks for a package of that name in the archive.
@@ -190,6 +190,31 @@ The delay is the wait for the next sample, plus Low's tick, plus the time the co
 - The speed is saved in the current profile, like the speed of the other effects. Profiles copied from Windows start at Normal, because the Windows app saves Normal (and ignores the value).
 - Without the USB Ambiglow controller, the monitor itself runs Follow video (see [The Ambiglow controller is missing](#the-ambiglow-controller-is-missing)). The Speed slider on that page is the monitor's own, and it is disabled for Follow video, as in the Windows app.
 
+#### Brightness: dimming the Follow video colours
+
+With the Ambiglow controller connected over USB, the Ambiglow page also shows a **Brightness** slider for Follow video (the Windows app has none). The app dims the screen colours before it sends them to the LEDs:
+
+| Brightness | The LEDs show |
+|---|---|
+| **Bright** | the screen colours at one third |
+| **Brighter** | the screen colours at two thirds |
+| **Brightest** (default) | the screen colours as they are, as in the Windows app |
+
+- The change applies at once, even while the picture does not change, and Follow video keeps running: no new screen-sharing dialog on Wayland.
+- The preview on the page shows the dimmed colours. Like for every effect, the preview also fades its light layer with the slider (to 40 % at Bright, 70 % at Brighter), so at Bright and Brighter it looks clearly fainter than the LEDs. The LEDs show exactly the dimmed colours of the table.
+- The level is saved in the current profile, like the brightness of the other effects. Profiles copied from Windows start at Brightest, because the Windows app saves Brightest.
+- Without the USB Ambiglow controller there is no such slider for Follow video; the monitor itself decides.
+
+#### Fast LED upload (experimental)
+
+Below the Speed slider, Follow video has a checkbox **Fast LED upload (experimental)**, off by default (the Windows app has none). The Ambiglow controller normally takes each LED update as six small USB writes of about 65 ms in total, as in the Windows app, which limits Speed High to about 15 updates per second. With the checkbox ticked, each update is **one USB transfer** of about 11 ms, which lets High reach its 25 updates per second.
+
+- It is **untested on a real monitor**: it relies on how the controller stores the colours, which is not confirmed. If the LEDs show wrong colours, flicker or freeze, **untick it**. The change applies from the next update, while Follow video keeps running.
+- If the controller refuses the single transfer, the app goes back to the six writes by itself after three failures in a row, and says so in the backend log (see [Follow video lags behind the picture](#follow-video-lags-behind-the-picture)). The checkbox stays ticked; untick and tick it again to try once more.
+- The choice is kept for the next start, in `~/.config/evnia/config.json` as `"linuxExperimental": {"eneFrameBurst": true}`. It applies to every profile. The Windows app ignores that entry.
+- The checkbox appears only with the USB Ambiglow controller and with Follow video selected, and it is greyed out while the effect is switched off.
+- If the app was started with `EVNIA_ENE_FRAME_BURST=1` in its environment (the older way to switch it on), the checkbox shows ticked and greyed out, with a note: the environment variable wins for that run. Start the app without it to decide with the checkbox again.
+
 ### Ambiglow "Follow audio"
 
 Follow audio makes the LEDs react to what your computer plays. It records the **monitor of the default output device** (the playback signal), never a microphone.
@@ -300,6 +325,8 @@ A network kill-switch blocks every request that is not local and logs it. The ap
 
 - Start with the system is off by default. Without a tray icon, closing the window quits the app.
 - Ambiglow Follow video has a **Speed** slider (with the USB Ambiglow controller). Low is the Windows app's timing and delay. The default, Normal, updates the LEDs three times as often, with less than half the delay. See [Speed](#speed-how-quickly-the-leds-follow-the-screen).
+- Ambiglow Follow video has a **Brightness** slider (with the USB Ambiglow controller) that dims the colours to one or two thirds; the default, Brightest, is the Windows app's. See [Brightness](#brightness-dimming-the-follow-video-colours).
+- Ambiglow Follow video has an opt-in **Fast LED upload (experimental)** checkbox (with the USB Ambiglow controller), off by default. See [Fast LED upload](#fast-led-upload-experimental).
 - The application picker for app-bound themes offers `.desktop` files instead of `.exe` files.
 - Export always adds `.pcenter` / `.macro` to the file name you type, as the Windows dialog did.
 - The app can read only the files you pick in its dialogs and its own data folders. It can write only the file you choose in the export dialog.
@@ -401,13 +428,19 @@ The same applies to other DDC/CI tools and GNOME brightness extensions based on 
 - The backend log (`~/.config/EvniaServe/logs/`) shows the speed in use, for example `FollowVideo speed High: screen capture every 40 ms, LED upload of every new frame`. The application log shows `Screen capture interval 40 ms (same session)` when the running capture was changed.
 - The application log should show `capture video-started: …; sampling each new source frame`. If it shows `sampling a <video> element every … ms` instead, this Electron build lacks the interface the app uses to take each screen frame as it arrives. The colours then lag by up to one more sample interval (up to about 0.3 s more at Low). Please report it.
 
-**Advanced, experimental: one USB transfer per LED update.** At High the controller is the limit: each LED update is six small USB writes of about 65 ms in total, as in the Windows app. Starting the app from a terminal with
+**Experimental: one USB transfer per LED update.** At High the controller is the limit: each LED update is six small USB writes of about 65 ms in total, as in the Windows app. Tick **Fast LED upload (experimental)** below the Speed slider to send each update as one transfer instead, which could allow the full 25 updates per second (see [Fast LED upload](#fast-led-upload-experimental)). It is **untested on a real monitor**. What the logs show:
+
+- the backend log: `"Fast LED upload (experimental)" on: Follow video frames go to the ENE as one control transfer at 0xE300 from the next frame` when you tick it, and `Experimental ENE frame burst on ("Fast LED upload (experimental)")` near its start when it was ticked at the last run;
+- if the controller refuses the single transfer, the warning `the experimental frame burst ("Fast LED upload (experimental)" / EVNIA_ENE_FRAME_BURST=1) failed`, and after three failures in a row `frame burst failed 3 times in a row; switched off`: the app then uses the six writes again by itself, until you untick and tick the checkbox.
+
+If the LEDs show wrong colours, flicker or freeze, untick the checkbox. **If you cannot reach it** (the app does not show its window, say), quit the app and turn it off in the file:
 
 ```sh
-EVNIA_ENE_FRAME_BURST=1 evnia-precision-center
+# ~/.config/evnia/config.json: set "eneFrameBurst" to false, or delete the "linuxExperimental" entry
+sed -i 's/"eneFrameBurst": true/"eneFrameBurst": false/' ~/.config/evnia/config.json
 ```
 
-sends each update as one transfer instead, which could allow the full 25 updates per second. It is **untested on a real monitor**: it relies on how the controller stores the colours, which is not confirmed. The backend log then shows `Experimental ENE frame burst on (EVNIA_ENE_FRAME_BURST)` near its start. If the controller refuses the single transfer, the backend log shows the warning `the experimental frame burst (EVNIA_ENE_FRAME_BURST=1) failed`. After three failures in a row the app goes back to the six writes by itself and logs `frame burst failed 3 times in a row; switched off`. If the LEDs show wrong colours, flicker or freeze, quit the app and start it normally. Nothing is stored: the setting lasts only for that run. Please report the result (see [Reporting a problem](#reporting-a-problem)).
+Then start the app normally, without `EVNIA_ENE_FRAME_BURST` in its environment: that variable (`EVNIA_ENE_FRAME_BURST=1 evnia-precision-center`, the older way to try it for one run) turns the single transfer on whatever the checkbox says, and the backend log then shows `Experimental ENE frame burst on (EVNIA_ENE_FRAME_BURST=1, …)` near its start. Please report the result either way (see [Reporting a problem](#reporting-a-problem)).
 
 ### Follow audio shows nothing
 
@@ -529,7 +562,7 @@ docker run --rm -v "$PWD:/repo" -w /repo/port evnia-port-dev bash -c 'npm ci'
 # 3. Import the vendor UI, build, package
 docker run --rm -v "$PWD:/repo" -w /repo/port evnia-port-dev \
   bash -c 'npm run import-ui && npm run build && npm run dist:deb'
-# → port/dist/evnia-precision-center_1.13.0-linux.2_amd64.deb
+# → port/dist/evnia-precision-center_1.13.0-linux.3_amd64.deb
 ```
 
 - **Git Bash on Windows:** prefix each `docker run` with `MSYS_NO_PATHCONV=1`, and give the volume as a Windows path, e.g. `-v "C:\path\to\repo:/repo"`.

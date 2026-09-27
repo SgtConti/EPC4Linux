@@ -39,17 +39,28 @@ export interface BackendHostOptions {
   mockMonitor?: string;
   /** PATH_APP_TEMP for Comm_GenAppIcon (theme/paths.ts defaultAppTempDir), also served by local:. */
   appTempDir?: string;
+  /**
+   * The "Fast LED upload (experimental)" setting (config.json linuxExperimental.eneFrameBurst), read when the backend is
+   * created (AmbiglowServiceOptions.eneFrameBurst); later changes go through setEneFrameBurst().
+   */
+  eneFrameBurst?: () => boolean;
   /** Backend factory (tests); default createDefaultBackend. */
   createBackend?: (options: BackendOptions, overrides: DefaultCompositionOptions) => DefaultBackend;
 }
 
-/** The BackendOptions and composition overrides main uses. */
-export function backendConfiguration(o: Pick<BackendHostOptions, 'host' | 'usb' | 'mockMonitor' | 'appTempDir'>): {
+/**
+ * The BackendOptions and composition overrides main uses. `eneFrameBurst` is the "Fast LED upload (experimental)"
+ * setting at backend creation; only a setting that is on is passed (off is the service's default).
+ */
+export function backendConfiguration(o: Pick<BackendHostOptions, 'host' | 'usb' | 'mockMonitor' | 'appTempDir'> & { eneFrameBurst?: boolean }): {
   options: BackendOptions;
   overrides: DefaultCompositionOptions;
 } {
   const options: BackendOptions = o.mockMonitor ? { host: o.host, mockMonitor: o.mockMonitor, noHardware: true } : { host: o.host, usb: o.usb };
-  const overrides: DefaultCompositionOptions = o.appTempDir ? { themes: { appTempDir: o.appTempDir } } : {};
+  const overrides: DefaultCompositionOptions = {
+    ...(o.appTempDir ? { themes: { appTempDir: o.appTempDir } } : {}),
+    ...(o.eneFrameBurst === true ? { ambiglow: { eneFrameBurst: true } } : {}),
+  };
   return { options, overrides };
 }
 
@@ -87,6 +98,18 @@ export class BackendHost {
     this.#backend?.hotplug(kind);
   }
 
+  /**
+   * The "Fast LED upload (experimental)" checkbox changed (AmbiglowService.setEneFrameBurst, from the next frame). Before
+   * the backend exists nothing is to do: it is created with the current setting (BackendHostOptions.eneFrameBurst).
+   */
+  setEneFrameBurst(enabled: boolean): void {
+    try {
+      this.#backend?.services.ambiglow.setEneFrameBurst?.(enabled);
+    } catch (e) {
+      this.#o.log.error('setEneFrameBurst failed', e);
+    }
+  }
+
   async stop(): Promise<void> {
     this.#stopped = true;
     // A start still in flight finishes first, so its hub and services are stopped too.
@@ -111,7 +134,7 @@ export class BackendHost {
     log.info('Backend service run');
     try {
       if (!this.#backend) {
-        const { options, overrides } = backendConfiguration(this.#o);
+        const { options, overrides } = backendConfiguration({ ...this.#o, eneFrameBurst: this.#o.eneFrameBurst?.() === true });
         this.#backend = (this.#o.createBackend ?? createDefaultBackend)(options, overrides);
       }
       await this.#backend.start();

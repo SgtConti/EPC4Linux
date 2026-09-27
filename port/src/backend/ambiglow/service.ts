@@ -45,7 +45,7 @@ import { bindBaseEffectDetailInfo, syncProfileJson, type BaseEffectDetailInfoMod
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { stripBom } from '../core/json.ts';
-import { ENE_FRAME_BURST_ENV, EneDevice, eneFrameBurstFromEnv, findEneDevices } from './ene.ts';
+import { ENE_FRAME_BURST_ENV, ENE_FRAME_BURST_SETTING, EneDevice, eneFrameBurstFromEnv, findEneDevices } from './ene.ts';
 import { EneError, type EneTransportOptions } from './ene-transport.ts';
 import { loadAmbiglowInfo, matchEneModelName, type EneModelLayout } from './ene-layout.ts';
 import { toEneParameterSet } from './ene-params.ts';
@@ -123,9 +123,15 @@ export interface AmbiglowServiceOptions {
   clock?: DdcClock;
   /**
    * Experimental: follow-video frames as one control transfer at 0xE300 instead of six paced writes
-   * (EneDeviceOptions.frameBurst, impl-usb-ene §2.2). Default: EVNIA_ENE_FRAME_BURST=1 in the environment.
+   * (EneDeviceOptions.frameBurst, impl-usb-ene §2.2). The "Fast LED upload (experimental)" setting at start; main
+   * passes config.json linuxExperimental.eneFrameBurst and changes it with setEneFrameBurst(). Default false.
    */
   eneFrameBurst?: boolean;
+  /**
+   * EVNIA_ENE_FRAME_BURST=1: the frame burst is on whatever the setting (eneFrameBurst, setEneFrameBurst). Default:
+   * read from the environment once (eneFrameBurstFromEnv).
+   */
+  eneFrameBurstForced?: boolean;
   idleIntervalMs?: number;
   lostGraceMs?: number;
   /** ENE_AWAY_CAPTURE_MS. */
@@ -186,8 +192,10 @@ export class AmbiglowServiceImpl implements AmbiglowService {
   readonly #themes: ThemeStore | undefined;
   readonly #monitors: MonitorManager | undefined;
   readonly #opts: AmbiglowServiceOptions;
-  /** Experimental single-transfer follow-video frames (EneDeviceOptions.frameBurst). */
-  readonly #frameBurst: boolean;
+  /** The "Fast LED upload (experimental)" setting: single-transfer follow-video frames (EneDeviceOptions.frameBurst). */
+  #frameBurstSetting: boolean;
+  /** EVNIA_ENE_FRAME_BURST=1: the frame burst is on whatever the setting. */
+  readonly #frameBurstForced: boolean;
   readonly #timers: EffectTimers;
   readonly #clock: DdcClock;
   readonly #lifecycle = new Mutex();
@@ -243,10 +251,15 @@ export class AmbiglowServiceImpl implements AmbiglowService {
       target,
       timers: this.#timers,
     });
-    this.#frameBurst = options.eneFrameBurst ?? eneFrameBurstFromEnv();
-    if (this.#frameBurst) {
+    this.#frameBurstSetting = options.eneFrameBurst === true;
+    this.#frameBurstForced = options.eneFrameBurstForced ?? eneFrameBurstFromEnv();
+    if (this.#frameBurstForced) {
       this.#log.warn(
-        `Experimental ENE frame burst on (${ENE_FRAME_BURST_ENV}): Follow video frames go to the ENE as one control transfer at 0xE300 instead of six paced writes; unset ${ENE_FRAME_BURST_ENV} if the LEDs misbehave`,
+        `Experimental ENE frame burst on (${ENE_FRAME_BURST_ENV}=1, whatever the "${ENE_FRAME_BURST_SETTING}" setting): Follow video frames go to the ENE as one control transfer at 0xE300 instead of six paced writes; unset ${ENE_FRAME_BURST_ENV} if the LEDs misbehave`,
+      );
+    } else if (this.#frameBurstSetting) {
+      this.#log.warn(
+        `Experimental ENE frame burst on ("${ENE_FRAME_BURST_SETTING}"): Follow video frames go to the ENE as one control transfer at 0xE300 instead of six paced writes; untick it on the Ambiglow page if the LEDs misbehave`,
       );
     }
     this.#audio = new FollowAudioEngine({ log: this.#log.child('audio'), capture: core.host.capture, target });
@@ -323,6 +336,37 @@ export class AmbiglowServiceImpl implements AmbiglowService {
    */
   checkEne(display: DisplayDevice): Promise<string> {
     return this.#reconcile(display);
+  }
+
+  /**
+   * The "Fast LED upload (experimental)" setting (services.ts AmbiglowService.setEneFrameBurst; main passes the
+   * checkbox of the Ambiglow page, stored in config.json linuxExperimental.eneFrameBurst): follow-video frames as one
+   * control transfer instead of six paced writes (impl-usb-ene §2.2). It applies from the next frame of the ENE in
+   * use (EneDevice.setFrameBurst) and to every ENE opened later; the capture and the effect are not touched. A change
+   * is logged once; the same value again is a no-op. EVNIA_ENE_FRAME_BURST=1 keeps the burst on whatever the setting.
+   * A burst the ENE refuses falls back to the six writes in the driver (logged there); the setting stays.
+   */
+  setEneFrameBurst(enabled: boolean): void {
+    if (typeof enabled !== 'boolean') {
+      this.#log.warn(`setEneFrameBurst: ignored a non-boolean value (${typeof enabled})`);
+      return;
+    }
+    if (enabled === this.#frameBurstSetting) return;
+    this.#frameBurstSetting = enabled;
+    const on = this.#frameBurstOn();
+    this.#log.info(
+      this.#frameBurstForced
+        ? `"${ENE_FRAME_BURST_SETTING}" ${enabled ? 'ticked' : 'unticked'}; the frame burst stays on (${ENE_FRAME_BURST_ENV}=1)`
+        : enabled
+          ? `"${ENE_FRAME_BURST_SETTING}" on: Follow video frames go to the ENE as one control transfer at 0xE300 from the next frame`
+          : `"${ENE_FRAME_BURST_SETTING}" off: Follow video frames use the six paced writes from the next frame`,
+    );
+    this.#ene?.setFrameBurst(on);
+  }
+
+  /** The frame burst state: the setting, the environment override, and whether ENEs are opened (and driven) with it. */
+  get eneFrameBurst(): { setting: boolean; forcedByEnv: boolean; enabled: boolean } {
+    return { setting: this.#frameBurstSetting, forcedByEnv: this.#frameBurstForced, enabled: this.#frameBurstOn() };
   }
 
   // ───────────────────────────── diagnostics / tests ─────────────────────────────
@@ -504,7 +548,11 @@ export class AmbiglowServiceImpl implements AmbiglowService {
     });
   }
 
-  /** Effect_BrightnessChange: EffectDetail.Brightness; same exception as the speed (:1105-1121). */
+  /**
+   * Effect_BrightnessChange: EffectDetail.Brightness; same exception as the speed (:1105-1121). For FollowVideo the
+   * brightness dims the frames on the host (1/3, 2/3, full; deviation 17): #checkSoftEffect hands it to the engine,
+   * which re-sends the newest frame at the new level without a new capture session and without a ParameterSet.
+   */
   effectBrightnessChange(display: DisplayDevice, brightness: number): Promise<JsonResult> {
     return this.#eneEdit(display, (info) => {
       info.EffectDetail.Brightness = brightness;
@@ -723,9 +771,12 @@ export class AmbiglowServiceImpl implements AmbiglowService {
           log: this.#log.child('ene'),
           layouts: await this.#loadLayouts(),
           onLost: (d) => this.#handleLost(d),
-          frameBurst: this.#frameBurst,
+          frameBurst: this.#frameBurstOn(),
           ...this.#opts.ene,
         });
+        // The setting may have changed while the open was pending (setEneFrameBurst() reaches only a held
+        // #ene): the new device takes the setting as it stands now. Idempotent (EneDevice.setFrameBurst).
+        this.#ene.setFrameBurst(this.#frameBurstOn());
         this.#eneOwner = display.key;
         this.#accessWarned.delete(key);
       } catch (e) {
@@ -814,6 +865,11 @@ export class AmbiglowServiceImpl implements AmbiglowService {
     this.#eneAway = false;
     if (this.#awayTimer !== null) this.#timers.clearTimeout(this.#awayTimer);
     this.#awayTimer = null;
+  }
+
+  /** Single-transfer frames: the environment override or the setting. */
+  #frameBurstOn(): boolean {
+    return this.#frameBurstForced || this.#frameBurstSetting;
   }
 
   /** The open ENE of `display`, if usable. */
@@ -994,9 +1050,14 @@ export class AmbiglowServiceImpl implements AmbiglowService {
     const enabled = this.#started && display !== null && info !== null && info.EffectEnable;
     const active = enabled && eneMode && ene !== null && !this.#idle.idle;
     const followVideo = enabled && effect === EFFECT.FollowVideo && ((eneMode && ene !== null) || this.#eneAway);
-    // The FollowVideo entry's Speed picks the cadence tier (follow-video.ts; deviation 17): set before a start,
-    // and a live session is retuned in place (Effect_SpeedChange, a profile apply or theme switch).
-    if (followVideo && info) this.#video.setSpeed(info.EffectDetail.Speed);
+    // The FollowVideo entry's Speed picks the cadence tier and its Brightness the host-side dimming (follow-video.ts;
+    // deviation 17): set before a start, and a live session follows a change in place (Effect_SpeedChange,
+    // Effect_BrightnessChange, a profile apply or theme switch). A missing entry (EffectDetail would be a fresh
+    // default with Brightness 2) counts as full brightness.
+    if (followVideo && info) {
+      this.#video.setSpeed(info.EffectDetail.Speed);
+      this.#video.setBrightness(info.EffectList?.find((d) => d.Effect.Value === EFFECT.FollowVideo)?.Brightness);
+    }
     // Stop before pausing, resume before starting: a paused session is slowed to 1 fps (follow-video.ts
     // FOLLOW_VIDEO_PAUSED_CAPTURE_MS), so a session that ends is not retuned first, and a start on wake asks the
     // tier's interval at once.

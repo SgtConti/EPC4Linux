@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GRID_HEIGHT, GRID_WIDTH, burstFrameWrite, planFrame, renderFrame, roundHalfEven } from '../../../src/backend/ambiglow/ene-frame.ts';
+import { GRID_HEIGHT, GRID_WIDTH, burstFrameWrite, dimFrameWrites, planFrame, renderFrame, roundHalfEven } from '../../../src/backend/ambiglow/ene-frame.ts';
 import { findModelLayout } from '../../../src/backend/ambiglow/ene-layout.ts';
 import { EneMode, EneRegion, EneSpeed, EneBrightness } from '../../../src/backend/ambiglow/ene-registers.ts';
 import type { EneParameterSet } from '../../../src/backend/ambiglow/ene-params.ts';
 import { FakeUsbBackend } from '../../../src/backend/usb/fake-backend.ts';
 import { ENE_FRAME_BURST_ENV, ENE_FRAME_BURST_MAX_FAILURES, EneDevice, eneFrameBurstFromEnv } from '../../../src/backend/ambiglow/ene.ts';
-import { MockEneDevice } from '../../../src/backend/ambiglow/mock-ene.ts';
+import { MOCK_ENE_FRAME_WRITE_HISTORY, MockEneDevice } from '../../../src/backend/ambiglow/mock-ene.ts';
 import { UsbError } from '../../../src/backend/usb/errors.ts';
 import { LAYOUTS, fmt, hex, openRig, recordingLog, w } from './helpers.ts';
 
@@ -237,6 +237,19 @@ test('frameBurst refused by the controller (a firmware that stalls data stages o
   assert.equal(await device.writeVideoFrame(coordinateGrid(4)), true);
   assert.deepEqual(usb.transfers.slice(m).map(fmt), SPEC_TABLE, 'six paced writes from now on');
   assert.equal(hex(mock.state().frame), SPEC_TABLE.map((line) => line.split(' | ')[1]).join(' '));
+  assert.equal(device.frameBurst, false, 'given up');
+  assert.match(lines.find((l) => l.includes('switched off'))!, /the setting is kept; untick "Fast LED upload \(experimental\)" on the Ambiglow page, or unset EVNIA_ENE_FRAME_BURST/);
+
+  // Switching it on again (the user re-ticks the checkbox) re-arms it with a fresh count and a fresh warning.
+  refuseLong = false;
+  device.setFrameBurst(true);
+  assert.equal(device.frameBurst, true);
+  m = usb.transfers.length;
+  assert.equal(await device.writeVideoFrame(coordinateGrid(4)), true);
+  assert.equal(usb.transfers.slice(m).length, 1, 'the burst again');
+  refuseLong = true;
+  await assert.rejects(device.writeVideoFrame(coordinateGrid(3)), stall);
+  assert.equal(burstWarnings().length, 2, 'warned again after the re-arm');
   assert.deepEqual(mock.violations, []);
 });
 
@@ -256,4 +269,85 @@ test('eneFrameBurstFromEnv: EVNIA_ENE_FRAME_BURST=1 only', () => {
   assert.equal(eneFrameBurstFromEnv({ EVNIA_ENE_FRAME_BURST: ' 1 ' }), true);
   for (const v of [undefined, '', '0', 'true', 'yes', '2']) assert.equal(eneFrameBurstFromEnv({ EVNIA_ENE_FRAME_BURST: v }), false, String(v));
   assert.equal(eneFrameBurstFromEnv({}), false);
+});
+
+// ── host-side brightness (VideoFrameOptions.gain; the FollowVideo Brightness slider) and the runtime burst switch ──
+
+/** The SPEC_TABLE bytes of the coordinate grid (R = row, G = col, B = 0xA5), each × gain and rounded. */
+function dimmedSpecBytes(gain: number): string {
+  const bytes = SPEC_TABLE.map((line) => line.split(' | ')[1]).join(' ').split(' ').map((b) => parseInt(b, 16));
+  return hex(bytes.map((b) => Math.round(b * gain)));
+}
+
+test('dimFrameWrites: every byte × gain, rounded to the nearest integer; gain 1 (or above, or NaN) unchanged, 0 or below black', () => {
+  const writes = [{ reg: 0xe300, data: Uint8Array.of(0, 1, 2, 3, 150, 151, 255) }];
+  assert.deepEqual([...dimFrameWrites(writes, 2 / 3)[0].data], [0, 1, 1, 2, 100, 101, 170]);
+  assert.deepEqual([...dimFrameWrites(writes, 1 / 3)[0].data], [0, 0, 1, 1, 50, 50, 85]);
+  for (const gain of [1, 1.5, Number.NaN]) assert.equal(dimFrameWrites(writes, gain)[0], writes[0], `gain ${gain}: the same write`);
+  for (const gain of [0, -1]) assert.deepEqual([...dimFrameWrites(writes, gain)[0].data], [0, 0, 0, 0, 0, 0, 0]);
+  assert.deepEqual([...writes[0].data], [0, 1, 2, 3, 150, 151, 255], 'the input is not modified');
+  assert.equal(dimFrameWrites(writes, 2 / 3)[0].reg, 0xe300);
+});
+
+test('writeVideoFrame gain: the six writes carry the dimmed bytes, the mirror too; with the burst the one transfer does', async () => {
+  const rig = await openRig();
+  await rig.device.setEffect(followVideo);
+  let m = rig.mark();
+  assert.equal(await rig.device.writeVideoFrame(coordinateGrid(4), { gain: 2 / 3 }), true);
+  const sent = rig.since(m);
+  assert.equal(sent.length, 6);
+  assert.equal(sent.map((line) => line.split(' | ')[1]).join(' '), dimmedSpecBytes(2 / 3), 'the §7.3 bytes x 2/3');
+  assert.equal(hex(rig.mock.state().frame), dimmedSpecBytes(2 / 3));
+  assert.equal(hex(rig.device.ledColors()), dimmedSpecBytes(2 / 3), 'Effect_GetLEDs mirror = what the LEDs show');
+  await rig.device.writeVideoFrame(coordinateGrid(4));
+  assert.equal(hex(rig.device.ledColors()), dimmedSpecBytes(1), 'no gain: the grid as it is');
+
+  const burst = await openRig({}, { frameBurst: true });
+  await burst.device.setEffect(followVideo);
+  m = burst.mark();
+  await burst.device.writeVideoFrame(coordinateGrid(3), { gain: 1 / 3 });
+  assert.deepEqual(burst.since(m), [`40 80 0000 E300 008A | ${dimmedSpecBytes(1 / 3)}`]);
+  assert.equal(hex(burst.device.ledColors()), dimmedSpecBytes(1 / 3));
+  assert.deepEqual([rig.mock.violations, burst.mock.violations], [[], []]);
+});
+
+test('setFrameBurst switches between the six writes and the one transfer from the next frame, without touching the effect', async () => {
+  const rig = await openRig();
+  await rig.device.setEffect(followVideo);
+  assert.equal(rig.device.frameBurst, false, 'off by default');
+  const frame = async () => {
+    const m = rig.mark();
+    assert.equal(await rig.device.writeVideoFrame(coordinateGrid(3)), true);
+    return rig.since(m);
+  };
+  assert.equal((await frame()).length, 6);
+  rig.device.setFrameBurst(true);
+  assert.equal(rig.device.frameBurst, true);
+  assert.deepEqual((await frame()).map((l) => l.slice(0, 20)), ['40 80 0000 E300 008A']);
+  // A frame queued while the switch changes goes out as the switch stands when its turn comes.
+  const busy = rig.device.setEffect(followVideo);
+  const queued = rig.device.writeVideoFrame(coordinateGrid(3));
+  rig.device.setFrameBurst(false);
+  const m = rig.mark();
+  await busy;
+  await queued;
+  assert.equal(rig.since(m).filter((l) => l.startsWith('40 80 0000 E3')).length, 6, 'switched off before its turn: six writes');
+  assert.equal(rig.device.frameBurst, false);
+  assert.equal(hex(rig.mock.state().frame), SPEC_TABLE.map((line) => line.split(' | ')[1]).join(' '));
+  assert.equal(rig.device.applied?.mode, EneMode.UserDefine, 'the effect is untouched');
+  assert.deepEqual(rig.mock.violations, []);
+});
+
+test('mock ENE: recentFrameWrites lists the frame-buffer writes as [register, length] (six segments, or one burst), bounded', async () => {
+  const rig = await openRig();
+  await rig.device.setEffect(followVideo);
+  assert.equal(rig.mock.frameWriteCount, 0, 'a ParameterSet is no frame write');
+  await rig.device.writeVideoFrame(coordinateGrid(3));
+  assert.deepEqual(rig.mock.recentFrameWrites(), [[0xe300, 9], [0xe309, 12], [0xe315, 12], [0xe321, 9], [0xe32a, 54], [0xe360, 42]]);
+  rig.device.setFrameBurst(true);
+  for (let i = 0; i < 30; i++) await rig.device.writeVideoFrame(coordinateGrid(3));
+  assert.equal(rig.mock.frameWriteCount, 36);
+  const recent = rig.mock.recentFrameWrites();
+  assert.equal(recent.length, MOCK_ENE_FRAME_WRITE_HISTORY);
+  assert.ok(recent.every(([reg, length]) => reg === 0xe300 && length === 138));
 });

@@ -1,7 +1,7 @@
 {
   "name": "evnia-precision-center-linux",
   "productName": "Evnia Precision Center",
-  "version": "1.13.0-linux.2",
+  "version": "1.13.0-linux.3",
   "private": true,
   "description": "Offline Linux port of Philips Evnia Precision Center (monitor features only)",
   "license": "UNLICENSED",

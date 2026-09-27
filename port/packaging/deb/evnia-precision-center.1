@@ -1,4 +1,4 @@
-.TH EVNIA\-PRECISION\-CENTER 1 2026-09-27 "1.13.0-linux.2" "User Commands"
+.TH EVNIA\-PRECISION\-CENTER 1 2026-09-27 "1.13.0-linux.3" "User Commands"
 .SH NAME
 evnia\-precision\-center \- control centre for Philips Evnia monitors (unofficial offline port)
 .SH SYNOPSIS
@@ -30,7 +30,12 @@ extension) the window is shown anyway.
 Experimental: when set to
 .BR 1 ,
 Ambiglow "Follow video" sends each LED update to the Ambiglow controller
-as one USB transfer instead of six. Untested on real monitors; unset it
+as one USB transfer instead of six, whatever the "Fast LED upload
+(experimental)" checkbox of the Ambiglow page says (it is then shown
+ticked and greyed out). The checkbox is the usual way to switch it; its
+setting is kept in
+.IR ~/.config/evnia/config.json .
+Untested on real monitors; untick the checkbox, or unset the variable,
 if the LEDs misbehave. A controller that refuses the single transfer is
 logged, and after three failures in a row the six transfers are used
 again.

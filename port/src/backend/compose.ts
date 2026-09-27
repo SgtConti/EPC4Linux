@@ -84,7 +84,7 @@ export interface DefaultCompositionOptions {
   themes?: ThemeStoreOptions;
   /** monitor/manager.ts seams (clock, discovery, settle time); production passes none. */
   monitors?: MonitorManagerOptions;
-  /** ambiglow/service.ts options (USB backend, timers, layout table). */
+  /** ambiglow/service.ts options (USB backend, timers, layout table; main passes the "Fast LED upload" setting when on). */
   ambiglow?: AmbiglowServiceOptions;
   /** API modules (default API_MODULES). */
   modules?: readonly ApiModule[];

@@ -12,6 +12,19 @@
 
 const STYLES = 'assets/styles-*.js';
 const MAIN = 'assets/main-*.js';
+// The monitor Ambiglow page (03 §4.5). The glob also matches the three peripheral Ambiglow chunks, which only a
+// PIN_MISSING message lists; the exact name and hash pin the monitor page.
+const AMBIGLOW = 'assets/Ambiglow-*.js';
+
+/** The FAST-LED-UPLOAD checkbox's description (a visible second line and the row's tooltip). */
+const FAST_LED_UPLOAD_HINT = 'Sends each frame in one USB transfer. Turn off if the lights flicker or freeze.';
+
+/**
+ * The FAST-LED-UPLOAD checkbox's log line when the preload refuses a change (followed by the reason). The vendor
+ * Checkbox has already toggled its local value and cannot be reset from the page, so the line says so.
+ */
+const FAST_LED_UPLOAD_REFUSED =
+  'Fast LED upload not changed; the checkbox shows the wrong state until the row is shown again (another effect and back, or the page reopened): ';
 
 /**
  * Local-only policy for every HTML entry point (14 N31; ARCHITECTURE rules 4 and 5). For a file: page
@@ -36,6 +49,7 @@ export default {
     { glob: MAIN, path: 'assets/main-CDosWiM3.js', sha256: 'de62edb3976b0b256b6f8e8549a084d990d3ffeefe3401471a89ff97d33cd24a' },
     { glob: 'index.html', path: 'index.html', sha256: '96f86597d762b950c28087602f97b5215331e47746dd2945642504a75498adab' },
     { glob: 'notice/notice.html', path: 'notice/notice.html', sha256: '74725dc53130d4166f7620c54ddbc552b354941c05ef807c50408ce11223c1cb' },
+    { glob: AMBIGLOW, path: 'assets/Ambiglow-Dvqon39u.js', sha256: '89838ac09fdb11c535ef79dc931e997fe7803509a4cf19cb1fed22281921d43a' },
   ],
 
   cspFiles: ['index.html', 'notice/notice.html'],
@@ -355,6 +369,41 @@ export default {
       replace: 'let e=`../${o[i.deviceType]}/${d.value}.png`;p.value=',
       rationale: 'Same as IMG-PATH for the onError fallback (the 34M2C8600 has no _overview face, so this path is used).',
       spec: '02 §11.3; 04 §3.6 DeviceImage',
+    },
+
+    // ── Port features (Linux additions to the vendor UI) ─────────────────────────────────────
+    {
+      id: 'FAST-LED-UPLOAD',
+      file: AMBIGLOW,
+      // The end of the Speed slider block and the start of the StarCount one in the Ambiglow page's render
+      // (Ambiglow-Dvqon39u.js:1435-1454 prettified); `onChange:ia` names the Speed slider's handler.
+      find: 'onChange:ia},null,8,["modelValue","range","marks","disabled"])):m("",!0),Ye.startCount.support?',
+      replace:
+        'onChange:ia},null,8,["modelValue","range","marks","disabled"])):m("",!0),' +
+        'c(Z)&&1===Ae.value&&window.__EVNIA__?.experimental?(t=>(n(),u("div",{key:4,class:"slider-item evnia-fast-led-upload",' +
+        `title:${JSON.stringify(FAST_LED_UPLOAD_HINT)}},[` +
+        'r(s("Checkbox"),{modelValue:t.eneFrameBurst||t.forcedByEnv,label:"Fast LED upload (experimental)",i18n:!1,' +
+        'disabled:!Ce.value||t.forcedByEnv,onChange:e=>{window.__EVNIA__.experimental.setEneFrameBurst(e).catch(x=>{' +
+        `const msg=${JSON.stringify(FAST_LED_UPLOAD_REFUSED)}+(x&&x.message||x);console.warn(msg);window.__electronLog?.warn(msg)})}},` +
+        'null,8,["modelValue","disabled"]),' +
+        'S("div",{class:"evnia-fast-led-upload-hint",style:{fontSize:".11rem",lineHeight:".16rem",marginTop:".04rem",opacity:.6}},' +
+        `t.forcedByEnv?"On because EVNIA_ENE_FRAME_BURST=1 is set; unset it to turn this off.":${JSON.stringify(FAST_LED_UPLOAD_HINT)},1)` +
+        '])))(window.__EVNIA__.experimental.get()):m("",!0),' +
+        'Ye.startCount.support?',
+      rationale:
+        'Port feature (user request 2026-09-27): the "Fast LED upload (experimental)" checkbox for the experimental ENE frame ' +
+        'burst (one USB control transfer per Follow video frame instead of six paced writes; impl-usb-ene §2.2), directly ' +
+        'after the Speed slider. Shown only with the ENE (ENEEffectEnable, Z) and the Follow Video effect (Ae = EffectType 1), ' +
+        'and only when the preload offers window.__EVNIA__.experimental; disabled while the effect is off (Ce) like the ' +
+        'sliders, and ticked and disabled when EVNIA_ENE_FRAME_BURST=1 forces the burst on. It is the vendor\'s own global ' +
+        'Checkbox component (main-CDosWiM3.js:4052), resolved like the page\'s other components, in the page\'s scoped ' +
+        '"slider-item" row, with a second line of hint text. The checkbox keeps its toggled state itself (useModel without ' +
+        'onUpdate:modelValue) and calls the narrow preload API, which stores config.json linuxExperimental.eneFrameBurst ' +
+        'through main (main window only, booleans only) and switches the backend from the next frame; get() is synchronous, ' +
+        'so the first render shows the stored state. A refused call is logged (console and window.__electronLog, i.e. the ' +
+        'main log); the box keeps showing the refused value until the row is created again (the Checkbox\'s local model ' +
+        'cannot be reset from the page, and get() is not reactive). No window.ipc channel, no URL, nothing online.',
+      spec: 'impl-vendor-ui §3 FAST-LED-UPLOAD; impl-usb-ene §2.2 deviation 20; impl-electron-shell "IPC" (experimentalSet); 03 §4.5',
     },
   ],
 

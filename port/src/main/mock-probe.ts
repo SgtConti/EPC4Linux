@@ -53,6 +53,12 @@ export interface MockProbeSnapshot {
     groups: Record<string, MockProbeEneGroup | null>;
     /** The per-LED frame buffer at 0xE300 (R,G,B per LED; FollowVideo uploads). */
     frame: number[];
+    /**
+     * The frame-buffer writes the MCU accepted: how many since start, and the most recent ones as [register, length]
+     * (MockEneDevice.recentFrameWrites): six segments per frame, or one 138-byte transfer at 0xE300 with the
+     * experimental frame burst ("Fast LED upload").
+     */
+    frameWrites: { count: number; recent: Array<[number, number]> };
     /** Refused register accesses (must stay empty). */
     violations: string[];
   } | null;
@@ -124,7 +130,13 @@ export function snapshotOf(hw: MockHardware, capture: MockProbeCapture | null = 
     const state = hw.ene.state();
     const groups: Record<string, MockProbeEneGroup | null> = {};
     for (const [g, s] of Object.entries(state.groups)) groups[g] = s ? { ...s, color: [...s.color] } : null;
-    ene = { hostControl: state.hostControl, groups, frame: Array.from(state.frame), violations: [...hw.ene.violations] };
+    ene = {
+      hostControl: state.hostControl,
+      groups,
+      frame: Array.from(state.frame),
+      frameWrites: { count: hw.ene.frameWriteCount, recent: hw.ene.recentFrameWrites() },
+      violations: [...hw.ene.violations],
+    };
   }
   return { model: monitor.spec.name, vcp, writes, ene, capture: capture ? { ...capture } : null };
 }

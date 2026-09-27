@@ -11,15 +11,19 @@ import { EneBrightness, EneMode, EneRegion, EneSpeed } from '../../../src/backen
 import type { CaptureFrame, CaptureHost } from '../../../src/backend/types.ts';
 import type { EneDevice } from '../../../src/backend/ambiglow/ene.ts';
 import {
+  FOLLOW_VIDEO_BRIGHTNESS_NAMES,
   FOLLOW_VIDEO_BUSY_RETRY_MS,
   FOLLOW_VIDEO_CADENCES,
   FOLLOW_VIDEO_CAPTURE_MS,
+  FOLLOW_VIDEO_DEFAULT_BRIGHTNESS,
   FOLLOW_VIDEO_DEFAULT_SPEED,
   FOLLOW_VIDEO_PAUSED_CAPTURE_MS,
   FOLLOW_VIDEO_SEND_MS,
   FollowVideoEngine,
   describeCadence,
+  followVideoBrightness,
   followVideoCadence,
+  followVideoGain,
   frameLedColors,
   ledLayout,
   mapFrameToLeds,
@@ -109,6 +113,8 @@ async function engineRig(options: { capture?: FakeCaptureHost | null; speed?: nu
  */
 class FakeEne {
   readonly frames: CaptureFrame[] = [];
+  /** The brightness gain each upload was asked for (VideoFrameOptions.gain). */
+  readonly gains: number[] = [];
   closed = false;
   lost = false;
   #ops = 0;
@@ -128,8 +134,9 @@ class FakeEne {
     };
   }
 
-  writeVideoFrame(frame: CaptureFrame): Promise<boolean> {
+  writeVideoFrame(frame: CaptureFrame, options: { gain?: number } = {}): Promise<boolean> {
     this.frames.push(frame);
+    this.gains.push(options.gain ?? 1);
     this.#ops++;
     return new Promise((resolve) =>
       this.#uploads.push(() => {
@@ -632,4 +639,117 @@ test('without a capture host FollowVideo is inert (also across speed changes and
   engine.setPaused(false);
   engine.setWanted(true, { retry: true });
   assert.deepEqual([engine.state, engine.starts, engine.retunes, engine.captureIntervalMs, timers.pending], ['failed', 0, 0, null, 0]);
+});
+
+// ── Brightness (the port's Brightness slider for FollowVideo, deviation 17): host-side dimming of the frames ──
+
+test('brightness levels: 1 Bright = x 1/3, 2 Brighter = x 2/3, 3 Brightest = the colours as captured; anything else is 3', () => {
+  assert.deepEqual(FOLLOW_VIDEO_BRIGHTNESS_NAMES, { 1: 'Bright', 2: 'Brighter', 3: 'Brightest' }, 'the slider marks (Ambiglow-Dvqon39u.js na)');
+  assert.equal(FOLLOW_VIDEO_DEFAULT_BRIGHTNESS, 3);
+  for (const level of [1, 2, 3] as const) assert.equal(followVideoBrightness(level), level);
+  for (const other of [undefined, null, 0, -1, 4, 7, 2.5, '2', NaN, {}]) {
+    assert.equal(followVideoBrightness(other), 3, `${String(other)} → full (the behaviour before the slider)`);
+  }
+  assert.deepEqual([followVideoGain(1), followVideoGain(2), followVideoGain(3), followVideoGain(0)], [1 / 3, 2 / 3, 1, 1]);
+  // The vendor's host-side breathing curve maps Brightness the same way (clamp(b, 1, 3) / 3f) for 1..3.
+  const engine = new FollowVideoEngine({ log: silentLog, target: () => null });
+  assert.deepEqual([engine.brightness, engine.gain], [3, 1], 'default: full');
+  assert.equal(new FollowVideoEngine({ log: silentLog, target: () => null, brightness: 1 }).gain, 1 / 3);
+});
+
+test('brightness on the real driver: the mapped LED colours x level/3, rounded to the nearest integer; the mirror holds the dimmed colours; six writes as before', async () => {
+  const { ene, capture, engine } = await engineRig({ speed: 2 });
+  engine.setBrightness(2);
+  engine.setWanted(true);
+  await flush();
+  const frame = rgbaFrame((row, col) => [col * 5, row * 6, 200], 1);
+  const m = ene.mark();
+  capture!.frame(frame);
+  await flush();
+  assert.equal(ene.since(m).length, 6, 'still the six segment writes');
+  const full = leds(mapFrameToLeds(LAYOUT, COUNTS, frame));
+  const expected = full.map((c) => c.map((v) => Math.round((v * 2) / 3)));
+  assert.deepEqual(leds(ene.mock.state().frame), expected, 'every LED x 2/3 after the §7.3 mapping');
+  assert.deepEqual(leds(ene.device.ledColors()), expected, 'Effect_GetLEDs shows what the LEDs show');
+  // LED 45 samples cell (39, 49): 245, 234, 200 → 163.3, 156, 133.3 → 163, 156, 133 (never halfway: exact rounding).
+  assert.deepEqual(expected[45], [163, 156, 133]);
+  // Bright: x 1/3 (LED 0 samples (30, 49): 245, 180, 200 → 81.7, 60, 66.7 → 82, 60, 67).
+  engine.setBrightness(1);
+  await flush();
+  assert.deepEqual(leds(ene.mock.state().frame)[0], [82, 60, 67], 'the newest frame re-sent at once');
+  // Brightest: the grid's colours unchanged.
+  engine.setBrightness(3);
+  await flush();
+  assert.deepEqual(leds(ene.mock.state().frame), full);
+  assert.deepEqual(ene.mock.violations, []);
+});
+
+test('setBrightness live (event-driven): the newest frame goes again at once with the new gain, nothing is queued, the capture is not touched; the same level again is a no-op', async () => {
+  const { capture, ene, engine } = fakeEngine();
+  engine.setWanted(true);
+  await flush();
+  const a = rgbaFrame(() => [1, 1, 1], 1);
+  capture.frame(a);
+  ene.finish();
+  await flush();
+  assert.deepEqual([ene.frames, ene.gains], [[a], [1]]);
+  engine.setBrightness(2);
+  assert.deepEqual([ene.frames, ene.gains], [[a, a], [1, 2 / 3]], 'A again at 2/3, without waiting for a new frame');
+  engine.setBrightness(2);
+  engine.setBrightness('2');
+  assert.equal(engine.brightness, 3, "'2' is not a level: full");
+  // A change while an upload runs: the newest frame follows it at the new gain; B replaced nothing, one upload each.
+  engine.setBrightness(1);
+  const b = rgbaFrame(() => [2, 2, 2], 2);
+  capture.frame(b);
+  assert.equal(ene.inFlight, 1, 'one upload at a time');
+  ene.finish();
+  await flush();
+  ene.finish();
+  await flush();
+  ene.finish();
+  await flush();
+  assert.equal(ene.gains.at(-1), 1 / 3);
+  assert.equal(ene.frames.at(-1), b);
+  assert.deepEqual([capture.videoStarts, capture.videoIntervals, capture.videoStops, engine.retunes], [[100], [], 0, 0], 'same session, no retune');
+});
+
+test('setBrightness: Low sends the newest frame again on the next tick; while paused it applies on resume; while stopped at the next start', async () => {
+  const { capture, timers, ene, engine } = fakeEngine({ speed: 1 });
+  engine.setBrightness(1);
+  engine.setWanted(true);
+  await flush();
+  const a = rgbaFrame(() => [3, 3, 3], 1);
+  capture.frame(a);
+  timers.advance(FOLLOW_VIDEO_SEND_MS);
+  ene.finish();
+  await flush();
+  assert.deepEqual(ene.gains, [1 / 3], 'the level set before the start');
+  engine.setBrightness(3);
+  assert.equal(ene.frames.length, 1, 'Low: not before the tick');
+  timers.advance(FOLLOW_VIDEO_SEND_MS);
+  ene.finish();
+  await flush();
+  assert.deepEqual([ene.frames, ene.gains], [[a, a], [1 / 3, 1]]);
+
+  engine.setPaused(true);
+  engine.setBrightness(2);
+  timers.advance(3 * FOLLOW_VIDEO_SEND_MS);
+  await flush();
+  assert.equal(ene.frames.length, 2, 'paused: nothing goes out');
+  engine.setPaused(false);
+  timers.advance(FOLLOW_VIDEO_SEND_MS);
+  ene.finish();
+  await flush();
+  assert.deepEqual(ene.gains.at(-1), 2 / 3, 'resumed: the newest frame at the level set meanwhile');
+
+  engine.setWanted(false);
+  engine.setBrightness(1);
+  assert.equal(engine.brightness, 1);
+  engine.setWanted(true);
+  await flush();
+  capture.frame(rgbaFrame(() => [4, 4, 4], 2));
+  timers.advance(FOLLOW_VIDEO_SEND_MS);
+  await flush();
+  assert.equal(ene.gains.at(-1), 1 / 3);
 });

@@ -163,4 +163,13 @@ export interface AmbiglowService extends BackendService {
    * model last reported through DisplayDevice.setEneModel.
    */
   checkEne?(display: DisplayDevice): Promise<string>;
+  /**
+   * (Appended by ambiglow/, optional: older stand-ins need not implement it.) The port's "Fast LED upload
+   * (experimental)" setting, a checkbox on the Ambiglow page that main keeps in config.json
+   * (linuxExperimental.eneFrameBurst): follow-video frames go to the ENE as one control transfer instead of six paced
+   * writes (impl-usb-ene §2.2). Takes effect with the next frame, without a capture restart; the same value again is
+   * a no-op, a change is logged once. EVNIA_ENE_FRAME_BURST=1 keeps the burst on whatever the setting. Main calls it
+   * once the backend exists and on every change; the value at start is AmbiglowServiceOptions.eneFrameBurst.
+   */
+  setEneFrameBurst?(enabled: boolean): void;
 }

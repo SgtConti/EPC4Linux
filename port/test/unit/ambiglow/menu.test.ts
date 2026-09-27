@@ -1,6 +1,6 @@
 // Effect_GetMenu: DisplayEffectMenu.Default(model) against the byte-exact fixtures of
 // 20-enum-valuelist-catalog §6.1 (ENE "34M2C8600") and §6.2 (no ENE, ""), and the one deliberate deviation of
-// the served ENE menu: the FollowVideo item's Speed slider (impl-ambiglow §5 deviation 17).
+// the served ENE menu: the FollowVideo item's Speed and Brightness sliders (impl-ambiglow §5 deviation 17).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -8,6 +8,7 @@ import { createHash } from 'node:crypto';
 import { serialize } from '../../../src/backend/core/json.ts';
 import {
   EffectMenuCache,
+  FOLLOW_VIDEO_BRIGHTNESS_MENU,
   FOLLOW_VIDEO_SPEED_MENU,
   displayEffectMenu,
   effectRegions,
@@ -16,13 +17,22 @@ import {
 } from '../../../src/backend/ambiglow/menu.ts';
 import { parseAmbiglowInfo } from '../../../src/backend/ambiglow/ene-layout.ts';
 import { DisplayEffectInfo } from '../../../src/backend/monitor/model/effect.ts';
-import { PORT_FOLLOW_VIDEO_SPEED, VENDOR_FOLLOW_VIDEO_SPEED, vendorMenuText } from '../../fixtures/effect-menu.ts';
+import {
+  PORT_FOLLOW_VIDEO_BRIGHTNESS,
+  PORT_FOLLOW_VIDEO_SPEED,
+  SERVED_ENE_MENU_BYTES,
+  VENDOR_FOLLOW_VIDEO_BRIGHTNESS,
+  VENDOR_FOLLOW_VIDEO_SPEED,
+  vendorMenuText,
+} from '../../fixtures/effect-menu.ts';
 import { LAYOUTS } from './helpers.ts';
 
 const sha256 = (s: string) => createHash('sha256').update(Buffer.from(s, 'utf8')).digest('hex');
 const SPEC_61 = { bytes: 3962, sha256: '516cd5fad0f6938f314663ae956a79b845a816d272b7446b6bf605f77b290af2' };
 const SPEC_62 = { bytes: 3277, sha256: 'cd09882c69487c4bc4c2c08251d34db1119beb152a6be887c1aa63609306a236' };
 const SPEED_KEYS = ['SupSpeed', 'MinSpeed', 'MaxSpeed', 'SpeedStep'] as const;
+const BRIGHTNESS_KEYS = ['SupBrightness', 'MinBrightness', 'MaxBrightness', 'BrightnessStep'] as const;
+const PORT_KEYS: readonly string[] = [...SPEED_KEYS, ...BRIGHTNESS_KEYS];
 
 test('the vendor menu with ENE model 34M2C8600 = 20-enum §6.1 (3962 bytes, sha256 516cd5fa…)', () => {
   const json = serialize(vendorEffectMenu(LAYOUTS, '34M2C8600'), 'ui');
@@ -30,15 +40,16 @@ test('the vendor menu with ENE model 34M2C8600 = 20-enum §6.1 (3962 bytes, sha2
   assert.equal(sha256(json), SPEC_61.sha256);
 });
 
-test('the served ENE menu = §6.1 except the FollowVideo speed fields (deviation 17: the Speed slider 1..3)', () => {
+test('the served ENE menu = §6.1 except the FollowVideo speed and brightness fields (deviation 17: the Speed and Brightness sliders 1..3)', () => {
   const served = serialize(displayEffectMenu(LAYOUTS, '34M2C8600'), 'ui');
-  assert.ok(served.includes(PORT_FOLLOW_VIDEO_SPEED));
+  assert.equal(Buffer.byteLength(served, 'utf8'), SERVED_ENE_MENU_BYTES, '3960 bytes: "true" twice instead of "false"');
+  assert.ok(served.includes(PORT_FOLLOW_VIDEO_SPEED + PORT_FOLLOW_VIDEO_BRIGHTNESS));
   const reverted = vendorMenuText(served);
   assert.equal(Buffer.byteLength(reverted, 'utf8'), SPEC_61.bytes);
   assert.equal(sha256(reverted), SPEC_61.sha256, 'every other byte is the vendor fixture');
-  assert.ok(reverted.includes(VENDOR_FOLLOW_VIDEO_SPEED));
+  assert.ok(reverted.includes(VENDOR_FOLLOW_VIDEO_SPEED + VENDOR_FOLLOW_VIDEO_BRIGHTNESS));
 
-  // The same at object level: only the FollowVideo item differs, and only in the four speed members.
+  // The same at object level: only the FollowVideo item differs, and only in the four speed and four brightness members.
   const port = displayEffectMenu(LAYOUTS, '34M2C8600').EffectList;
   const vendor = vendorEffectMenu(LAYOUTS, '34M2C8600').EffectList;
   assert.equal(port.length, vendor.length);
@@ -53,11 +64,24 @@ test('the served ENE menu = §6.1 except the FollowVideo speed fields (deviation
       { ...FOLLOW_VIDEO_SPEED_MENU },
       'FollowVideo: SupSpeed true, MinSpeed 1, MaxSpeed 3, SpeedStep 1',
     );
-    assert.equal(vendor[i].SupSpeed, false, 'the vendor hides the slider');
-    const rest = (item: DisplayEffectMenuItem) => Object.fromEntries(Object.entries(item).filter(([k]) => !(SPEED_KEYS as readonly string[]).includes(k)));
+    assert.deepEqual(
+      Object.fromEntries(BRIGHTNESS_KEYS.map((k) => [k, port[i][k]])),
+      { ...FOLLOW_VIDEO_BRIGHTNESS_MENU },
+      'FollowVideo: SupBrightness true, MinBrightness 1, MaxBrightness 3, BrightnessStep 1',
+    );
+    assert.deepEqual([vendor[i].SupSpeed, vendor[i].SupBrightness], [false, false], 'the vendor hides both sliders');
+    assert.deepEqual(
+      Object.fromEntries(BRIGHTNESS_KEYS.slice(1).map((k) => [k, vendor[i][k]])),
+      { MinBrightness: 1, MaxBrightness: 3, BrightnessStep: 1 },
+      "the range was the vendor's already: only SupBrightness changes",
+    );
+    const rest = (item: DisplayEffectMenuItem) => Object.fromEntries(Object.entries(item).filter(([k]) => !PORT_KEYS.includes(k)));
     assert.deepEqual(rest(port[i]), rest(vendor[i]), 'FollowVideo: every other member as the vendor');
   }
+  assert.equal(port.find((i) => i.Effect.Name === 'FollowAudio')?.SupBrightness, false, 'FollowAudio keeps the vendor item');
   assert.throws(() => vendorMenuText(serialize(vendorEffectMenu(LAYOUTS, '34M2C8600'), 'ui')), /FollowVideo speed fields/, 'the helper refuses the unmodified menu');
+  const speedOnly = served.replace(PORT_FOLLOW_VIDEO_BRIGHTNESS, VENDOR_FOLLOW_VIDEO_BRIGHTNESS);
+  assert.throws(() => vendorMenuText(speedOnly), /FollowVideo brightness fields/, 'and a menu without the Brightness slider');
 });
 
 test('without ENE ("") the served menu is the vendor one = 20-enum §6.2 (3277 bytes, sha256 cd09882c…): FollowVideo is the firmware\'s', () => {
@@ -65,7 +89,8 @@ test('without ENE ("") the served menu is the vendor one = 20-enum §6.2 (3277 b
     const json = serialize(menu, 'ui');
     assert.equal(Buffer.byteLength(json, 'utf8'), SPEC_62.bytes);
     assert.equal(sha256(json), SPEC_62.sha256);
-    assert.equal(menu.EffectList.find((i) => i.Effect.Name === 'FollowVideo')?.SupSpeed, false);
+    const followVideo = menu.EffectList.find((i) => i.Effect.Name === 'FollowVideo');
+    assert.deepEqual([followVideo?.SupSpeed, followVideo?.SupBrightness], [false, false]);
   }
 });
 
@@ -103,6 +128,54 @@ test('the renderer builds exactly three marks 1..3 Low/Normal/High for FollowVid
   // The other effects with a Speed slider (ColorShift, ColorWave, Breathing, StarryNight) are unchanged: 1..3 too.
   for (const other of displayEffectMenu(LAYOUTS, '34M2C8600').EffectList.filter((i) => i.SupSpeed && i.Effect.Name !== 'FollowVideo')) {
     assert.deepEqual(rendererSpeedSlider({ Speed: 2, ...JSON.parse(serialize(other, 'ui')) }).range, [1, 2, 3], String(other.Effect.Name));
+  }
+});
+
+/**
+ * The renderer's Brightness slider, transcribed from Ambiglow-Dvqon39u.js:1040-1058 (work/app-pretty, vendor 1.13.0),
+ * over the same merged EffectDetail as the Speed slider. `R` is styles' Im(e): `null != e`. The if-condition is the
+ * last expression of the vendor's comma chain (its Brightness part).
+ */
+function rendererBrightnessSlider(e: Record<string, any>, ra: (key: string) => string = (k) => k) {
+  const na = ['Bright', 'Brighter', 'Brightest'];
+  const R = (x: unknown) => x != null;
+  const brightness = { support: false, value: -1, range: [] as number[], marks: {} as Record<number, string> };
+  if (
+    ((brightness.support = !!e.SupBrightness),
+    brightness.support && ((brightness.value = e.Brightness), (brightness.range = []), (brightness.marks = {}), e.MaxBrightness && R(e.MinBrightness)))
+  ) {
+    let a = e.MinBrightness;
+    if (e.MaxBrightness > a && e.BrightnessStep) {
+      let l = 0;
+      for (; a <= e.MaxBrightness; ) brightness.range.push(a), (brightness.marks[a] = ra(na[l++])), (a += e.BrightnessStep);
+    }
+  }
+  return brightness;
+}
+
+test('the renderer builds exactly three Brightness marks 1..3 Bright/Brighter/Brightest for FollowVideo with the ENE, none without', () => {
+  const detail = DisplayEffectInfo.default('34M2C8600').getEffectDetail(1).toJson(); // Brightness 3, like the user's profile
+  const item = displayEffectMenu(LAYOUTS, '34M2C8600').EffectList.find((i) => i.Effect.Name === 'FollowVideo')!;
+  const merged = { ...detail, ...JSON.parse(serialize(item, 'ui')) };
+  assert.deepEqual(rendererBrightnessSlider(merged), {
+    support: true,
+    value: 3,
+    range: [1, 2, 3],
+    marks: { 1: 'Bright', 2: 'Brighter', 3: 'Brightest' },
+  });
+  // The Speed slider next to it keeps its three marks (its MinBrightness bug reads the same 1).
+  assert.deepEqual(rendererSpeedSlider(merged).range, [1, 2, 3]);
+  // The vendor item (and the no-ENE menu) hides the slider.
+  for (const menu of [vendorEffectMenu(LAYOUTS, '34M2C8600'), displayEffectMenu(LAYOUTS, '')]) {
+    const vendorItem = menu.EffectList.find((i) => i.Effect.Name === 'FollowVideo')!;
+    assert.equal(rendererBrightnessSlider({ ...detail, ...JSON.parse(serialize(vendorItem, 'ui')) }).support, false);
+  }
+  // FollowAudio has no Brightness slider in either menu (out of scope).
+  const audio = displayEffectMenu(LAYOUTS, '34M2C8600').EffectList.find((i) => i.Effect.Name === 'FollowAudio')!;
+  assert.equal(rendererBrightnessSlider({ Brightness: 3, ...JSON.parse(serialize(audio, 'ui')) }).support, false);
+  // The other effects' Brightness sliders are unchanged: 1..3 too.
+  for (const other of displayEffectMenu(LAYOUTS, '34M2C8600').EffectList.filter((i) => i.SupBrightness && i.Effect.Name !== 'FollowVideo')) {
+    assert.deepEqual(rendererBrightnessSlider({ Brightness: 3, ...JSON.parse(serialize(other, 'ui')) }).range, [1, 2, 3], String(other.Effect.Name));
   }
 });
 

@@ -100,6 +100,9 @@ describe('import-vendor-ui against the real 1.13.0 app.asar', { skip }, () => {
   });
 
   test('every patch of the table was applied exactly its expected number of times', () => {
+    assert.equal(table.patches.length, 32, 'the 31 offline/removal patches and the port feature FAST-LED-UPLOAD');
+    assert.equal(table.patches.at(-1)?.id, 'FAST-LED-UPLOAD');
+    assert.match(run.stdout, /^OK: 32 patches, 11 files removed/m);
     assert.deepEqual(manifest.patches.map((p) => p.id), table.patches.map((p) => p.id));
     for (const p of table.patches) {
       const applied = manifest.patches.find((a) => a.id === p.id);
@@ -136,6 +139,28 @@ describe('import-vendor-ui against the real 1.13.0 app.asar', { skip }, () => {
     const styles = texts.get('assets/styles-DAnQi2A8.js') ?? '';
     assert.ok(styles.includes('`http://127.0.0.1:${e}/EvniaHub?k=${encodeURIComponent(window.__EVNIA__?.hubToken??"")}`'));
     assert.ok(!/AccessKey:"[^"]+"/.test(styles), 'saas HMAC credentials are blanked');
+  });
+
+  test('FAST-LED-UPLOAD: the Ambiglow page gets the checkbox once, between the Speed and the StarCount blocks, with a key of its own', () => {
+    const src = new AsarSource(asarPath);
+    const original = src.read(`${RENDERER_PREFIX}/assets/Ambiglow-Dvqon39u.js`).toString('utf8');
+    const patched = readFileSync(join(ui, 'assets', 'Ambiglow-Dvqon39u.js'), 'utf8');
+    assert.equal(patched.split('Fast LED upload (experimental)').length - 1, 1);
+    assert.equal(patched.split('window.__EVNIA__.experimental.setEneFrameBurst(e)').length - 1, 1);
+    const speed = patched.indexOf('label:"Speed"');
+    const box = patched.indexOf('evnia-fast-led-upload');
+    const stars = patched.indexOf('Ye.startCount.support?');
+    assert.ok(speed > 0 && speed < box && box < stars, 'after the Speed slider, before the StarCount slider');
+    // The sibling v-if blocks of that column use keys 0..3 (position/direction, brightness, speed, star count).
+    for (const key of ['{key:0,class:"ambiglow-item"}', 'key:1,modelValue:Ye.brightness.value', 'key:2,modelValue:Ye.speed.value', 'key:3,modelValue:Ye.startCount.value']) {
+      assert.ok(original.includes(key), key);
+    }
+    assert.equal(original.includes('{key:4,'), false, 'key 4 is free in the vendor chunk');
+    assert.equal(patched.length - original.length, table.patches.find((p) => p.id === 'FAST-LED-UPLOAD')!.replace.length - (table.patches.find((p) => p.id === 'FAST-LED-UPLOAD')!.find as string).length);
+    // The other Ambiglow chunks (peripheral pages) are not touched.
+    for (const other of ['Ambiglow-C1UG4F7Y.js', 'Ambiglow-CUjDUSuQ.js', 'Ambiglow-xxUfbvEw.js']) {
+      assert.ok(readFileSync(join(ui, 'assets', other)).equals(src.read(`${RENDERER_PREFIX}/assets/${other}`)), other);
+    }
   });
 
   test('patched and kept chunks are still valid ES modules', async () => {

@@ -136,6 +136,18 @@ export function burstFrameWrite(writes: readonly FrameWrite[]): FrameWrite | nul
 }
 
 /**
+ * Host-side dimming of a frame (the port's FollowVideo Brightness, impl-ambiglow §4.2 and deviation 17): every colour
+ * byte × `gain`, rounded to the nearest integer. A gain of 1 or more (or not a number) returns the writes unchanged
+ * (the same objects), 0 or less gives black. The follow-video engine passes 1/3, 2/3 or 1; with those c·gain is
+ * never halfway between two integers, so the rounding is exact.
+ */
+export function dimFrameWrites(writes: readonly FrameWrite[], gain: number): FrameWrite[] {
+  if (!(gain < 1)) return [...writes];
+  const f = gain > 0 ? gain : 0;
+  return writes.map((w) => ({ reg: w.reg, data: w.data.map((c) => Math.round(c * f)) }));
+}
+
+/**
  * Sample a grid into the plan's frame-buffer writes. The grid must be exactly 50×40 (the vendor's
  * fixed CalcRGBs(50, 40) size; it rejects smaller grids and ignores anything beyond 50×40).
  */

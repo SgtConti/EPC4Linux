@@ -71,6 +71,12 @@ Desktop notes
     controller): Low is the Windows app's timing, Normal (default) follows
     the screen faster, High more smoothly and with more CPU. Changing it
     keeps the running screen capture (no new portal dialog).
+  * It also has a Brightness slider (Bright, Brighter, Brightest = the
+    Windows app's full colours) and an opt-in "Fast LED upload
+    (experimental)" checkbox: one USB transfer per LED update instead of
+    six. The checkbox is untested on real monitors; untick it if the LEDs
+    flicker or freeze (the setting is kept in ~/.config/evnia/config.json
+    as "linuxExperimental").
   * Wayland: themes bound to an application do not switch automatically;
     the active window is only known on X11.
   * The tray icon needs a StatusNotifier host. On GNOME that is the

@@ -11,7 +11,10 @@
 //   nodeApi  the calls the renderer makes (02 §2.1): existsSync, readFileSync, readFile, copyFileSync,
 //            unlinkSync, getBaseName, pathJoin — file access via synchronous IPC, confined by main to
 //            the app's data directories and dialog-picked files (src/main/fs-guard.ts).
-//   evnia    window.__EVNIA__ {hubToken, platform} for the patched SignalR URL (ARCHITECTURE "Big picture").
+//   evnia    window.__EVNIA__ {hubToken, platform} for the patched SignalR URL (ARCHITECTURE "Big picture"), and
+//            {experimental: {get, setEneFrameBurst}} for the port's opt-in experiments: the Ambiglow page's
+//            "Fast LED upload (experimental)" checkbox (scripts/ui-patches.mjs FAST-LED-UPLOAD). get() is synchronous
+//            (the store snapshot of the bootstrap, so the first render is right) and follows config.json.
 //   noop     the vendor defined it only in the isolated world, so the page's `.catch(window.noop)`
 //            swallowed nothing; exposing it makes those catches work as intended.
 //   electronLog  window.__electronLog {sendToMain, log, error, …}: the renderer's electron-log lines into
@@ -22,6 +25,8 @@ import {
   type BootstrapData,
   DROPPED_SEND_CHANNELS,
   EVENT_CHANNELS,
+  EXPERIMENTAL_NONE,
+  type ExperimentalState,
   type FsSyncResult,
   INTERNAL_CHANNELS,
   INVOKE_CHANNELS,
@@ -31,7 +36,16 @@ import {
   syntheticReply,
 } from '../main/shared/channels.ts';
 import { basename, join } from '../main/shared/posix-path.ts';
-import { cloneJson, coerceForced, deletePath, getPath, setPath, splitKeyPath, writeError } from '../main/shared/store-schema.ts';
+import {
+  cloneJson,
+  coerceForced,
+  deletePath,
+  ENE_FRAME_BURST_KEY,
+  getPath,
+  setPath,
+  splitKeyPath,
+  writeError,
+} from '../main/shared/store-schema.ts';
 
 type IpcListener = (event: unknown, ...args: unknown[]) => void;
 
@@ -77,7 +91,20 @@ export interface PreloadApi {
     getBaseName(p: string, ext?: string): string;
     pathJoin(...parts: string[]): string;
   };
-  evnia: { hubToken: string; platform: 'linux' };
+  evnia: {
+    hubToken: string;
+    platform: 'linux';
+    /**
+     * The port's opt-in experiments. Only the main window gets the real state (other windows see everything off and
+     * are refused by main). Nothing of this is a vendor API; only the FAST-LED-UPLOAD patch of the Ambiglow page uses it.
+     */
+    experimental: {
+      /** Synchronous: {eneFrameBurst: the saved "Fast LED upload" setting, forcedByEnv: EVNIA_ENE_FRAME_BURST=1}. */
+      get(): ExperimentalState;
+      /** Save the setting (config.json linuxExperimental.eneFrameBurst) and switch the ENE frame burst; rejects for a non-boolean or a refused sender. */
+      setEneFrameBurst(enabled: boolean): Promise<void>;
+    };
+  };
   noop: () => void;
   /**
    * window.__electronLog: the bridge electron-log 5's own preload exposed in the vendor app (its renderer IPC
@@ -200,7 +227,6 @@ export function createPreloadApi(ipcRenderer: IpcRendererLike, out: PreloadConso
   // ───────────── store ─────────────
 
   const snapshot: Record<string, unknown> = boot.store;
-
   ipcRenderer.on(INTERNAL_CHANNELS.storeChanged, (_e, key, value) => {
     if (typeof key !== 'string') return;
     if (value === undefined) deletePath(snapshot, key);
@@ -285,5 +311,29 @@ export function createPreloadApi(ipcRenderer: IpcRendererLike, out: PreloadConso
     silly: level('silly'),
   };
 
-  return { ipc, store, nodeApi, evnia: { hubToken: boot.hubToken, platform: 'linux' }, noop: () => {}, electronLog };
+  // ───────────── experiments (window.__EVNIA__.experimental) ─────────────
+
+  // Main sends the real state to the main window only (the one with the hub token) and EXPERIMENTAL_NONE to the others.
+  // The setting itself is config.json linuxExperimental.eneFrameBurst, so the main window reads it from its store
+  // snapshot, which follows every write (its own, main's broadcasts); forcedByEnv is fixed for the app's run.
+  const isMainWindow = boot.hubToken !== '';
+  const forcedByEnv = (boot.experimental ?? EXPERIMENTAL_NONE).forcedByEnv === true;
+  const experimental: PreloadApi['evnia']['experimental'] = {
+    get: (): ExperimentalState => ({ eneFrameBurst: isMainWindow && getPath(snapshot, ENE_FRAME_BURST_KEY) === true, forcedByEnv }),
+    async setEneFrameBurst(enabled) {
+      if (typeof enabled !== 'boolean') throw new TypeError('setEneFrameBurst expects a boolean');
+      const next = (await ipcRenderer.invoke(INTERNAL_CHANNELS.experimentalSet, enabled)) as Partial<ExperimentalState> | null;
+      // The snapshot now (main's broadcast of the same write may arrive after this reply).
+      setPath(snapshot, ENE_FRAME_BURST_KEY, next?.eneFrameBurst === true);
+    },
+  };
+
+  return {
+    ipc,
+    store,
+    nodeApi,
+    evnia: { hubToken: boot.hubToken, platform: 'linux', experimental },
+    noop: () => {},
+    electronLog,
+  };
 }
