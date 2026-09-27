@@ -64,7 +64,7 @@ export interface MonitorManagerOptions {
   mockEne?: boolean;
   /**
    * Mock mode: the simulated monitor's seed (default MOCK_34M2C8600, synthetic serial). The contract tests
-   * pass the user's real EDID and serial (test/fixtures/user-monitor.ts) to replay the captured session.
+   * pass the captured unit's EDID and serial (test/fixtures/user-monitor.ts) to replay the captured session.
    */
   mockSpec?: MockMonitorSpec;
   /** Real mode: sysfs root, /dev root and i2c syscalls (tests). */

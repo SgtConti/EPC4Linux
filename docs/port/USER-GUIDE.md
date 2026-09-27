@@ -537,37 +537,24 @@ Your own files are left in place. Delete them yourself if you want:
 
 ## Building from source
 
-The port's source contains no copy of the vendor application. The build takes the vendor's user interface and three data files from **your own copy** of the Windows application, patches them, and packages them with the Linux backend. The resulting `.deb` therefore contains vendor material: it is for your personal use only. Do not share it.
+The complete guide is [BUILDING.md](../../BUILDING.md) at the repository root. It covers the prerequisites, getting the vendor installer, the build, the tests, the installation, building without Docker, and troubleshooting.
 
-You need:
+The port's source contains no copy of the vendor application. The build takes the vendor's user interface and three data files from **your own copy** of Evnia Precision Center 1.13.0, patches them, and packages them with the Linux backend. The resulting `.deb` therefore contains vendor material: it is for your personal use only. Do not share it.
 
-1. **The Evnia Precision Center 1.13.0 installation folder** from Windows (the folder containing `Evnia Precision Center.exe`). The build reads:
-   - `resources/app.asar`;
-   - `resources/bin/res/data/PCenter_DeviceInfo.json`;
-   - `resources/bin/res/data/ENE/PCenter_AmbiglowInfo.json`.
+In short, you need Docker, network access once, and the vendor's Windows installer `evnia Setup 1.13.0.exe`, which you download yourself from Philips. Windows is not needed: the installer is unpacked with 7-Zip, never run. Only version 1.13.0 is accepted; any other fails with a clear message before anything is patched.
 
-   Put the folder next to `port/` as `Evnia Precision Center/`, or point the build at it (see below). Only version 1.13.0 is accepted. Any other build fails with a clear message before anything is patched.
-2. **Docker**. On Windows, Docker Desktop with Git Bash works.
-3. **Network access once**, for the Docker base image and `npm ci`. The `npm ci` step downloads Electron. The build and the tests themselves need no network.
-
-Steps, from the repository root:
+The steps, from the repository root:
 
 ```sh
-# 1. The development image (Debian 13 with Node 22, Xvfb, dpkg tools, lintian)
 docker build -t evnia-port-dev -f port/docker/Dockerfile.dev port/docker
-
-# 2. Dependencies, installed inside the container so they are Linux builds
-docker run --rm -v "$PWD:/repo" -w /repo/port evnia-port-dev bash -c 'npm ci'
-
-# 3. Import the vendor UI, build, package
-docker run --rm -v "$PWD:/repo" -w /repo/port evnia-port-dev \
+docker run --rm -v "$PWD:/repo" -w /repo/port evnia-port-dev npm ci
+docker run --rm --network none -v "$PWD:/repo" -v "$HOME/Downloads:/installer:ro" -w /repo/port evnia-port-dev \
+  node scripts/extract-installer.mjs --installer "/installer/evnia Setup 1.13.0.exe"
+docker run --rm --network none -v "$PWD:/repo" -w /repo/port evnia-port-dev \
   bash -c 'npm run import-ui && npm run build && npm run dist:deb'
 # → port/dist/evnia-precision-center_1.13.0-linux.3_amd64.deb
 ```
 
-- **Git Bash on Windows:** prefix each `docker run` with `MSYS_NO_PATHCONV=1`, and give the volume as a Windows path, e.g. `-v "C:\path\to\repo:/repo"`.
-- **Linux host:** the container runs as root, so the files it creates in `port/` are owned by root. Afterwards run `sudo chown -R "$USER" port/build port/dist port/node_modules`.
-- **Installation folder elsewhere:** use `npm run import-ui -- --asar /path/to/resources/app.asar`. That uses the data files next to it, unless `--resources <dir>` names another `resources` folder. The environment variable `EVNIA_VENDOR_ASAR` works as well; the path must be visible inside the container.
-- **Package maintainer field:** set `DEBEMAIL="Your Name <you@example.org>"` for the build. Without it the neutral placeholder `Evnia Linux Port <noreply@localhost>` is used.
+These commands are for Linux and WSL2. Git Bash on Windows needs `export MSYS_NO_PATHCONV=1` and Windows paths for the volumes: `-v "$(pwd -W):/repo"` and `-v "$(cygpath -w "$HOME/Downloads"):/installer:ro"`. An installed 1.13.0 folder copied from Windows works instead of the installer. [BUILDING.md](../../BUILDING.md) explains both.
 
-Other `npm` scripts, the tests and the project layout are described in [`port/README.md`](../../port/README.md). How the pieces fit together is in [ARCHITECTURE.md](ARCHITECTURE.md), and how to maintain and update the port is in [MAINTAINING.md](MAINTAINING.md).
+Other `npm` scripts and the project layout are described in [`port/README.md`](../../port/README.md). How the pieces fit together is in [ARCHITECTURE.md](ARCHITECTURE.md), and how to maintain and update the port is in [MAINTAINING.md](MAINTAINING.md).

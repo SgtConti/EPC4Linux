@@ -4,7 +4,7 @@
   "version": "1.13.0-linux.3",
   "private": true,
   "description": "Offline Linux port of Philips Evnia Precision Center (monitor features only)",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "main": "build/app/main.cjs",
   "engines": { "node": ">=22.18" },

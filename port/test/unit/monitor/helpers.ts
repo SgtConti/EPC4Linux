@@ -213,7 +213,7 @@ export interface TestDisplayOptions {
 }
 
 export async function testDisplay(options: TestDisplayOptions = {}): Promise<TestDisplay> {
-  // The user's unit (real EDID and serial, test/fixtures/user-monitor.ts): the fixtures were captured on it.
+  // The captured unit (its EDID and anonymized serial, test/fixtures/user-monitor.ts): the fixtures come from it.
   const bundle = await createMock34M2C8600({ spec: USER_34M2C8600, transports: options.spec ? [] : (options.transports ?? ['via']) });
   if (options.spec) {
     bundle.monitor = new SimulatedMonitor(options.spec);

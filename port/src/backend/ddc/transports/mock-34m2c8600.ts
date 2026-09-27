@@ -8,10 +8,11 @@
 // the simulator answers every code the capability string advertises.
 //
 // Privacy: this file ships inside the app (mock mode is part of the product, ARCHITECTURE rule 7), so it
-// carries no identifier of the user's unit. The serial is the synthetic MOCK_SERIAL, in the TPV GetSN
-// answer and in the EDID (0xFF descriptor text, the 32-bit serial number 1, the checksum recomputed); the
-// rest of the EDID is the model's. Tests that replay the user's captured session inject the real serial and
-// EDID from test/fixtures/user-monitor.ts (MonitorManagerOptions.mockSpec, createMock34M2C8600({spec})).
+// carries no identifier of a real unit. The serial is the synthetic MOCK_SERIAL, in the TPV GetSN answer and
+// in the EDID (0xFF descriptor text, the 32-bit serial number 1, manufacture week 1, the checksum
+// recomputed); the rest of the EDID is the model's. Tests that replay the captured session inject the
+// captured unit's (anonymized) serial and EDID from test/fixtures/user-monitor.ts
+// (MonitorManagerOptions.mockSpec, createMock34M2C8600({spec})).
 
 export interface MockMonitorSpec {
   name: string;

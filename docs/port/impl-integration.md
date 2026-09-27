@@ -86,7 +86,7 @@ A mock monitor wins over `noHardware` (the simulated devices are not real hardwa
 
 All composed tests build the **production** backend: `compose.ts composeMockBackend({ ene? })` = `createDefaultBackend({ host, mockMonitor: '34M2C8600/no-ene' | '34M2C8600', noHardware: true })` with the user's `EvniaServe/` and `evnia/` fixtures copied to a temp dir, `resourcesDir = build/vendor-data` (`npm run import-ui`; the only skip reason when missing), the user's display mode (3440x1440/175Hz/0°), idle 0, no capture host. Nothing is wired test-locally. Observations go through the exposed services and the simulated hardware (`services.monitors.mockHardware`: the monitor's received frames and control values, the fake USB bus, the ENE MCU registers).
 
-The one composition option the tests pass is the simulated monitor's identity (security review): the shipped mock has a synthetic serial (`MOCK000000001`), while the golden replies carry the user's. So `composeMockBackend` passes `monitors: { mockSpec: USER_34M2C8600 }` (`test/fixtures/user-monitor.ts`: the real EDID and serial) through `DefaultCompositionOptions`. `serve.test.ts` runs `serve.ts --mock` unchanged and therefore sees the synthetic serial.
+The one composition option the tests pass is the simulated monitor's identity (security review): the shipped mock has a synthetic serial (`MOCK000000001`), while the golden replies carry the user's. So `composeMockBackend` passes `monitors: { mockSpec: USER_34M2C8600 }` (`test/fixtures/user-monitor.ts`: the captured EDID and serial, anonymized) through `DefaultCompositionOptions`. `serve.test.ts` runs `serve.ts --mock` unchanged and therefore sees the synthetic serial.
 
 | File | Test | What it checks |
 |---|---|---|

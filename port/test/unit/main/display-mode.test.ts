@@ -1,7 +1,7 @@
 // HostServices.getDisplayMode (20-monitor-io-linux-consolidation §3.5): the pure string rules, the Mutter
 // (GetCurrentState) and XRandR (--current --verbose) readers, output matching by EDID / Mutter spec /
-// connector, and the provider's source order, fallbacks and refresh behaviour. The monitor is the user's
-// 34M2C8600 with its real EDID (the RAW DUMP of EvniaServe-2026-09-25.txt, as seeded in the simulator).
+// connector, and the provider's source order, fallbacks and refresh behaviour. The monitor is the captured
+// 34M2C8600 with its logged EDID (the RAW DUMP of EvniaServe-2026-09-25.txt, serials anonymized).
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';

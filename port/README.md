@@ -35,18 +35,25 @@ src/main/       Electron main: windows, tray, IPC allowlist, store, kill-switch,
                 display mode, idle time, foreground app, device events, autostart, logs
 src/preload/    window.ipc / window.store / window.nodeApi (sandboxed, allowlisted)
 src/capture/    hidden follow-video capture page
-scripts/        import-vendor-ui.mjs + ui-patches.mjs (patch table), build.mjs, package-deb.mjs, lib/
+scripts/        extract-installer.mjs (vendor installer → ../Evnia Precision Center), import-vendor-ui.mjs +
+                ui-patches.mjs (patch table), build.mjs, package-deb.mjs, lib/
 packaging/deb/  control, maintainer scripts, udev rules, modules-load, .desktop, README.Debian, man page
 docker/         Dockerfile.dev (build/test image), Dockerfile.install-test
 test/           unit/, contract/ (golden transcript), e2e/ (Playwright + Electron), install/ (.deb in clean images),
-                fixtures/ (the user's real Windows data: do not publish)
+                fixtures/ (data captured from a Windows installation, anonymized: tools/sanitize-public.py)
 ```
 
 Generated and git-ignored: `node_modules/`, `build/` (vendor import and bundles), `dist/` (the `.deb`), `test/e2e/artifacts/`, `test/install/artifacts/`.
 
 ## Prerequisites
 
-- **Your own copy of the Evnia Precision Center 1.13.0 installation** from Windows. By default the importer reads `../Evnia Precision Center/resources/app.asar` and the data files under `resources/bin/res/data/`. Use `npm run import-ui -- --asar <app.asar> [--resources <dir>]` or `EVNIA_VENDOR_ASAR` for another location. Another vendor version is refused by hash.
+[BUILDING.md](../BUILDING.md) is the step-by-step guide for a first build. In short:
+
+- **Your own copy of Evnia Precision Center 1.13.0.** By default the importer reads `../Evnia Precision Center/resources/app.asar` and the data files under `resources/bin/res/data/`. There are two ways to get them there:
+  - extract them from the vendor's Windows installer, without Windows: `node scripts/extract-installer.mjs --installer "<dir>/evnia Setup 1.13.0.exe"` (7-Zip; the installer is only read, never run);
+  - copy an installation from Windows.
+
+  Use `npm run import-ui -- --asar <app.asar> [--resources <dir>]` or `EVNIA_VENDOR_ASAR` for another location. Another vendor version is refused by hash.
 - **Docker.** Everything is built and tested in the `evnia-port-dev` image. The dependencies must be the Linux builds, so install them inside the container.
 - **Network once**, for the image and `npm ci` (which downloads Electron). The build, the app and the tests need none.
 
@@ -56,11 +63,13 @@ docker build -t evnia-port-dev -f port/docker/Dockerfile.dev port/docker
 docker run --rm -v "$PWD:/repo" -w /repo/port evnia-port-dev bash -c 'npm ci'
 ```
 
-To run commands (Git Bash on Windows: add `MSYS_NO_PATHCONV=1`, and use a Windows path for `-v`):
+To run commands (Git Bash on Windows: `export MSYS_NO_PATHCONV=1` and write the volume as `-v "$(pwd -W):/repo"`; see [BUILDING.md](../BUILDING.md#4-build-with-docker-recommended), section 4):
 
 ```sh
-docker run --rm --network none -v "$PWD:/repo" -w /repo/port evnia-port-dev bash -c '<command>'
+docker run --rm --init --network none -v "$PWD:/repo" -w /repo/port evnia-port-dev bash -c '<command>'
 ```
+
+`--init` reaps orphaned processes. The child-process test that SIGKILLs a helper's parent needs it when the command is a single program.
 
 The container runs as root, so on a Linux host the generated files are root-owned. `chown` them back afterwards.
 
@@ -68,6 +77,7 @@ The container runs as root, so on a Linux host the generated files are root-owne
 
 | Command | What |
 |---|---|
+| `node scripts/extract-installer.mjs --installer <exe> [--full]` | Unpack the vendor's 1.13.0 installer with 7-Zip into `../Evnia Precision Center` (verified against the pins; `--full` for the whole installation) |
 | `npm run import-ui` | Extract `app.asar`, verify the pinned hashes, apply the patch table, rewrite the CSP, audit → `build/vendor-ui`, `build/vendor-data`, `build/vendor-assets` |
 | `npm run build` | esbuild → `build/app` |
 | `npx tsc -p tsconfig.json` (`npm run typecheck`) | Strict typecheck of `src/` and `test/` |
@@ -91,6 +101,7 @@ npm run import-ui && npm run build && npm run dist:deb
 |---|---|
 | `EVNIA_MOCK_MONITOR=34M2C8600` (`…/no-ene`) | The app uses the simulated monitor (with or without the simulated ENE); no real hardware is opened. It is also used by the tests. |
 | `EVNIA_VENDOR_ASAR` | Default `app.asar` for `npm run import-ui` |
+| `EVNIA_VENDOR_INSTALLER`, `EVNIA_7Z` | Default installer and 7-Zip executable for `scripts/extract-installer.mjs` |
 | `DEBEMAIL`, `DEBFULLNAME`, `SOURCE_DATE_EPOCH` | Maintainer field and changelog date of the `.deb` |
 | `XDG_CONFIG_HOME`, `XDG_RUNTIME_DIR` | Base of `evnia/` and `EvniaServe/`, and of the lock files and debug flag |
 
@@ -108,5 +119,5 @@ This is an unofficial port for personal use, not affiliated with or endorsed by 
 - The source here contains no copy of the vendor's application or binaries. It holds only short excerpts needed for interoperability:
   - the patch anchors in `scripts/ui-patches.mjs`;
   - transcribed menu tables and the tray labels;
-  - test fixtures derived from the user's own installation and logs.
-- The build takes the vendor's renderer and data files from **your own** installation. So `build/` and the resulting `.deb` contain vendor material: keep them for your own use and do not redistribute them.
+  - test fixtures derived from one user's installation and logs, anonymized (`tools/sanitize-public.py`).
+- The build takes the vendor's renderer and data files from **your own** installer or installation. So `build/` and the resulting `.deb` contain vendor material: keep them for your own use and do not redistribute them.

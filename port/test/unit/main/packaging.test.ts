@@ -8,7 +8,7 @@ import { test } from 'node:test';
 import { describeFuses, FUSE, FUSE_SENTINEL, fuseState, PACKAGED_FUSES, readFuseWire, setFuses } from '../../../scripts/lib/fuses.ts';
 import { IGNORED_ADAPTER_PREFIXES, isIgnoredI2cAdapter } from '../../../src/backend/ddc/discovery.ts';
 import { MOCK_34M2C8600 } from '../../../src/backend/ddc/transports/mock-34m2c8600.ts';
-import { USER_34M2C8600, USER_MONITOR_SERIAL } from '../../fixtures/user-monitor.ts';
+import { USER_34M2C8600, USER_ENE_SERIAL, USER_MONITOR_SERIAL } from '../../fixtures/user-monitor.ts';
 
 const PORT = join(import.meta.dirname, '..', '..', '..');
 const deb = (f: string) => readFileSync(join(PORT, 'packaging', 'deb', f), 'utf8');
@@ -194,14 +194,15 @@ test('fuses: the wire parser refuses what it does not understand', () => {
   assert.equal(describeFuses(setFuses(b, { RunAsNode: false })), 'RunAsNode=0 EnableCookieEncryption=0 EnableNodeOptionsEnvironmentVariable=1 EnableNodeCliInspectArguments=1 EnableEmbeddedAsarIntegrityValidation=0 OnlyLoadAppFromAsar=0 LoadBrowserProcessSpecificV8Snapshot=0 GrantFileProtocolExtraPrivileges=1');
 });
 
-test('privacy: nothing that ships (sources of the bundles, scripts, packaging, the built app) carries the user\'s unit identifiers', () => {
+test('privacy: nothing that ships (sources of the bundles, scripts, packaging, the built app) carries the fixtures\' unit identifiers', () => {
   // The simulated monitor and ENE are part of the product (EVNIA_MOCK_MONITOR); their identities are synthetic.
-  // The real ones live in test/fixtures only (user-monitor.ts, windows/).
+  // The identity of the captured unit (anonymized by tools/sanitize-public.py) lives in test/fixtures only
+  // (user-monitor.ts, windows/) and is never compiled into the product.
   const needles = [...new Set([
     USER_MONITOR_SERIAL,
     Buffer.from(USER_MONITOR_SERIAL, 'latin1').toString('hex').toUpperCase(), // inside an EDID hex string
     Buffer.from(USER_MONITOR_SERIAL, 'latin1').toString('hex'),
-    '0000000002', // the ENE MCU's USB serial (logs/EvniaServe-2026-09-25.txt:31)
+    USER_ENE_SERIAL, // the ENE MCU's USB serial (logs/EvniaServe-2026-09-25.txt:31)
   ])];
   const roots = ['src', 'scripts', 'packaging', join('build', 'app')].map((d) => join(PORT, d)).filter((d) => existsSync(d));
   const offenders: string[] = [];

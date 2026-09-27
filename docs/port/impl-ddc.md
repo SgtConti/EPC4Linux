@@ -257,16 +257,18 @@ No `types.ts` additions were needed.
   `cli.ts --mock`, the install test). So it carries no identifier of the user's unit:
   - the serial is `MOCK_SERIAL` = `MOCK000000001`, in the TPV GetSN answer and in the EDID's 0xFF
     descriptor;
-  - the EDID's 32-bit serial number is 1, with the base-block checksum recomputed;
-  - everything else of the EDID (PnP id, product code, week/year, name, timings, extension block) is the
+  - the EDID's 32-bit serial number is 1 and its manufacture week 1, with the base-block checksum
+    recomputed;
+  - everything else of the EDID (PnP id, product code, year, name, timings, extension block) is the
     model's.
 
   Tests that compare with data captured on the user's monitor (golden transcripts, the logged EDID dump,
   the LOG26 banner, the Windows profiles) use `test/fixtures/user-monitor.ts` `USER_34M2C8600`, which
-  has the real EDID and serial. They pass it as `createMock34M2C8600({spec})`,
+  has an anonymized copy of the captured EDID and serial (serial `AU00000000001`, EDID serial number and
+  week 1; `tools/sanitize-public.py`). They pass it as `createMock34M2C8600({spec})`,
   `MonitorManagerOptions.mockSpec` or `new SimulatedMonitor(spec)`. `edid.test.ts` checks that the
-  shipped EDID differs from the real dump only in the serial bytes (12-15, 77-89) and the checksum. A
-  packaging test scans the bundle sources and `build/app` for the real serials.
+  shipped EDID differs from the logged dump only in the serial bytes (12-15, 77-89) and the checksum. A
+  packaging test scans the bundle sources and `build/app` for the fixtures' serials.
 
 ## Deviations from the vendor (deliberate)
 

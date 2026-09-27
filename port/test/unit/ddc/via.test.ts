@@ -21,7 +21,7 @@ function describe(t: FakeTransfer): string {
 }
 
 async function viaSetup() {
-  const monitor = new SimulatedMonitor(USER_34M2C8600); // the user's unit (LOG26 banner, real serial)
+  const monitor = new SimulatedMonitor(USER_34M2C8600); // the captured unit (LOG26 banner, anonymized serial)
   const usb = new FakeUsbBackend();
   const info = usb.attach(mockViaDeviceSpec(monitor));
   const transport = new ViaUsbTransport(await usb.open(info));

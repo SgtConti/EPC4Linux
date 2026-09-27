@@ -97,7 +97,7 @@ test('pairing name and header fix', () => {
   assert.throws(() => parseEdid(new Uint8Array(100)), /not an EDID/);
 });
 
-test('the user\'s unit in the tests is the real dump; the shipped simulator differs only in its serials (privacy)', () => {
+test('the captured unit in the tests is the (anonymized) logged dump; the shipped simulator differs only in its serials (privacy)', () => {
   const real = realEdid();
   assert.deepEqual(hexToBytes(USER_EDID_HEX), real);
   const shipped = hexToBytes(MOCK_34M2C8600.edidHex);

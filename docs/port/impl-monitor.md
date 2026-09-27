@@ -163,7 +163,7 @@ Specs used: 20-backend-host-tail (§2.4-2.6, §3, §5, §6, §7.2), 20-enum-valu
   - a temporary sysfs is written with `writeMockSysfs`;
   - the real `discoverMonitors` runs over all of it, with `NO_DELAY_TIMINGS`.
 
-  `"34M2C8600/no-ene"` (or `mockEne: false`) leaves the ENE out, which is the user's 2026-09-26 state. `mockHardware` exposes all of it to tests. `mockSpec` replaces the simulated monitor's seed: the shipped one has a synthetic serial (`MOCK000000001`, impl-ddc "Synthetic identity"), and the tests that replay the user's captured data pass `test/fixtures/user-monitor.ts` `USER_34M2C8600` (real EDID and serial).
+  `"34M2C8600/no-ene"` (or `mockEne: false`) leaves the ENE out, which is the user's 2026-09-26 state. `mockHardware` exposes all of it to tests. `mockSpec` replaces the simulated monitor's seed: the shipped one has a synthetic serial (`MOCK000000001`, impl-ddc "Synthetic identity"), and the tests that replay the user's captured data pass `test/fixtures/user-monitor.ts` `USER_34M2C8600` (the captured EDID and serial, anonymized).
 - **Real mode:** `BackendOptions.usb`, or a new `LibusbBackend`, plus `/sys`, `/dev` and `linuxI2cSyscalls()`. With `noHardware` and no mock, there are no monitors.
 
 ### 2.5 API dispositions (20-backend-host-tail §3; audited against `api/catalog.ts`)

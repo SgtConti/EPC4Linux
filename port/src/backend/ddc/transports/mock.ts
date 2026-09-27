@@ -458,8 +458,8 @@ export interface MockMonitorBundle {
 
 /**
  * The simulated 34M2C8600 reachable over both a mock VIA bridge and a mock /dev/i2c-5. `spec` replaces the
- * seed (default MOCK_34M2C8600, whose identity is synthetic), e.g. with the user's real EDID and serial in
- * tests that replay the captured session.
+ * seed (default MOCK_34M2C8600, whose identity is synthetic), e.g. with the captured unit's EDID and serial
+ * in tests that replay the captured session.
  */
 export async function createMock34M2C8600(
   options: { busPath?: string; connector?: string; transports?: Array<'via' | 'i2c'>; spec?: MockMonitorSpec } = {},

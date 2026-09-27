@@ -6,8 +6,8 @@
 // Two runs, each a fresh app launch:
 //   34M2C8600         simulated monitor + ENE Ambiglow MCU, first-run configuration (the vendor tutorials
 //                     are walked through): the ENE Ambiglow page (09 §5, 03 §4.5 ENE path)
-//   34M2C8600-no-ene  the user's hardware on 2026-09-26 (golden session: no ENE on the bus) with the user's
-//                     real Windows data (test/fixtures/windows: config.json, DataTheme.cfg, Default.pcenter,
+//   34M2C8600-no-ene  the captured hardware of 2026-09-26 (golden session: no ENE on the bus) with the
+//                     captured Windows data (test/fixtures/windows: config.json, DataTheme.cfg, Default.pcenter,
 //                     SoftConfig.data, data.json) migrated into ~/.config: the DDC Ambiglow page
 //
 // Every step visits a page or tab, performs what a user would, asserts that the simulated monitor or ENE

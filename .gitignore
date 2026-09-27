@@ -1,2 +1,5 @@
 work/
 /Evnia Precision Center/
+# Private old->new table of tools/sanitize-public.py (holds the identifiers it removes). Keep it outside the
+# checkout (<checkout>-private/, see the script's --map); this pattern only guards the old place. Never commit it.
+/tools/*.local.json

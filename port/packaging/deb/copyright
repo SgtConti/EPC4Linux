@@ -8,19 +8,19 @@ Comment:
  installed paths.
 
 Files: *
-Copyright: 2026 The Evnia Precision Center for Linux port authors
-License: other-port
+Copyright: 2026 The Evnia Precision Center for Linux contributors
+License: Expat
 
 Files: opt/evnia-precision-center/resources/app.asar
 Copyright: © Top Victory Investments Limited. All Rights Reserved.
- 2026 The Evnia Precision Center for Linux port authors
+ 2026 The Evnia Precision Center for Linux contributors
  2011 Einar Otto Stangvik <einaros@gmail.com>
  2013 Arnout Kazemier and contributors
  2016 Luigi Pinca and contributors
  2017 Node.js API collaborators
  2017 Mathias Buus
  Microsoft Corporation
-License: other-vendor and other-port and Expat
+License: other-vendor and Expat
 Comment: The archive holds the Evnia Precision Center user interface and data
  (vendor-ui/, resources/), the port code (main.cjs, preload.cjs, capture/)
  and the npm packages ws, node-addon-api, node-gyp-build and
@@ -53,13 +53,13 @@ Files: opt/evnia-precision-center/resources/app.asar.unpacked/node_modules/koffi
 Copyright: 2026 Niels Martignène <niels.martignene@protonmail.com>
 License: Expat
 
-License: other-port
- The Linux port code (main process, backend, preload, packaging) is not
- published under an open-source licence.
-
 License: other-vendor
  The Evnia Precision Center user interface and data are proprietary to Top
- Victory Investments Limited and not redistributable.
+ Victory Investments Limited and not redistributable. They are extracted from
+ the user's own lawfully obtained copy at build time; this package is for
+ personal use only. The MIT (Expat) licence of the port code does not extend
+ to them. This is an unofficial project, not affiliated with or endorsed by
+ Philips, TPV or Zeasn.
 
 License: other-chromium
  Chromium is distributed under the BSD-3-Clause licence and the licences of

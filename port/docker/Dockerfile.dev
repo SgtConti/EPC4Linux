@@ -1,9 +1,9 @@
-# Dev/test environment for the Evnia Linux port: builds the app, runs Electron headless (Xvfb),
-# runs unit/integration tests and builds + test-installs the .deb.
+# Dev/test environment for the Evnia Linux port: extracts the vendor installer (7zip, scripts/extract-installer.mjs),
+# builds the app, runs Electron headless (Xvfb), runs unit/integration tests and builds + test-installs the .deb.
 FROM debian:trixie
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl xz-utils git python3 build-essential pkg-config \
+      ca-certificates curl xz-utils git python3 build-essential pkg-config 7zip \
       xvfb xauth dbus dbus-x11 \
       libgtk-3-0t64 libnss3 libasound2t64 libgbm1 libxkbcommon0 libatk-bridge2.0-0t64 libcups2t64 \
       libdrm2 libxdamage1 libxss1 libnotify4 libxtst6 libsecret-1-0 libpipewire-0.3-0t64 \

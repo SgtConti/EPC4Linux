@@ -9,10 +9,10 @@
 //       "34M2C8600/no-ene"  the hardware state of the golden session (20-backend-host-tail §5 "Setup"): the
 //                           monitor over USB-DDC through the VIA bridge, the ENE controller ABSENT (default);
 //       "34M2C8600"         the same plus the simulated ENE MCU on USB 3-2.1 (`{ ene: true }`);
-//   - the simulated monitor with the user's real EDID and serial (test/fixtures/user-monitor.ts, passed as
-//     MonitorManagerOptions.mockSpec), since the golden replies carry them; the product's mock monitor has a
-//     synthetic serial;
-//   - the user's real persisted state copied to a temporary EvniaServe/ and evnia/ directory
+//   - the simulated monitor with the captured unit's EDID and (anonymized) serial (test/fixtures/user-monitor.ts,
+//     passed as MonitorManagerOptions.mockSpec), since the golden replies carry them; the product's mock monitor
+//     has a synthetic serial;
+//   - the persisted state captured on Windows (anonymized) copied to a temporary EvniaServe/ and evnia/ directory
 //     (test/fixtures/windows: Config/SoftConfig.data, Config/data.json, Theme/DataTheme.cfg,
 //     Theme/User/Default.pcenter, evnia/config.json);
 //   - the bundled vendor data (MonitorInfo.json, PCenter_DeviceInfo.json, ENE/PCenter_AmbiglowInfo.json) from
@@ -96,8 +96,8 @@ export async function composeMockBackend(options: ComposeOptions = {}): Promise<
   };
 
   const mockMonitor = options.ene ? '34M2C8600' : '34M2C8600/no-ene';
-  // The simulated monitor with the user's real EDID and serial (the product's mock carries synthetic ones):
-  // the golden replies were captured on the user's unit.
+  // The simulated monitor with the captured unit's EDID and anonymized serial (the product's mock carries
+  // synthetic ones): the golden replies were captured on that unit.
   const overrides = { ...options.overrides, monitors: { mockSpec: USER_34M2C8600, ...options.overrides?.monitors } };
   const backend = createDefaultBackend({ host, mockMonitor, noHardware: true }, overrides);
   const notifications: string[] = [];

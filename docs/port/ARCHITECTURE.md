@@ -112,7 +112,7 @@ Reference hardware: Philips Evnia 34M2C8600 (EDID `PHL`/`0xC29F`, scaler RTD2738
 6. **Windows profile compatibility.** Files under `$XDG_CONFIG_HOME/EvniaServe/` use the same formats as `%APPDATA%\EvniaServe\`, so profiles can be copied across in both directions. `$XDG_CONFIG_HOME/evnia/config.json` is electron-store compatible with `%APPDATA%\evnia\config.json`.
 7. **Testable without hardware.** `EVNIA_MOCK_MONITOR=34M2C8600` swaps in a simulated monitor (a VCP state machine seeded from the user's real values, 06 §5.7, 03 §6.3) plus a simulated ENE device. It works in the CLI, `serve.ts`, the contract tests, the e2e run and the install test.
    - The simulator ships in the package, so its serials are synthetic (`MOCK000000001`, ENE `0000000001`).
-   - Tests that replay the user's captured session inject the real EDID and serial from `test/fixtures/user-monitor.ts`.
+   - Tests that replay the user's captured session inject the captured unit's EDID and serial (anonymized) from `test/fixtures/user-monitor.ts`.
 
 ## Linux integration
 
