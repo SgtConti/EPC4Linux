@@ -1,6 +1,6 @@
 # Evnia Precision Center for Linux
 
-This repository holds an unofficial, **offline, monitor-only Linux port** of the Philips/TPV/Zeasn Windows application **Evnia Precision Center 1.13.0**, together with the reverse-engineering work it is built on.
+This repository holds an unofficial, **offline, monitor-only Linux port** of the Philips/TPV/Zeasn Windows application **Evnia Precision Center**, together with the reverse-engineering work it is built on.
 
 - It controls a Philips Evnia monitor: picture modes, game settings, input, audio, system settings, profiles and Ambiglow lighting.
 - It talks to the monitor over the monitor's USB-DDC bridge, DDC/CI (i2c) and the Ambiglow USB controller.
@@ -36,13 +36,6 @@ Quick start:
 - **Bring your own copy.** Building requires your own lawfully obtained copy of Evnia Precision Center 1.13.0. The build extracts and modifies parts of it (the user interface and three data files), so `port/build/` and the resulting `.deb` contain the vendor's proprietary material. They are for **personal use only; do not redistribute them.**
 - **Documentation.** `docs/re/` describes the behaviour of the original software and quotes only short fragments where needed for interoperability.
 - **No warranty.** Provided "as is". Changing monitor settings over DDC/CI and USB is at your own risk; "Reset profile" and "Factory reset" also reset the monitor itself.
-- **Test data is anonymized.** The tests compare against logs, settings and a session transcript captured from one real Windows installation. Everything that identified the machine, its owner or the monitor unit was replaced by synthetic values:
-  - serial numbers and USB serials, and the EDID's serial number and manufacture week;
-  - the Windows user name and device-instance IDs;
-  - the unrelated USB devices;
-  - the GPU model and the Windows edition.
-
-  `python3 tools/sanitize-public.py --check --public-only` verifies this (`py -3` instead of `python3` on Windows). Run it before publishing new test data (see [MAINTAINING.md](docs/port/MAINTAINING.md#test-data-and-privacy)).
 
 ## Licence
 
