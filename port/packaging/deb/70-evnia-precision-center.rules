@@ -1,0 +1,27 @@
+# Evnia Precision Center for Linux: device access for the user at the local seat (TAG+="uaccess",
+# applied by systemd-logind through 73-seat-late.rules, hence the number below 73). No group
+# membership and no world-writable nodes are needed.
+#
+# USB: the app talks to exactly two USB functions of the monitor, both with vendor control
+# transfers on endpoint 0 (docs/re/08 §4, docs/re/09 §3):
+#   2109:8884  VIA Labs USB-DDC bridge inside the Evnia hub (DDC/CI over USB)
+#   0cf2:a201  ENE Technology Ambiglow LED controller
+# VIA Labs (2109) is a hub-silicon vendor: the same vendor ID covers ordinary USB 2/3 hubs and their
+# billboard/hub-controller functions in countless docks and monitors. Tagging 2109:* would let any
+# seat user send raw control requests (port power, reset, firmware-update commands) to every such
+# hub, which the app never needs, so only the DDC bridge product ID is granted.
+# power/control=on keeps the DDC bridge out of USB autosuspend (TLP or "powertop --auto-tune" set it
+# to "auto"), which would stall or fail the first transfer after an idle period (08 §8.5).
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="2109", ATTR{idProduct}=="8884", TAG+="uaccess", ATTR{power/control}="on"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="0cf2", ATTR{idProduct}=="a201", TAG+="uaccess"
+
+# I2C: DDC/CI fallback over the graphics card's i2c buses (/dev/i2c-N from the i2c-dev module).
+# Like ddcutil's 60-ddcutil-i2c.rules, only buses that belong to a display adapter are tagged
+# (PCI class 0x030000 VGA-compatible controller, 0x038000 display controller); SMBus, sensor and
+# touchpad buses stay root-only. Adapters below the GPU that are not display buses are excluded by
+# their name (the i2c-dev node's `name` attribute), exactly the ones the backend never probes
+# (src/backend/ddc/discovery.ts IGNORED_ADAPTER_PREFIXES, plus any name containing "smbus"): amdgpu's
+# "AMDGPU SMU n" buses carry the RAS/FRU EEPROM and the power-management firmware, and GPU SMBus
+# controllers; raw access to them stays root-only (20-monitor-io-linux-consolidation §2.3 step 3c).
+SUBSYSTEM=="i2c-dev", KERNEL=="i2c-[0-9]*", ATTR{name}!="AMDGPU SMU*|Synopsys DesignWare*|soc:i2cdsi*|smu*|mac-io*|u4*|*[Ss][Mm][Bb][Uu][Ss]*", ATTRS{class}=="0x030000", TAG+="uaccess"
+SUBSYSTEM=="i2c-dev", KERNEL=="i2c-[0-9]*", ATTR{name}!="AMDGPU SMU*|Synopsys DesignWare*|soc:i2cdsi*|smu*|mac-io*|u4*|*[Ss][Mm][Bb][Uu][Ss]*", ATTRS{class}=="0x038000", TAG+="uaccess"

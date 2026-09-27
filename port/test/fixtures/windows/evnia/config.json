@@ -1,0 +1,33 @@
+{
+	"languageTemp": "en",
+	"language": "en",
+	"dashboardPreview": {},
+	"dashboardPreviewEnable": true,
+	"autoStartup": true,
+	"autoStartupMinimize": true,
+	"noticeSwitch": false,
+	"noticeSound": 0,
+	"noticeStyle": 0,
+	"autoUpdate": true,
+	"automaticUpdate": true,
+	"overviewType": "category",
+	"ambiScapeEnable": false,
+	"__internal__": {
+		"migrations": {
+			"version": "1.13.0"
+		}
+	},
+	"tutorials": {
+		"DeviceOverview": true,
+		"MonitorView": true,
+		"Dashboard": true
+	},
+	"skipLoginState": true,
+	"mainWindowBounds": {
+		"x": 760,
+		"y": 156,
+		"width": 1920,
+		"height": 1080,
+		"maximized": false
+	}
+}

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Evnia Precision Center
+GenericName=Monitor Settings
+Comment=Adjust Philips Evnia monitor settings and Ambiglow lighting (offline)
+Exec=evnia-precision-center
+Icon=evnia-precision-center
+Terminal=false
+Categories=Settings;HardwareSettings;
+Keywords=monitor;display;DDC;Ambiglow;Philips;Evnia;
+StartupNotify=true
+StartupWMClass=evnia-precision-center

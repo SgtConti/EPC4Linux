@@ -1,0 +1,42 @@
+[
+  {
+    "ModelName": "49M2C8900L",
+    "WriteType": 1,
+    "RightLedCount": 3,
+    "RightUpLedCount": 9,
+    "LeftUpLedCount": 9,
+    "LeftLedCount": 3,
+    "CenterLedCount": 20,
+    "BottomLedCount": 0
+  },
+  {
+    "ModelName": "34M2C8600",
+    "WriteType": 1,
+    "RightLedCount": 3,
+    "RightUpLedCount": 4,
+    "LeftUpLedCount": 4,
+    "LeftLedCount": 3,
+    "CenterLedCount": 18,
+    "BottomLedCount": 14
+  },
+  {
+    "ModelName": "34M2C6500",
+    "WriteType": 1,
+    "RightLedCount": 3,
+    "RightUpLedCount": 4,
+    "LeftUpLedCount": 4,
+    "LeftLedCount": 3,
+    "CenterLedCount": 18,
+    "BottomLedCount": 0
+  },
+  {
+    "ModelName": "27M2N5900A",
+    "WriteType": 1,
+    "RightLedCount": 4,
+    "RightUpLedCount": 4,
+    "LeftUpLedCount": 4,
+    "LeftLedCount": 4,
+    "CenterLedCount": 0,
+    "BottomLedCount": 0
+  }
+]

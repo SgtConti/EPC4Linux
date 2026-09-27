@@ -1,0 +1,81 @@
+.TH EVNIA\-PRECISION\-CENTER 1 2026-09-27 "1.13.0-linux.1" "User Commands"
+.SH NAME
+evnia\-precision\-center \- control centre for Philips Evnia monitors (unofficial offline port)
+.SH SYNOPSIS
+.B evnia\-precision\-center
+.RB [ \-\-openAsHidden ]
+.SH DESCRIPTION
+.B evnia\-precision\-center
+is an unofficial, offline Linux port of Evnia Precision Center 1.13.0.
+It adjusts a Philips Evnia monitor: picture modes (SmartImage), game
+settings, input, audio, system settings, profiles, the dashboard overlay
+and Ambiglow lighting.
+It reaches the monitor over its USB upstream cable (USB\-DDC bridge and
+Ambiglow controller) or, without that cable, over DDC/CI on the graphics
+card's i2c buses.
+The program makes no network connection.
+.PP
+Only one instance runs per user; starting it again shows the running
+window.
+.SH OPTIONS
+.TP
+.B \-\-openAsHidden
+Start without showing the window, reachable from the tray icon.
+The login autostart entry uses it.
+Without a tray host (for example GNOME without the AppIndicator
+extension) the window is shown anyway.
+.SH ENVIRONMENT
+.TP
+.B EVNIA_MOCK_MONITOR
+For testing: when set to a model name such as
+.BR 34M2C8600 ,
+the program runs against a simulated monitor of that model and opens no
+real hardware.
+.TP
+.B XDG_CONFIG_HOME
+Base directory of the files below (default
+.IR ~/.config ).
+.SH FILES
+.TP
+.I ~/.config/evnia/
+Program settings
+.RI ( config.json )
+and logs
+.RI ( logs/ ).
+.TP
+.I ~/.config/EvniaServe/
+Themes, profiles, macros and the backend logs.
+.TP
+.I ~/.config/autostart/evnia\-precision\-center.desktop
+Login autostart entry, written when "Start with the system" is enabled.
+.TP
+.I $XDG_RUNTIME_DIR/evnia\-debug\-open.tmp
+When this file exists at start, the log level is debug and Alt+Shift+M
+opens the developer tools.
+The file is removed when the program exits.
+.TP
+.I /usr/lib/udev/rules.d/70\-evnia\-precision\-center.rules
+Grants the user at the local seat access to the monitor's USB\-DDC bridge
+(2109:8884), its Ambiglow controller (0cf2:a201) and the i2c buses of
+display adapters, except their SMBus and AMDGPU SMU buses.
+.TP
+.I /usr/lib/modules\-load.d/evnia\-precision\-center\-i2c.conf
+Loads the i2c\-dev module at boot.
+.SH NOTES
+.B Profile \(-> Reset
+and
+.B Settings \(-> Factory reset
+also restore the monitor's own factory settings: like the Windows
+application they send the DDC/CI command "Restore factory defaults"
+(VCP 0x04 = 1), so every OSD picture setting of the monitor returns to its
+factory value.
+Factory reset also deletes the program's themes, profiles, macros and
+settings in
+.I ~/.config/EvniaServe
+(the logs are kept).
+.PP
+Removing the package leaves the files in the users' home directories in
+place.
+.PP
+More information, including desktop\-specific notes, is in
+.IR /usr/share/doc/evnia\-precision\-center/README.Debian.gz .

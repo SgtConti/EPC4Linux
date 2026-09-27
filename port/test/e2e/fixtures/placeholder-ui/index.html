@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <!-- Same policy as the patched vendor UI (scripts/ui-patches.mjs). -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src 'self' ws://127.0.0.1:* https://kill-switch-probe.invalid; img-src 'self' data: blob: local:; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    />
+    <title>Evnia Precision Center (e2e placeholder)</title>
+    <style>
+      body { margin: 0; padding: 24px; font: 14px/1.5 system-ui, sans-serif; background: #111318; color: #e8e8ea; }
+      h1 { font-size: 18px; margin: 0 0 12px; }
+      li.ok::before { content: '✔ '; color: #4caf50; }
+      li.fail::before { content: '✘ '; color: #f44336; }
+    </style>
+  </head>
+  <body>
+    <h1>Shell contract check (placeholder renderer)</h1>
+    <ul id="steps"></ul>
+    <script src="placeholder.js"></script>
+  </body>
+</html>

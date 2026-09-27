@@ -1,0 +1,22 @@
+#!/bin/sh
+# postrm for evnia-precision-center
+set -e
+
+case "$1" in
+  remove|purge)
+    # The uaccess rules are gone with the package; stop applying them to new events. Existing ACLs
+    # disappear on the next replug/logout. User data (~/.config/evnia, ~/.config/EvniaServe and an
+    # autostart entry the app may have written) is left alone, as Debian policy requires.
+    if command -v udevadm >/dev/null 2>&1; then
+      udevadm control --reload-rules >/dev/null 2>&1 || true
+    fi
+    ;;
+  upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    ;;
+  *)
+    echo "postrm called with unknown argument '$1'" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

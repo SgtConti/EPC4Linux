@@ -1,0 +1,86 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: evnia-precision-center
+Comment:
+ Personal-use package, not an official Philips, TPV or Zeasn product. The
+ Evnia Precision Center user interface and the data it contains are extracted
+ by scripts/import-vendor-ui.mjs from the user's own installation of Evnia
+ Precision Center 1.13.0; they are not redistributable. Paths below are the
+ installed paths.
+
+Files: *
+Copyright: 2026 The Evnia Precision Center for Linux port authors
+License: other-port
+
+Files: opt/evnia-precision-center/resources/app.asar
+Copyright: © Top Victory Investments Limited. All Rights Reserved.
+ 2026 The Evnia Precision Center for Linux port authors
+ 2011 Einar Otto Stangvik <einaros@gmail.com>
+ 2013 Arnout Kazemier and contributors
+ 2016 Luigi Pinca and contributors
+ 2017 Node.js API collaborators
+ 2017 Mathias Buus
+ Microsoft Corporation
+License: other-vendor and other-port and Expat
+Comment: The archive holds the Evnia Precision Center user interface and data
+ (vendor-ui/, resources/), the port code (main.cjs, preload.cjs, capture/)
+ and the npm packages ws, node-addon-api, node-gyp-build and
+ @types/w3c-web-usb (MIT; their LICENSE files are inside the archive).
+
+Files: opt/evnia-precision-center/evnia-precision-center
+ opt/evnia-precision-center/chrome-sandbox
+ opt/evnia-precision-center/chrome_crashpad_handler
+ opt/evnia-precision-center/*.so
+ opt/evnia-precision-center/*.so.*
+ opt/evnia-precision-center/*.pak
+ opt/evnia-precision-center/*.bin
+ opt/evnia-precision-center/*.dat
+ opt/evnia-precision-center/*.json
+ opt/evnia-precision-center/locales/*
+Copyright: 2013-2020 GitHub Inc.
+ Electron contributors
+ The Chromium Authors and the authors listed in LICENSES.chromium.html
+License: Expat and other-chromium
+Comment: Electron 44 runtime, unmodified.
+
+Files: opt/evnia-precision-center/resources/app.asar.unpacked/node_modules/usb/*
+Copyright: 2012 Nonolith Labs, LLC
+License: Expat
+Comment: The linux-x64 prebuild links libusb statically; libusb is
+ LGPL-2.1+ (https://libusb.info).
+
+Files: opt/evnia-precision-center/resources/app.asar.unpacked/node_modules/koffi/*
+ opt/evnia-precision-center/resources/app.asar.unpacked/node_modules/@koromix/*
+Copyright: 2026 Niels Martignène <niels.martignene@protonmail.com>
+License: Expat
+
+License: other-port
+ The Linux port code (main process, backend, preload, packaging) is not
+ published under an open-source licence.
+
+License: other-vendor
+ The Evnia Precision Center user interface and data are proprietary to Top
+ Victory Investments Limited and not redistributable.
+
+License: other-chromium
+ Chromium is distributed under the BSD-3-Clause licence and the licences of
+ its third-party components, reproduced in full in
+ /opt/evnia-precision-center/LICENSES.chromium.html.
+
+License: Expat
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.

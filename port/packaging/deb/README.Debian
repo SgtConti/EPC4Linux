@@ -1,0 +1,120 @@
+Evnia Precision Center for Linux
+================================
+
+This is an unofficial, offline Linux port of Evnia Precision Center 1.13.0,
+limited to the monitor: picture modes (SmartImage), game settings, input,
+audio, system settings, profiles, the dashboard overlay and Ambiglow
+lighting. Philips peripherals (mice, keyboards, headsets, lamps), firmware
+updates, accounts and every other online feature are removed. The program
+makes no network connection; a kill-switch blocks any request that is not
+local.
+
+Start it from the application menu ("Evnia Precision Center") or with the
+command evnia-precision-center. See evnia-precision-center(1).
+
+
+Reset and Factory reset also reset the monitor
+----------------------------------------------
+
+Like the Windows application, two functions send the monitor the DDC/CI
+command "Restore factory defaults" (VCP 0x04 = 1):
+
+  * Profile -> Reset (reset the current profile)
+  * Settings -> Factory reset
+
+Every OSD picture setting of the monitor (SmartImage mode values,
+brightness, contrast, colour, the monitor's own Ambiglow settings, ...)
+returns to its factory value. The program waits 5 seconds and then reads
+the monitor again. Factory reset additionally deletes the program's themes,
+profiles, macros and settings in ~/.config/EvniaServe (the logs folder is
+kept) and recreates the defaults. Both operations take about 6 to 10
+seconds; the monitor may blank briefly.
+
+
+How the monitor is reached, and permissions
+-------------------------------------------
+
+The program talks to the monitor over the USB-C/USB upstream cable (the
+monitor's built-in hub has a USB-DDC bridge, VIA Labs 2109:8884, and an
+Ambiglow controller, ENE 0cf2:a201). Without the USB cable it falls back to
+DDC/CI over the graphics card's i2c buses (/dev/i2c-N).
+
+The package installs what the logged-in user needs for this; no group
+membership and no root access are required:
+
+  /usr/lib/udev/rules.d/70-evnia-precision-center.rules
+      TAG+="uaccess" (access for the user at the local seat) for exactly
+      2109:8884 and 0cf2:a201, and for the i2c buses of display adapters
+      (not for the graphics card's SMBus and "AMDGPU SMU" buses, which
+      stay root-only). The USB-DDC bridge is also kept out of USB autosuspend.
+  /usr/lib/modules-load.d/evnia-precision-center-i2c.conf
+      loads the i2c-dev module at boot (the package loads it once at
+      installation too).
+
+The rules apply to devices that are present at installation. If the
+monitor is not found, re-plug the monitor's USB upstream cable, or log out
+and in again. To check the access rights:
+
+  getfacl /dev/bus/usb/$(lsusb -d 2109:8884 | awk '{print $2 "/" substr($4, 1, 3)}')
+
+When the Ambiglow controller cannot be opened, the program uses the
+monitor's own Ambiglow over DDC/CI instead and writes a warning to its log.
+
+
+Desktop notes
+-------------
+
+  * Wayland: "Follow video" Ambiglow asks for screen-sharing permission
+    (the desktop portal dialog) once per program run, and GNOME shows its
+    screen-sharing indicator while it runs.
+  * Wayland: themes bound to an application do not switch automatically;
+    the active window is only known on X11.
+  * The tray icon needs a StatusNotifier host. On GNOME that is the
+    "AppIndicator and KStatusNotifierItem Support" extension (package
+    gnome-shell-extension-appindicator). Without a tray, closing the window
+    quits the program, and a start "minimized to tray" shows the window.
+  * "Follow audio" records the default output's monitor with parec
+    (package pulseaudio-utils; PulseAudio or PipeWire with pipewire-pulse).
+    GNOME may show its microphone indicator while it runs.
+  * "Start with the system" writes ~/.config/autostart/
+    evnia-precision-center.desktop. It is off by default.
+
+
+Files
+-----
+
+  ~/.config/evnia/            program settings (config.json) and logs
+                              (logs/YY-MM-DD.log)
+  ~/.config/EvniaServe/       themes, profiles, macros, the monitor
+                              capability cache and the backend logs
+                              (logs/YYYY-MM-DD.txt)
+
+Settings and profiles of the Windows application can be taken over: before
+the first start, copy the folders %APPDATA%\evnia and %APPDATA%\EvniaServe
+of the Windows installation to ~/.config/evnia and ~/.config/EvniaServe.
+Profiles exported from the Windows application (.pcenter files) can also be
+imported in Profile.
+
+Debug logging: create the file "$XDG_RUNTIME_DIR/evnia-debug-open.tmp"
+(touch it) and start the program. The log level is then debug and
+Alt+Shift+M opens the developer tools. The file is removed when the program
+exits.
+
+
+Removal
+-------
+
+"apt purge evnia-precision-center" removes every file of the package. It
+does not touch the files in the users' home directories: remove
+~/.config/evnia, ~/.config/EvniaServe and, if present,
+~/.config/autostart/evnia-precision-center.desktop yourself.
+
+
+Sandbox
+-------
+
+The Chromium renderer runs sandboxed. Where unprivileged user namespaces
+are not available (for example on Ubuntu 24.04, whose AppArmor policy
+restricts them), Chromium uses its setuid helper
+/opt/evnia-precision-center/chrome-sandbox, which the package installs
+root-owned with mode 4755.

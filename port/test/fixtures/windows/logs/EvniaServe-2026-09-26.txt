@@ -1,0 +1,1235 @@
+2026-09-26 07:52:29.3156 DEBUG  ===================================== PCenter Start ======================================  Program.nqHFqdMYx => Program.muf7G1PUuE5QCRPTA2T => ZLog.Debug
+2026-09-26 07:52:29.4501 INFO  SystemInVirtualMachine = False  <>c.<SyncInit>b__2_0 => CSystemInfo.SysInfo => ZLog.Info
+2026-09-26 07:52:29.4741 INFO  Microsoft Windows 11 Pro  <>c.<SyncInit>b__2_0 => CSystemInfo.SysInfo => ZLog.Info
+2026-09-26 07:52:29.4861 INFO  Name - AMD Radeon Graphics</br>  <>c.<SyncInit>b__2_0 => CSystemInfo.SysInfo => ZLog.Info
+2026-09-26 07:52:29.4861 INFO  DeviceID - VideoController1</br>  <>c.<SyncInit>b__2_0 => CSystemInfo.SysInfo => ZLog.Info
+2026-09-26 07:52:30.4974 DEBUG  EvniaHub OnConnectedAsync  EvniaHub.OnConnectedAsync => EvniaHub.pwGLDaPYAZwm5Ro4kTP => ZLog.Debug
+2026-09-26 07:52:30.8778 WARN  不存在程序 C:\Users\user\AppData\Roaming\SmartControl\Modules\SmartDesktop\modules\FancyZones\PowerToys.FancyZones.exe   FancyZonesOper.VdgkkVZ8P => FancyZonesOper.QJht7ggaB7Y8tUECBLi => ZLog.Warn
+2026-09-26 07:52:30.9457 DEBUG  GetTaskAsync param = {"functionName":"Start","requestId":"683a49b0-ff8e-4e9e-aa25-30a2e8d09b87","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:52:30.9938 DEBUG  =====================================  Start() ======================================  SystemOper.Start => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1124 DEBUG  ----------------- 开始扫描设备 scanType = All -----------------  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1124 DEBUG  ==> UsbList count=12 
+\\?\hid#vid_0000&pid_0001&mi_01&col02#9&0000008&0&0001#{4d1e55b2-f16f-11cf-88cb-001111000030}\kbd
+\\?\hid#vid_0000&pid_0001&mi_00#9&00000009&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}\kbd
+\\?\hid#vid_0000&pid_0003&mi_03#8&0000000d&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#hid_device_system_vhf#9&00000007&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0001&mi_01&col01#9&0000008&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col01#9&0000000b&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}\kbd
+\\?\hid#vid_0000&pid_0002&mi_01&col02#9&0000000b&0&0001#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_00#9&00000c&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col03#9&0000000b&0&0002#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col04#9&0000000b&0&0003#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col05#9&0000000b&0&0004#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0001&mi_02#9&0000000a&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+==================> UsbList End  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1124 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1124 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1124 DEBUG  ==> UsbDevices count=4 
+\\?\usb#vid_0000&pid_0002#serialmouse1#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+\\?\usb#vid_0000&pid_0001#serialkeyboard01#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+\\?\usb#vid_0000&pid_0003#serialaudiodevice1#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+\\?\usb#vid_2109&pid_8884#0000000000000001#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+==================> UsbDevices End  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1124 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  ==> UsbHubs count=5 
+\\?\usb#root_hub30#5&0000001&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#vid_2109&pid_0211#7&00000003&4&4#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#vid_2109&pid_0817#msft30000000000#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#root_hub30#5&00000002&1&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#vid_2109&pid_2817#msft20000000000#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+==================> UsbHubs End  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked PHL_CDeviceDisplay  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked RongYuan_KeyboardSPK8708  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked RongYuan_KeyboardSPK8508  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked RongYuan_KeyboardSPK8308  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked RongYuan_KeyboardSPK8708_BLE  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked RongYuan_KeyboardSPK8708_24G  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked BeiYing_KeyboardSPK8618  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked BeiYing_KeyboardSPK8618_24G  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked RongYuan_MouseSPK9708  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked RongYuan_MouseSPK9508  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked RongYuan_MouseSPK9308  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked RongYuan_MouseSPK9708_24G  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked JiangMeng_MouseSPK9718  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked JiangMeng_Mouse_Dongle_8K  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked JiangMeng_MouseSPK9728  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked YongJiaXing_MouseSPK9618  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked YongJiaXing_MouseSPK9618_24G  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked YongJiaXing_MouseSPK9418  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked YongJiaXing_MouseSPK9418_24G  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked HaiHui_MouseSPK9618_3395  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked HaiHui_MouseSPK9618_3395_24G  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked HaiHui_MouseSPK9618_8960  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked HaiHui_MouseSPK9618_8960_24G  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked RongYuan_MousePadSPL7508  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked PHL_CDeviceTAG4106  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1247 DEBUG  Task Run ConnectionChecked PHL_CDeviceTAG5106  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:31.1784 INFO  JiangMeng ConnectionCkecked JiangMeng_MouseSPK9728  CDevice_JiangMeng_Mouse.ConnectionCkecked => CDevice_JiangMeng_Mouse.l94tAnmzKqBLGYtroPy => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  JiangMeng ConnectionCkecked JiangMeng_MouseSPK9718  CDevice_JiangMeng_Mouse.ConnectionCkecked => CDevice_JiangMeng_Mouse.l94tAnmzKqBLGYtroPy => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  JiangMeng ConnectionCkecked JiangMeng_Mouse_Dongle_8K  CDevice_JiangMeng_Mouse.ConnectionCkecked => CDevice_JiangMeng_Mouse.l94tAnmzKqBLGYtroPy => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  PHL_CDeviceTAG5106 CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.1784 DEBUG  ConnectionCheckedTime PHL_CDeviceTAG5106==> 51  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.1784 INFO  PHL_CDeviceTAG4106 CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.1784 DEBUG  ConnectionCheckedTime PHL_CDeviceTAG4106==> 0  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.1784 INFO  JiangMeng QuickCheckConnectd JiangMeng_Mouse_Dongle_8K ret: False  SystemOper.kDDWpYod0 => CDevice_JiangMeng_Mouse.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  JiangMeng QuickCheckConnectd JiangMeng_MouseSPK9718 ret: False  SystemOper.kDDWpYod0 => CDevice_JiangMeng_Mouse.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  JiangMeng QuickCheckConnectd JiangMeng_MouseSPK9728 ret: False  SystemOper.kDDWpYod0 => CDevice_JiangMeng_Mouse.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  JiangMeng ConnectionCkecked devices: []  CDevice_JiangMeng_Mouse.ConnectionCkecked => CDevice_JiangMeng_Mouse.l94tAnmzKqBLGYtroPy => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  JiangMeng ConnectionCkecked devices: []  CDevice_JiangMeng_Mouse.ConnectionCkecked => CDevice_JiangMeng_Mouse.l94tAnmzKqBLGYtroPy => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  JiangMeng ConnectionCkecked devices: []  CDevice_JiangMeng_Mouse.ConnectionCkecked => CDevice_JiangMeng_Mouse.l94tAnmzKqBLGYtroPy => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  JiangMeng ConnectionCkecked JiangMeng_MouseSPK9728 Error: devices.Count < 1  SystemOper.kDDWpYod0 => CDevice_JiangMeng_Mouse.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  JiangMeng ConnectionCkecked JiangMeng_Mouse_Dongle_8K Error: devices.Count < 1  SystemOper.kDDWpYod0 => CDevice_JiangMeng_Mouse.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.1784 INFO  JiangMeng ConnectionCkecked JiangMeng_MouseSPK9718 Error: devices.Count < 1  SystemOper.kDDWpYod0 => CDevice_JiangMeng_Mouse.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.1784 DEBUG  ConnectionCheckedTime JiangMeng_MouseSPK9728==> 56  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.1784 DEBUG  ConnectionCheckedTime JiangMeng_Mouse_Dongle_8K==> 56  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.1784 DEBUG  ConnectionCheckedTime JiangMeng_MouseSPK9718==> 56  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.2658 INFO  RongYuan_MouseSPK9308 CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.2658 INFO  RongYuan_MouseSPK9708_24G CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.2658 INFO  RongYuan_KeyboardSPK8708_24G CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.2658 INFO  RongYuan_KeyboardSPK8508 CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.2658 DEBUG  ConnectionCheckedTime RongYuan_MouseSPK9708_24G==> 139  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.2658 DEBUG  ConnectionCheckedTime RongYuan_MouseSPK9308==> 139  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.2658 DEBUG  ConnectionCheckedTime RongYuan_KeyboardSPK8508==> 139  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.2658 INFO  RongYuan_MouseSPK9708 CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.2658 DEBUG  ConnectionCheckedTime RongYuan_MouseSPK9708==> 139  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.2658 DEBUG  ConnectionCheckedTime RongYuan_KeyboardSPK8708_24G==> 139  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.2658 INFO  RongYuan_MouseSPK9508 CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.2658 INFO  RongYuan_KeyboardSPK8308 CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.2658 INFO  RongYuan_KeyboardSPK8708 CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.2658 DEBUG  ConnectionCheckedTime RongYuan_MouseSPK9508==> 139  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.2658 DEBUG  ConnectionCheckedTime RongYuan_KeyboardSPK8708==> 139  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.2658 DEBUG  ConnectionCheckedTime RongYuan_KeyboardSPK8308==> 140  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.3003 INFO  RongYuan_MousePadSPL7508 CDeviceUsbBase Start  SystemOper.kDDWpYod0 => CDeviceUsbBase`1.ConnectionCkecked => ZLog.Info
+2026-09-26 07:52:31.3003 DEBUG  ConnectionCheckedTime RongYuan_MousePadSPL7508==> 119  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.3003 DEBUG  ConnectionCheckedTime BeiYing_KeyboardSPK8618==> 176  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.3003 DEBUG  ConnectionCheckedTime BeiYing_KeyboardSPK8618_24G==> 176  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9418 ConnectionCkecked YongJiaXing_MouseSPK9418 Start!  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9418_24G ConnectionCkecked YongJiaXing_MouseSPK9418_24G Start!  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9618 ConnectionCkecked YongJiaXing_MouseSPK9618 Start!  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9618_24G ConnectionCkecked YongJiaXing_MouseSPK9618_24G Start!  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9418_24G ConnectionCkecked QuickCheckConnectd ret: False  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9418 ConnectionCkecked QuickCheckConnectd ret: False  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9618_24G ConnectionCkecked QuickCheckConnectd ret: False  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9618 ConnectionCkecked QuickCheckConnectd ret: False  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9418_24G ConnectionCkecked UsbCount = 0  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9418 ConnectionCkecked UsbCount = 0  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9618 ConnectionCkecked UsbCount = 0  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 INFO  YongJiaXing_MouseSPK9618_24G ConnectionCkecked UsbCount = 0  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.3259 DEBUG  ConnectionCheckedTime YongJiaXing_MouseSPK9418_24G==> 61  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.3259 DEBUG  ConnectionCheckedTime YongJiaXing_MouseSPK9418==> 143  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.3259 DEBUG  ConnectionCheckedTime YongJiaXing_MouseSPK9618_24G==> 143  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.3259 DEBUG  ConnectionCheckedTime YongJiaXing_MouseSPK9618==> 143  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.4678 INFO  HaiHui_MouseSPK9618_8960 ConnectionCkecked HaiHui_MouseSPK9618_8960 Start!  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4678 INFO  HaiHui_MouseSPK9618_8960_24G ConnectionCkecked HaiHui_MouseSPK9618_8960_24G Start!  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4678 INFO  HaiHui_MouseSPK9618_3395_24G ConnectionCkecked HaiHui_MouseSPK9618_3395_24G Start!  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4678 INFO  HaiHui_MouseSPK9618_3395 ConnectionCkecked HaiHui_MouseSPK9618_3395 Start!  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4691 INFO  HaiHui_MouseSPK9618_8960_24G ConnectionCkecked QuickCheckConnectd ret: False  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4691 INFO  HaiHui_MouseSPK9618_8960 ConnectionCkecked QuickCheckConnectd ret: False  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4691 INFO  HaiHui_MouseSPK9618_8960_24G ConnectionCkecked UsbCount = 0  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4691 INFO  HaiHui_MouseSPK9618_8960 ConnectionCkecked UsbCount = 0  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4691 DEBUG  ConnectionCheckedTime HaiHui_MouseSPK9618_8960_24G==> 203  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.4691 DEBUG  ConnectionCheckedTime HaiHui_MouseSPK9618_8960==> 203  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.4691 INFO  HaiHui_MouseSPK9618_3395_24G ConnectionCkecked HaiHui_MouseSPK9618_3395_24G QuickCheckConnectd ret: False  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4691 INFO  HaiHui_MouseSPK9618_3395 ConnectionCkecked HaiHui_MouseSPK9618_3395 QuickCheckConnectd ret: False  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4691 INFO  HaiHui_MouseSPK9618_3395 ConnectionCkecked HaiHui_MouseSPK9618_3395 UsbCount = 0  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4691 INFO  HaiHui_MouseSPK9618_3395_24G ConnectionCkecked HaiHui_MouseSPK9618_3395_24G UsbCount = 0  CDeviceBase.Info => CDeviceBase.KgndXsxv5q8Y0kiAl6j => ZLog.Info
+2026-09-26 07:52:31.4691 DEBUG  ConnectionCheckedTime HaiHui_MouseSPK9618_3395==> 204  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.4691 DEBUG  ConnectionCheckedTime HaiHui_MouseSPK9618_3395_24G==> 204  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:31.4691 DEBUG  ----------------- Display ConnectionCkecked 1 => start -----------------  SystemOper.kDDWpYod0 => CDeviceDisplayBase`1.ConnectionCkecked => ZLog.Debug
+2026-09-26 07:52:31.7431 INFO  【MonitorOTAOperator】没有检测到 RTK-Hub 机台  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:31.7431 INFO  【MonitorOTAOperator】没有检测到 Genesys-Hub 机台  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:32.7801 DEBUG  ConnectionCheckedTime RongYuan_KeyboardSPK8708_BLE==> 1654  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:32.8419 DEBUG  * * * * * * * * * * * * * * * * *  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:32.8419 DEBUG  * ModelName: 34M2C8600          *  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:32.8419 DEBUG  * BomString: 100GPRS2003NA1SXXY *  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:32.8419 DEBUG  * Version: V1.01                *  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:32.8419 DEBUG  * DualImageBank: 0x40           *  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:32.8419 DEBUG  * ScalerName: RTD2738VL         *  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:32.8419 DEBUG  * VID: 0x2109, PID: 0x8884      *  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:32.8419 DEBUG  * Hub-Scaler: VIA-RTK           *  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:32.8419 DEBUG  * * * * * * * * * * * * * * * * *  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:32.8419 DEBUG  
+  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:33.0650 INFO  Get display device for display \\.\DISPLAY1 : \\?\DISPLAY#PHLC29F#7&0000005&0&UID264#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2919 INFO  CheckSupportUSBDDC(0x14): isSupport = True，value = 0x05，max = 0x0D  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2919 DEBUG  ----------------- Display ConnectionCkecked 2 => USBDevices Init -----------------  SystemOper.kDDWpYod0 => CDeviceDisplayBase`1.ConnectionCkecked => ZLog.Debug
+2026-09-26 07:52:33.2919 DEBUG  DDCHelAPIIni 开始初始化显示器 DDCCIHelperIni_CS  Logger.GQJv0ZT53 => CDevice_PHLDisplay.rkeJzFYpbd => ZLog.Debug
+2026-09-26 07:52:33.2972 INFO  --R:29--:DDCHelper:DDCCIHelperInit LogTest = 3  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:3734--:DDCHelper:InitDDCHelper  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:3752--:DDCHelper:WinVer: 6.2   CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:3761--:DDCHelper:Win64: YES  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:3793--:DDCHelper:CreateFile Failed: 2  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:3799--:DDCHelper:InitDDCHelper Finished: ERROR_CANNOTOPENDRIVER  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:3866--:DDCHelper:InitDDCHelper Finished: S_OK(2)  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 DEBUG  DDCHelAPIIni 开始获取显示器列表及当前显示器  Logger.GQJv0ZT53 => CDevice_PHLDisplay.rkeJzFYpbd => ZLog.Debug
+2026-09-26 07:52:33.2972 DEBUG  EnumDisplays EnumDisplayIDIni start  Logger.GQJv0ZT53 => CDevice_PHLDisplay.rkeJzFYpbd => ZLog.Debug
+2026-09-26 07:52:33.2972 INFO  --R:4304--:DDCHelper:EnumGetFirst  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:4348--:DDCHelper:COMMLOGIC: 3  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:3330--:DDCHelper:EnumPCI  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:3340--:DDCHelper:EnumPCI Finished: FALSE, driver not available  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:4232--:DDCHelper:EnumSDKs: EnumNV  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:3150--:DDCHelper:EnumNV  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:3167--:DDCHelper:EnumNV: skip checking, exit  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:235--:DDCHelper:DetectATI  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:245--:DDCHelper:DetectATI: hDll == 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:4255--:DDCHelper:EnumSDKs: EnumATIA  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.2972 INFO  --R:2681--:DDCHelper:EnumA_ATI  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2777--:DDCHelper:Adapters: 5  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2786--:DDCHelper:ch01  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2795--:DDCHelper:ch02  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2804--:DDCHelper:ch03  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2841--:DDCHelper:ch04  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2895--:DDCHelper:ch05  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2903--:DDCHelper:ch06  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2938--:DDCHelper:ch07  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2955--:DDCHelper:ch08  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2964--:DDCHelper:ch09  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2973--:DDCHelper:EnumA_ATI: cnt = 14  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:2994--:DDCHelper:ch10  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3169 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3365 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3365 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3365 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3365 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:1366--:DDCHelper:ReadEDID256_Direc RAW DUMP: 00FFFFFFFFFFFF00410C9FC20100000001230104B55022783BAC05B04D3DB7250F5054BFEF00D1C0B3009500818081C0316845686168E77C70A0D0A0295030203A0020513100001A000000FF0041553030303030303030303031000000FC0050484C2033344D324338363030000000FD0030AFFFFF5F010A20202020202002BD02033DF14D03051404131F02904B4C3F595A2309070783010000E200D5E305C301E6060501664B02741A0000030330AF00A066024B02AF00000000000088D170A0D0A0325030403A0020513100001C539D70A0D0A0345030403A0020513100001A733E70A0D0A0295030203A0020513100001A000000000000000000000000C9  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:1376--:DDCHelper:ReadEDID256_Direc Finished: 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:3023--:DDCHelper:ch10a  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:3031--:DDCHelper:EnumA_ATI: found  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:5066--:DDCHelper:GetEDIDOption: 1  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: PHLC29F  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:3048--:DDCHelper:ch11  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:2955--:DDCHelper:ch08  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:2964--:DDCHelper:ch09  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:2973--:DDCHelper:EnumA_ATI: cnt = 14  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:2994--:DDCHelper:ch10  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3484 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3658 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3658 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3658 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3658 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:1366--:DDCHelper:ReadEDID256_Direc RAW DUMP: 00FFFFFFFFFFFF00410C9FC20100000001230104B55022783BAC05B04D3DB7250F5054BFEF00D1C0B3009500818081C0316845686168E77C70A0D0A0295030203A0020513100001A000000FF0041553030303030303030303031000000FC0050484C2033344D324338363030000000FD0030AFFFFF5F010A20202020202002BD02033DF14D03051404131F02904B4C3F595A2309070783010000E200D5E305C301E6060501664B02741A0000030330AF00A066024B02AF00000000000088D170A0D0A0325030403A0020513100001C539D70A0D0A0345030403A0020513100001A733E70A0D0A0295030203A0020513100001A000000000000000000000000C9  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:1376--:DDCHelper:ReadEDID256_Direc Finished: 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:3023--:DDCHelper:ch10a  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:1587--:DDCHelper:EDID found  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:2955--:DDCHelper:ch08  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:2964--:DDCHelper:ch09  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:2973--:DDCHelper:EnumA_ATI: cnt = 14  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:2994--:DDCHelper:ch10  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3768 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:1366--:DDCHelper:ReadEDID256_Direc RAW DUMP: 00FFFFFFFFFFFF00410C9FC20100000001230104B55022783BAC05B04D3DB7250F5054BFEF00D1C0B3009500818081C0316845686168E77C70A0D0A0295030203A0020513100001A000000FF0041553030303030303030303031000000FC0050484C2033344D324338363030000000FD0030AFFFFF5F010A20202020202002BD02033DF14D03051404131F02904B4C3F595A2309070783010000E200D5E305C301E6060501664B02741A0000030330AF00A066024B02AF00000000000088D170A0D0A0325030403A0020513100001C539D70A0D0A0345030403A0020513100001A733E70A0D0A0295030203A0020513100001A000000000000000000000000C9  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:1376--:DDCHelper:ReadEDID256_Direc Finished: 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:3023--:DDCHelper:ch10a  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:1587--:DDCHelper:EDID found  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:2955--:DDCHelper:ch08  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.3940 INFO  --R:2964--:DDCHelper:ch09  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4140 INFO  --R:2973--:DDCHelper:EnumA_ATI: cnt = 14  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4140 INFO  --R:2994--:DDCHelper:ch10  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4140 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4140 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4140 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:1366--:DDCHelper:ReadEDID256_Direc RAW DUMP: 00FFFFFFFFFFFF00410C9FC20100000001230104B55022783BAC05B04D3DB7250F5054BFEF00D1C0B3009500818081C0316845686168E77C70A0D0A0295030203A0020513100001A000000FF0041553030303030303030303031000000FC0050484C2033344D324338363030000000FD0030AFFFFF5F010A20202020202002BD02033DF14D03051404131F02904B4C3F595A2309070783010000E200D5E305C301E6060501664B02741A0000030330AF00A066024B02AF00000000000088D170A0D0A0325030403A0020513100001C539D70A0D0A0345030403A0020513100001A733E70A0D0A0295030203A0020513100001A000000000000000000000000C9  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:1376--:DDCHelper:ReadEDID256_Direc Finished: 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:3023--:DDCHelper:ch10a  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:1587--:DDCHelper:EDID found  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:2955--:DDCHelper:ch08  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4253 INFO  --R:2964--:DDCHelper:ch09  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4425 INFO  --R:2973--:DDCHelper:EnumA_ATI: cnt = 14  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4425 INFO  --R:2994--:DDCHelper:ch10  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4425 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4425 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4425 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:1366--:DDCHelper:ReadEDID256_Direc RAW DUMP: 00FFFFFFFFFFFF00410C9FC20100000001230104B55022783BAC05B04D3DB7250F5054BFEF00D1C0B3009500818081C0316845686168E77C70A0D0A0295030203A0020513100001A000000FF0041553030303030303030303031000000FC0050484C2033344D324338363030000000FD0030AFFFFF5F010A20202020202002BD02033DF14D03051404131F02904B4C3F595A2309070783010000E200D5E305C301E6060501664B02741A0000030330AF00A066024B02AF00000000000088D170A0D0A0325030403A0020513100001C539D70A0D0A0345030403A0020513100001A733E70A0D0A0295030203A0020513100001A000000000000000000000000C9  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:1376--:DDCHelper:ReadEDID256_Direc Finished: 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:3023--:DDCHelper:ch10a  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:1587--:DDCHelper:EDID found  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:3056--:DDCHelper:ch12  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:3072--:DDCHelper:EnumA_ATI: Finished: 1  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:3079--:DDCHelper:ch13  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:4266--:DDCHelper:EnumSDKs: EnumInteSDK  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:2123--:DDCHelper:EnumCUI  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:2142--:DDCHelper:Windows monitors cnt: 1  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:2154--:DDCHelper:CoCreateInstance Failed(1): 80040154  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:4275--:DDCHelper:EnumSDKs: EnumIntelGCLSDK  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:2351--:DDCHelper:EnumIntelGCLSDK: ctlInit...  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:2361--:DDCHelper:EnumIntelGCLSDK: ctlInit failed: 0x40000026  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:4286--:DDCHelper:EnumSDKs: EnumMatrox  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:3993--:DDCHelper:EnumMatrox  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:4016--:DDCHelper:EnumMatrox: dll not found. exit  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:4388--:DDCHelper:EnumGetFirst: EnumWindows  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:1976--:DDCHelper:EnumWindows  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:2006--:DDCHelper:Windows monitors cnt: 1  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4536 INFO  --R:1727--:DDCHelper:WindowsEnumProc: 10001  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:1875--:DDCHelper:Key found  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:1925--:DDCHelper:EDID received OK  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:1587--:DDCHelper:EDID found  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:2033--:DDCHelper:EnumWindows OK: 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:4426--:DDCHelper:EnumGetFirst Finished: S_OK  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 6  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: PHL 34M2C8600  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:68--:DDCHelper:EnumDisplayIDIn DispIndex = 0 , acName = PHLC29F_PHL 34M2C8600;  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 DEBUG  EnumDisplays EnumDisplayIDIni end  Logger.GQJv0ZT53 => CDevice_PHLDisplay.rkeJzFYpbd => ZLog.Debug
+2026-09-26 07:52:33.4687 DEBUG  EnumDisplays stDisplayPackage_t.strName =PHLC29F_PHL 34M2C8600;  Logger.GQJv0ZT53 => CDevice_PHLDisplay.rkeJzFYpbd => ZLog.Debug
+2026-09-26 07:52:33.4687 DEBUG  EnumDisplays stDisplayPackage_t.strDeviceName =\\.\DISPLAY1\Monitor0;  Logger.GQJv0ZT53 => CDevice_PHLDisplay.rkeJzFYpbd => ZLog.Debug
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 6  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: PHL 34M2C8600  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 5  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: AU00000000001  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 1  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: PHLC29F  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 12  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 1.4  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: C  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 01-2025  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 3  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 3440  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 4  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 1440  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: E  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 800  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: F  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 340  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 1  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: PHLC29F  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: B  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 2.2  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 16  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 0.688  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 17  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 0.302  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 18  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 0.241  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 19  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 0.713  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 1A  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 0.144  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 1B  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 0.0584  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: D  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: DIGITAL  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 14  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 0.313  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5066--:DDCHelper:GetEDIDOption: 15  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:5086--:DDCHelper:GetEDIDOption Finished: 0.328  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:1027--:DDCHelper:GetCIValue: DispIndex = 0,Command = 14  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.4687 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.6015 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.6015 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.6652 INFO  --R:691--:DDCHelper:Sleep(50)  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.6652 INFO  --R:1177--:DDCHelper:GetCIValue Finished: S_OK,Value = 5,MaxValue = D  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.6652 INFO  --R:1624--:DDCHelper:DDCSupport_Judg: curValue = 5  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.6652 INFO  JudgeSupportDDCCI EDID    SN=AU00000000001  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.6652 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.6652 INFO  --R:399--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.7909 INFO  --R:380--:DDCHelper:atiA_Invoke  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.7909 INFO  --R:417--:DDCHelper:atiA_Invoke Finished: WR - 0  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.8537 INFO  --R:691--:DDCHelper:Sleep(50)  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.8537 INFO  --R:5270--:DDCHelper:GetMonitorPropertySN: SUCCESS_DDCREAD SNbuf =  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.8537 INFO  GetMonitorFactorySN Factory SN=AU00000000001  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:33.8537 ERROR  DDCHelAPIIni Display=0-PHLC29F_PHL 34M2C8600 IsSupportDDCCI = True sn = AU00000000001  CDevice_PHLDisplay.rkeJzFYpbd => CDevice_PHLDisplay.DXV3mjwSqnOrNhEXVXU => ZLog.Error
+2026-09-26 07:52:33.8537 DEBUG  DDCHelAPIIni 取到显示器个数: 1 支持个数: 1  Logger.GQJv0ZT53 => CDevice_PHLDisplay.rkeJzFYpbd => ZLog.Debug
+2026-09-26 07:52:33.8537 DEBUG  ----------------- Display ConnectionCkecked 3 => DDCDevices Init -----------------  SystemOper.kDDWpYod0 => CDeviceDisplayBase`1.ConnectionCkecked => ZLog.Debug
+2026-09-26 07:52:33.8653 DEBUG  MergeDisplays count=1  CDeviceDisplayBase`1.ConnectionCkecked => CDeviceDisplayBase`1.OXGyfwQ6S => ZLog.Debug
+2026-09-26 07:52:34.0562 DEBUG  PHL 34M2C8600: Hub SetStandardDDC command=60 value=0F errorCode=0  Display.V9F4O9KC7 => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:34.0562 DEBUG  TryGetCapabilites cacheKey=v1.01_0f  Display.InitDisplayVcpCode => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:34.0562 INFO  LoadTXTConfig: file not found - C:\Users\user\AppData\Roaming\EvniaServe\config\data.json  CacheVcpMgr.Init => SerializedFileUtil.LoadTXTConfigWithSign => ZLog.Info
+2026-09-26 07:52:34.2447 INFO  [GetSN] | INFO |【GetSN SN : AU00000000001】  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:34.2447 INFO  [GetSN] | INFO |【GetSN Span Time : 0,1846182】  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:40.9861 INFO  GetCapabilitiesString | INFO |【GetVCP Span Time : 6,7385813】  CDevice_PHLDisplay.D9t89B48Id => CDevice_PHLDisplay.wVYp13w6A6VkY0kQIXw => ZLog.Info
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  1. 匹配 VCP : "VCP(02 04 05 08 0B 0C 10 12 14(02 04 05 06 07 08 0A 0B 0D ) 16 18 1A 52 54(00 01) 60(11 12 0F 15 21 22 2F 35 ) 62 6C 6E 70 72(50 64 78 8C A0) 86(01 0A 12 13 14 15 16 17 18 19 1A 1B 23)87 8D(01 02) A4 A5 AC AE B2 B6 C0 C6 C8 CA(01 02) CC(01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 12 14 16 17 1A 1E 24) D6(01 04 05) DA(00 02) DC(00 01 03 04 05 06 07 08 0B 0E 11 20 21 22 23 24 30 33 51 E2) DF E9(00 02) E0(01 02 03 05) E2A000(46 47 48 49 4A 4B) E2A001(00 01 02 03 04) E2A004(00 01 02) E2A006(00 01 02 03) E2A007(00 01) E2A008(00 01) E2A009(01 02 03 04 05 06 07) E2A00A E2A00B E2A00C E2A00D E2A00E E2A00F E2A010(00 01 02 03 04) E2A011(00 01 02 03 04) E2A012(00 01) E2A013(00 01) E2A015(00 01 02) E2A016(00 01) E2A017(00 01) E2A019(00 01 02 03 04 05 06 07) E2A01A(00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D) E2A01B(00 01 02 03) E2A01C(00 01 02) E2A01D(00 01 02) E2A020(02 03 04  0F) E2A024(00 01 02 03 04) E2A034(00 02 03 04) E2A035(00 02 03) E2A036(00 01) E2A038(01) E2A039 E2A040(00 01) E2A041(00 01 02) E2A042(30 31 32 33 34 35 36 37 38 39 3A 3B 3C 3D 3E 3F) E2A043(00 01) E2A044(00 01 02 03) EC(01 02 03) ED(00 01) F0(00 01) F2(00 01 02 03 04) F6(01) F7(42)FD FF)"。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：02 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 02 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：04 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 04 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：05 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 05 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：08 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 08 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：0B 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 0B 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：0C 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 0C 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：10 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 10 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：12 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 12 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：14(02 04 05 06 07 08 0A 0B 0D )。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[02, 04, 05, 06, 07, 08, 0A, 0B, 0D]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：16 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 16 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：18 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 18 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：1A 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 1A 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：52 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 52 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：54(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：60(11 12 0F 15 21 22 2F 35 )。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[11, 12, 0F, 15, 21, 22, 2F, 35]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：62 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 62 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：6C 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 6C 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：6E 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 6E 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：70 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 70 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：72(50 64 78 8C A0)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[50, 64, 78, 8C, A0]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：86(01 0A 12 13 14 15 16 17 18 19 1A 1B 23)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 0A, 12, 13, 14, 15, 16, 17, 18, 19, 1A, 1B, 23]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：87 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 87 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：8D(01 02)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：A4 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 A4 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：A5 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 A5 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：AC 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 AC 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：AE 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 AE 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：B2 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 B2 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：B6 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 B6 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：C0 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 C0 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：C6 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 C6 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：C8 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 C8 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：CA(01 02)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：CC(01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 12 14 16 17 1A 1E 24)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02, 03, 04, 05, 06, 07, 08, 09, 0A, 0B, 0C, 0D, 0E, 12, 14, 16, 17, 1A, 1E, 24]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：D6(01 04 05)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 04, 05]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：DA(00 02)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：DC(00 01 03 04 05 06 07 08 0B 0E 11 20 21 22 23 24 30 33 51 E2)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 03, 04, 05, 06, 07, 08, 0B, 0E, 11, 20, 21, 22, 23, 24, 30, 33, 51, E2]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：DF 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 DF 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E9(00 02)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E0(01 02 03 05)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02, 03, 05]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A000(46 47 48 49 4A 4B)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[46, 47, 48, 49, 4A, 4B]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A001(00 01 02 03 04)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A004(00 01 02)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A006(00 01 02 03)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A007(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A008(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A009(01 02 03 04 05 06 07)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02, 03, 04, 05, 06, 07]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00A 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 E2A00A 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00B 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 E2A00B 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00C 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 E2A00C 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00D 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 E2A00D 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00E 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 E2A00E 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00F 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 E2A00F 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A010(00 01 02 03 04)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A011(00 01 02 03 04)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A012(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A013(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A015(00 01 02)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A016(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A017(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A019(00 01 02 03 04 05 06 07)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04, 05, 06, 07]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A01A(00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 0A, 0B, 0C, 0D]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A01B(00 01 02 03)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A01C(00 01 02)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A01D(00 01 02)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A020(02 03 04  0F)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[02, 03, 04, 0F]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A024(00 01 02 03 04)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A034(00 02 03 04)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A035(00 02 03)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 02, 03]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A036(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A038(01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A039 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 E2A039 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A040(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A041(00 01 02)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A042(30 31 32 33 34 35 36 37 38 39 3A 3B 3C 3D 3E 3F)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 3A, 3B, 3C, 3D, 3E, 3F]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A043(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：E2A044(00 01 02 03)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：EC(01 02 03)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02, 03]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：ED(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：F0(00 01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：F2(00 01 02 03 04)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：F6(01)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：F7(42)。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  4. 匹配 VCP 子项：[42]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：FD 。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 FD 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  2. 匹配 VCP 项：FF。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO |  3. VCP 项 FF 不包含子项。  Display.InitDisplayVcpCode => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:40.9861 DEBUG  | INFO | 5. 匹配完毕的 VCP：
+          02, [], 
+          04, [], 
+          05, [], 
+          08, [], 
+          0B, [], 
+          0C, [], 
+          10, [], 
+          12, [], 
+          14, [02, 04, 05, 06, 07, 08, 0A, 0B, 0D], 
+          16, [], 
+          18, [], 
+          1A, [], 
+          52, [], 
+          54, [00, 01], 
+          60, [11, 12, 0F, 15, 21, 22, 2F, 35], 
+          62, [], 
+          6C, [], 
+          6E, [], 
+          70, [], 
+          72, [50, 64, 78, 8C, A0], 
+          86, [01, 0A, 12, 13, 14, 15, 16, 17, 18, 19, 1A, 1B, 23], 
+          87, [], 
+          8D, [01, 02], 
+          A4, [], 
+          A5, [], 
+          AC, [], 
+          AE, [], 
+          B2, [], 
+          B6, [], 
+          C0, [], 
+          C6, [], 
+          C8, [], 
+          CA, [01, 02], 
+          CC, [01, 02, 03, 04, 05, 06, 07, 08, 09, 0A, 0B, 0C, 0D, 0E, 12, 14, 16, 17, 1A, 1E, 24], 
+          D6, [01, 04, 05], 
+          DA, [00, 02], 
+          DC, [00, 01, 03, 04, 05, 06, 07, 08, 0B, 0E, 11, 20, 21, 22, 23, 24, 30, 33, 51, E2], 
+          DF, [], 
+          E9, [00, 02], 
+          E0, [01, 02, 03, 05], 
+          E2A000, [46, 47, 48, 49, 4A, 4B], 
+          E2A001, [00, 01, 02, 03, 04], 
+          E2A004, [00, 01, 02], 
+          E2A006, [00, 01, 02, 03], 
+          E2A007, [00, 01], 
+          E2A008, [00, 01], 
+          E2A009, [01, 02, 03, 04, 05, 06, 07], 
+          E2A00A, [], 
+          E2A00B, [], 
+          E2A00C, [], 
+          E2A00D, [], 
+          E2A00E, [], 
+          E2A00F, [], 
+          E2A010, [00, 01, 02, 03, 04], 
+          E2A011, [00, 01, 02, 03, 04], 
+          E2A012, [00, 01], 
+          E2A013, [00, 01], 
+          E2A015, [00, 01, 02], 
+          E2A016, [00, 01], 
+          E2A017, [00, 01], 
+          E2A019, [00, 01, 02, 03, 04, 05, 06, 07], 
+          E2A01A, [00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 0A, 0B, 0C, 0D], 
+          E2A01B, [00, 01, 02, 03], 
+          E2A01C, [00, 01, 02], 
+          E2A01D, [00, 01, 02], 
+          E2A020, [02, 03, 04, 0F], 
+          E2A024, [00, 01, 02, 03, 04], 
+          E2A034, [00, 02, 03, 04], 
+          E2A035, [00, 02, 03], 
+          E2A036, [00, 01], 
+          E2A038, [01], 
+          E2A039, [], 
+          E2A040, [00, 01], 
+          E2A041, [00, 01, 02], 
+          E2A042, [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 3A, 3B, 3C, 3D, 3E, 3F], 
+          E2A043, [00, 01], 
+          E2A044, [00, 01, 02, 03], 
+          EC, [01, 02, 03], 
+          ED, [00, 01], 
+          F0, [00, 01], 
+          F2, [00, 01, 02, 03, 04], 
+          F6, [01], 
+          F7, [42], 
+          FD, [], 
+          FF, [].  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  Display ConnectionCkecked connection =True  SystemOper.kDDWpYod0 => CDeviceDisplayBase`1.ConnectionCkecked => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  ----------------- Display ConnectionCkecked 4 => middle -----------------  SystemOper.kDDWpYod0 => CDeviceDisplayBase`1.ConnectionCkecked => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  1. 匹配 VCP : "VCP(02 04 05 08 0B 0C 10 12 14(02 04 05 06 07 08 0A 0B 0D ) 16 18 1A 52 54(00 01) 60(11 12 0F 15 21 22 2F 35 ) 62 6C 6E 70 72(50 64 78 8C A0) 86(01 0A 12 13 14 15 16 17 18 19 1A 1B 23)87 8D(01 02) A4 A5 AC AE B2 B6 C0 C6 C8 CA(01 02) CC(01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 12 14 16 17 1A 1E 24) D6(01 04 05) DA(00 02) DC(00 01 03 04 05 06 07 08 0B 0E 11 20 21 22 23 24 30 33 51 E2) DF E9(00 02) E0(01 02 03 05) E2A000(46 47 48 49 4A 4B) E2A001(00 01 02 03 04) E2A004(00 01 02) E2A006(00 01 02 03) E2A007(00 01) E2A008(00 01) E2A009(01 02 03 04 05 06 07) E2A00A E2A00B E2A00C E2A00D E2A00E E2A00F E2A010(00 01 02 03 04) E2A011(00 01 02 03 04) E2A012(00 01) E2A013(00 01) E2A015(00 01 02) E2A016(00 01) E2A017(00 01) E2A019(00 01 02 03 04 05 06 07) E2A01A(00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D) E2A01B(00 01 02 03) E2A01C(00 01 02) E2A01D(00 01 02) E2A020(02 03 04  0F) E2A024(00 01 02 03 04) E2A034(00 02 03 04) E2A035(00 02 03) E2A036(00 01) E2A038(01) E2A039 E2A040(00 01) E2A041(00 01 02) E2A042(30 31 32 33 34 35 36 37 38 39 3A 3B 3C 3D 3E 3F) E2A043(00 01) E2A044(00 01 02 03) EC(01 02 03) ED(00 01) F0(00 01) F2(00 01 02 03 04) F6(01) F7(42)FD FF)"。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：02 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 02 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：04 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 04 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：05 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 05 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：08 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 08 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：0B 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 0B 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：0C 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 0C 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：10 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 10 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：12 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 12 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：14(02 04 05 06 07 08 0A 0B 0D )。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  4. 匹配 VCP 子项：[02, 04, 05, 06, 07, 08, 0A, 0B, 0D]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：16 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 16 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：18 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 18 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：1A 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 1A 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：52 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 52 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：54(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：60(11 12 0F 15 21 22 2F 35 )。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  4. 匹配 VCP 子项：[11, 12, 0F, 15, 21, 22, 2F, 35]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：62 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 62 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：6C 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 6C 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：6E 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 6E 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：70 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 70 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：72(50 64 78 8C A0)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  4. 匹配 VCP 子项：[50, 64, 78, 8C, A0]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：86(01 0A 12 13 14 15 16 17 18 19 1A 1B 23)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 0A, 12, 13, 14, 15, 16, 17, 18, 19, 1A, 1B, 23]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：87 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  3. VCP 项 87 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  2. 匹配 VCP 项：8D(01 02)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0113 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：A4 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 A4 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：A5 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 A5 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：AC 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 AC 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：AE 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 AE 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：B2 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 B2 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：B6 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 B6 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：C0 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 C0 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：C6 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 C6 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：C8 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 C8 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：CA(01 02)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：CC(01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 12 14 16 17 1A 1E 24)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02, 03, 04, 05, 06, 07, 08, 09, 0A, 0B, 0C, 0D, 0E, 12, 14, 16, 17, 1A, 1E, 24]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：D6(01 04 05)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 04, 05]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：DA(00 02)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：DC(00 01 03 04 05 06 07 08 0B 0E 11 20 21 22 23 24 30 33 51 E2)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 03, 04, 05, 06, 07, 08, 0B, 0E, 11, 20, 21, 22, 23, 24, 30, 33, 51, E2]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：DF 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 DF 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E9(00 02)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E0(01 02 03 05)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02, 03, 05]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A000(46 47 48 49 4A 4B)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[46, 47, 48, 49, 4A, 4B]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A001(00 01 02 03 04)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A004(00 01 02)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A006(00 01 02 03)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A007(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A008(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A009(01 02 03 04 05 06 07)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02, 03, 04, 05, 06, 07]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00A 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 E2A00A 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00B 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 E2A00B 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00C 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 E2A00C 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00D 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 E2A00D 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00E 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 E2A00E 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A00F 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 E2A00F 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A010(00 01 02 03 04)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A011(00 01 02 03 04)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A012(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A013(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A015(00 01 02)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A016(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A017(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A019(00 01 02 03 04 05 06 07)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04, 05, 06, 07]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A01A(00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 0A, 0B, 0C, 0D]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A01B(00 01 02 03)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A01C(00 01 02)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A01D(00 01 02)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A020(02 03 04  0F)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[02, 03, 04, 0F]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A024(00 01 02 03 04)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A034(00 02 03 04)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A035(00 02 03)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 02, 03]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A036(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A038(01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A039 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 E2A039 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A040(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A041(00 01 02)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A042(30 31 32 33 34 35 36 37 38 39 3A 3B 3C 3D 3E 3F)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 3A, 3B, 3C, 3D, 3E, 3F]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A043(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：E2A044(00 01 02 03)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：EC(01 02 03)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[01, 02, 03]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：ED(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：F0(00 01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：F2(00 01 02 03 04)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[00, 01, 02, 03, 04]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：F6(01)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[01]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：F7(42)。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  4. 匹配 VCP 子项：[42]。  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：FD 。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 FD 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  2. 匹配 VCP 项：FF。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO |  3. VCP 项 FF 不包含子项。  DataOSD.InitDisplayInfo => ComUtil.AnalyseVcpString => ZLog.Debug
+2026-09-26 07:52:41.0154 DEBUG  | INFO | 5. 匹配完毕的 VCP：
+          02, [], 
+          04, [], 
+          05, [], 
+          08, [], 
+          0B, [], 
+          0C, [], 
+          10, [], 
+          12, [], 
+          14, [02, 04, 05, 06, 07, 08, 0A, 0B, 0D], 
+          16, [], 
+          18, [], 
+          1A, [], 
+          52, [], 
+          54, [00, 01], 
+          60, [11, 12, 0F, 15, 21, 22, 2F, 35], 
+          62, [], 
+          6C, [], 
+          6E, [], 
+          70, [], 
+          72, [50, 64, 78, 8C, A0], 
+          86, [01, 0A, 12, 13, 14, 15, 16, 17, 18, 19, 1A, 1B, 23], 
+          87, [], 
+          8D, [01, 02], 
+          A4, [], 
+          A5, [], 
+          AC, [], 
+          AE, [], 
+          B2, [], 
+          B6, [], 
+          C0, [], 
+          C6, [], 
+          C8, [], 
+          CA, [01, 02], 
+          CC, [01, 02, 03, 04, 05, 06, 07, 08, 09, 0A, 0B, 0C, 0D, 0E, 12, 14, 16, 17, 1A, 1E, 24], 
+          D6, [01, 04, 05], 
+          DA, [00, 02], 
+          DC, [00, 01, 03, 04, 05, 06, 07, 08, 0B, 0E, 11, 20, 21, 22, 23, 24, 30, 33, 51, E2], 
+          DF, [], 
+          E9, [00, 02], 
+          E0, [01, 02, 03, 05], 
+          E2A000, [46, 47, 48, 49, 4A, 4B], 
+          E2A001, [00, 01, 02, 03, 04], 
+          E2A004, [00, 01, 02], 
+          E2A006, [00, 01, 02, 03], 
+          E2A007, [00, 01], 
+          E2A008, [00, 01], 
+          E2A009, [01, 02, 03, 04, 05, 06, 07], 
+          E2A00A, [], 
+          E2A00B, [], 
+          E2A00C, [], 
+          E2A00D, [], 
+          E2A00E, [], 
+          E2A00F, [], 
+          E2A010, [00, 01, 02, 03, 04], 
+          E2A011, [00, 01, 02, 03, 04], 
+          E2A012, [00, 01], 
+          E2A013, [00, 01], 
+          E2A015, [00, 01, 02], 
+          E2A016, [00, 01], 
+          E2A017, [00, 01], 
+          E2A019, [00, 01, 02, 03, 04, 05, 06, 07], 
+          E2A01A, [00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 0A, 0B, 0C, 0D], 
+          E2A01B, [00, 01, 02, 03], 
+          E2A01C, [00, 01, 02], 
+          E2A01D, [00, 01, 02], 
+          E2A020, [02, 03, 04, 0F], 
+          E2A024, [00, 01, 02, 03, 04], 
+          E2A034, [00, 02, 03, 04], 
+          E2A035, [00, 02, 03], 
+          E2A036, [00, 01], 
+          E2A038, [01], 
+          E2A039, [], 
+          E2A040, [00, 01], 
+          E2A041, [00, 01, 02], 
+          E2A042, [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 3A, 3B, 3C, 3D, 3E, 3F], 
+          E2A043, [00, 01], 
+          E2A044, [00, 01, 02, 03], 
+          EC, [01, 02, 03], 
+          ED, [00, 01], 
+          F0, [00, 01], 
+          F2, [00, 01, 02, 03, 04], 
+          F6, [01], 
+          F7, [42], 
+          FD, [], 
+          FF, [].  ComUtil.AnalyseVcpString => ComUtil.Hojmh24XimGjx52HpnE => ZLog.Debug
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 2  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 5  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 8  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 11  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 12  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 82  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 108  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 110  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 112  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 172  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 174  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 178  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 182  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 192  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 198  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 200  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 202  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 223  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 253  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0154 WARN  UnHandle vcpCode = 255  DataOSD.InitDisplayInfo => DataOSD.CS82vXLS8dQ9Y8Sn2je => ZLog.Warn
+2026-09-26 07:52:41.0829 ERROR  CheckENEUnPlugin bUsbChange=False bEnableENE=False needClearCache=True  CDevice_PHLDisplay.cN38cQJRKj => CDevice_PHLDisplay.DXV3mjwSqnOrNhEXVXU => ZLog.Error
+2026-09-26 07:52:41.1004 DEBUG  GetOSVersion: 10.0.26200 (Build 26200)  CWinVerCheck.IsWindows10BuildOrGreater => CWinVerCheck.GetOSVersion => ZLog.Debug
+2026-09-26 07:52:41.1004 DEBUG  GetHDRData Win11 24H2 Or Greater  CWinSysDisplayHDR.GetHDR => CWinSysDisplayHDR.wtuIGtrceM => ZLog.Debug
+2026-09-26 07:52:41.1004 DEBUG  GetHDRData Win11 24H2 Or Greater result = 0  CWinSysDisplayHDR.GetHDR => CWinSysDisplayHDR.wtuIGtrceM => ZLog.Debug
+2026-09-26 07:52:41.1004 DEBUG  GetValue<T> IsSmartImageHDR is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.1004 DEBUG  GetValue<T> HasUSBSetting is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  Hub GetStandardValue command=dc value=21 maxValue=35 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ModuleSmartImage is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ModuleSmartImageHDR is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ModuleGameMode is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ModuleAmbiglow is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ModuleInput is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ModuleAudio is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ModuleSystem is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ModuleSetup is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ENEEffectEnable is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> EffectInfo is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> DispalyData is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> EquipmentType is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> DeviceType is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ModelName is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.2887 DEBUG  GetValue<T> ExtModel is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:41.4755 DEBUG  Hub GetStandardValue command=10 value=64 maxValue=64 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:41.6627 DEBUG  Hub GetStandardValue command=12 value=32 maxValue=64 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:41.8478 DEBUG  Hub GetTPVExternValue command=e2a040 value=01 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:42.0314 DEBUG  Hub GetTPVExternValue command=e2a004 value=00 maxValue=02 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:42.2169 DEBUG  Hub GetTPVExternValue command=e2a044 value=00 maxValue=03 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:42.4013 DEBUG  Hub GetTPVExternValue command=e2a006 value=00 maxValue=03 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:42.5851 DEBUG  Hub GetTPVExternValue command=e2a007 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:42.7693 DEBUG  Hub GetTPVExternValue command=e2a008 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:42.9548 DEBUG  Hub GetTPVExternValue command=e2a009 value=01 maxValue=07 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:43.1429 DEBUG  Hub GetTPVExternValue command=e2a00a value=64 maxValue=64 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:43.3293 DEBUG  Hub GetTPVExternValue command=e2a00b value=32 maxValue=64 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:43.5169 DEBUG  Hub GetTPVExternValue command=e2a00c value=00 maxValue=05 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:43.7160 DEBUG  Hub GetTPVExternValue command=e2a00d value=00 maxValue=00 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:43.9004 DEBUG  Hub GetTPVExternValue command=e2a019 value=00 maxValue=07 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:44.0865 DEBUG  Hub GetTPVExternValue command=e2a01a value=06 maxValue=0d result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:44.2729 DEBUG  Hub GetTPVExternValue command=e2a01b value=00 maxValue=03 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:44.4578 DEBUG  Hub GetTPVExternValue command=e2a01c value=02 maxValue=02 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:44.6454 DEBUG  Hub GetTPVExternValue command=e2a01d value=00 maxValue=02 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:44.6454 DEBUG  GetValue<T> EffectEnable is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:44.8308 DEBUG  Hub GetStandardValue command=ed value=01 maxValue=01 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:45.0177 DEBUG  Hub GetStandardValue command=60 value=0f maxValue=3616 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:45.2063 DEBUG  Hub GetStandardValue command=a5 value=00 maxValue=200 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:45.3933 DEBUG  Hub GetStandardValue command=ec value=00 maxValue=00 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:45.5814 DEBUG  Hub GetStandardValue command=f6 value=00 maxValue=00 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:45.5814 DEBUG  GetValue<T> InputSourceList is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:45.5814 DEBUG  GetValue<T> PIPPBPSourceList is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:45.5814 DEBUG  GetValue<T> InputSourceInfo is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:45.5814 DEBUG  GetValue<T> PIPLocationList is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:45.7691 DEBUG  Hub GetStandardValue command=62 value=00 maxValue=64 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:45.9564 DEBUG  Hub GetStandardValue command=8d value=02 maxValue=02 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:46.1425 DEBUG  Hub GetTPVExternValue command=e2a000 value=46 maxValue=4b result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:46.3288 DEBUG  Hub GetStandardValue command=e0 value=03 maxValue=08 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:46.3288 DEBUG  GetValue<T> EQItems is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:46.4380 DEBUG  Hub SetTPVExternValue command=e2a001 value=00 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:46.7337 DEBUG  Hub GetTPVExternValue command=e2a039 value=08 maxValue=10 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:46.8417 DEBUG  Hub SetTPVExternValue command=e2a001 value=01 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:47.1365 DEBUG  Hub GetTPVExternValue command=e2a039 value=08 maxValue=10 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:47.2464 DEBUG  Hub SetTPVExternValue command=e2a001 value=02 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:47.5422 DEBUG  Hub GetTPVExternValue command=e2a039 value=08 maxValue=10 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:47.6521 DEBUG  Hub SetTPVExternValue command=e2a001 value=03 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:47.9486 DEBUG  Hub GetTPVExternValue command=e2a039 value=08 maxValue=10 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:48.0578 DEBUG  Hub SetTPVExternValue command=e2a001 value=04 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:48.3548 DEBUG  Hub GetTPVExternValue command=e2a039 value=08 maxValue=10 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:48.5425 DEBUG  Hub GetTPVExternValue command=e2a00e value=32 maxValue=64 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:48.7442 DEBUG  Hub GetTPVExternValue command=e2a00f value=32 maxValue=64 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:48.9300 DEBUG  Hub GetTPVExternValue command=e2a010 value=00 maxValue=04 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:49.1165 DEBUG  Hub GetTPVExternValue command=e2a011 value=02 maxValue=04 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:49.3035 DEBUG  Hub GetStandardValue command=86 value=02 maxValue=23 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:49.4879 DEBUG  Hub GetTPVExternValue command=e2a012 value=01 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:49.6753 DEBUG  Hub GetTPVExternValue command=e2a013 value=01 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:49.8642 DEBUG  Hub GetTPVExternValue command=e2a015 value=00 maxValue=02 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:50.0654 DEBUG  Hub GetTPVExternValue command=e2a016 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:50.2540 DEBUG  Hub GetStandardValue command=54 value=02 maxValue=04 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:50.4399 DEBUG  Hub GetStandardValue command=da value=02 maxValue=08 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:50.6261 DEBUG  Hub GetStandardValue command=f2 value=01 maxValue=04 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:50.8127 DEBUG  Hub GetStandardValue command=cc value=02 maxValue=24 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:50.9999 DEBUG  Hub GetStandardValue command=e9 value=00 maxValue=02 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 07:52:51.1870 DEBUG  Hub GetTPVExternValue command=e2a017 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:51.3761 DEBUG  Hub GetTPVExternValue command=e2a035 value=02 maxValue=03 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:51.5638 DEBUG  Hub GetTPVExternValue command=e2a034 value=03 maxValue=04 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:51.7523 DEBUG  Hub GetTPVExternValue command=e2a036 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:51.9395 DEBUG  Hub GetTPVExternValue command=e2a043 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:51.9395 DEBUG  GetValue<T> WorkingTime is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:51.9395 DEBUG  GetValue<T> TimeAfterPixelRefresh is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 07:52:52.1269 DEBUG  Hub GetTPVExternValue command=e2a041 value=01 maxValue=02 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 07:52:52.1269 DEBUG  CacheDeviceDataLoad    TotalMilliseconds=11097,4236    True  CDevice_PHLDisplay.vtt8qbfXNV => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:52.1696 DEBUG  PHLDisplay ParameterToDevice    TotalMilliseconds=3,0051    PHL 34M2C8600  CDevice_PHLDisplay.ParameterToDevice => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 07:52:52.1834 DEBUG  OnNotification connection=True eventType=0 param='The parameter exceeds the print limit'  HandleEvent.AoqvD925w => HandleEvent.F8qhfqP79NikargHFRZ => ZLog.Debug
+2026-09-26 07:52:52.1942 DEBUG  PHLDisplay ParameterToDevice end  CDeviceDisplayBase`1.DeviceDataCheck => CDevice_PHLDisplay.ParameterToDevice => ZLog.Debug
+2026-09-26 07:52:52.1942 DEBUG  ----------------- Display ConnectionCkecked 5 => end -----------------  SystemOper.kDDWpYod0 => CDeviceDisplayBase`1.ConnectionCkecked => ZLog.Debug
+2026-09-26 07:52:52.1942 DEBUG  ConnectionCheckedTime PHL_CDeviceDisplay==> 21069  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:52:52.1942 DEBUG  UsbDeviceChangeTime==> 0  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:52.2405 DEBUG  Effect_SyncTime==> 44  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:52.3943 INFO  [StartCapture] AudioSyncController stopping capture ...  EffectTimerMgr.augGcvYnA => EffectTimerMgr.QPPq6ebRgYc9UWcVQtA => ZLog.Info
+2026-09-26 07:52:52.3943 INFO  [StartCapture] AudioSyncController capture stopped.  EffectTimerMgr.augGcvYnA => EffectTimerMgr.QPPq6ebRgYc9UWcVQtA => ZLog.Info
+2026-09-26 07:52:52.3943 DEBUG  CheckSoftEffectTime==> 154  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:52.3943 DEBUG  GetTaskAsync param = {"functionName":"Device_GetConnectList","requestId":"d85976b8-9e88-45b6-8a28-d76cef48b3f7","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:52:52.3943 DEBUG  ==================> 已接入设备数 count=1 
+PHL_CDeviceDisplay
+==================> End  SystemOper.GetConnectionDevice => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:52:52.3943 DEBUG  
+  Bridge.t81hvXmUSNerstwyEA4 => SystemOper.GetConnectionDevice => ZLog.Debug
+2026-09-26 07:52:52.4081 DEBUG  GetTaskAsync param = {"functionName":"DisplayFW_GetDeviceList","requestId":"1b8c40f7-f55f-44f7-abb8-57c86bc286c9","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:52:54.0947 DEBUG  GetTaskAsync param = {"functionName":"Theme_GetThemeInfos","requestId":"e6efb073-8cf5-4399-ab31-7f09a738530d","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:52:54.1283 DEBUG  GetTaskAsync param = {"functionName":"SyncEffect_GetData","requestId":"4c8b0e31-fe1a-4706-b27a-bbb8b8e70da9","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:52:54.1283 INFO  GetSyncProfile Time==>3  SystemOper.F0V4uGdnc => SystemOper.lxt3G3nyJI0viP4MTlu => ZLog.Info
+2026-09-26 07:52:54.1406 DEBUG  GetTaskAsync param = {"functionName":"Effect_GetColorData","requestId":"9a28612b-c44a-4ae5-9a09-f5e07f38eeb5","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:52:54.1406 DEBUG  GetTaskAsync param = {"functionName":"Theme_GetCurTheme","requestId":"c2f07275-18af-4f8a-b4dc-24b60a8070a7","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:52:54.1615 DEBUG  GetTaskAsync param = {"functionName":"Macro_GetFuncMenu","requestId":"90e03aab-43d2-406f-a766-12126d985ce9","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:52:54.1722 DEBUG  GetTaskAsync param = {"functionName":"Macro_GetList","requestId":"985de1ec-19ce-4f11-b657-603396bb0226","parms":["User"]}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:53:01.8247 DEBUG  GetTaskAsync param = {"functionName":"PHL_SwitchDisplay","requestId":"23e6864d-0493-4b6a-a9fb-1e691a96ea0d","parms":["AU00000000001"]}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:53:01.8247 DEBUG  SwitchDisplay sn is sn = AU00000000001  SystemOper.qkUqntnTXgJyfRFC36C => CDeviceDisplayBase`1.SwitchDisplay => ZLog.Debug
+2026-09-26 07:53:01.8365 DEBUG  GetTaskAsync param = {"functionName":"Profile_GetDeviceData","requestId":"b09910ba-8ed2-4ce9-b184-dc5f5ea0495b","parms":[100000]}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:53:01.8657 DEBUG  GetTaskAsync param = {"functionName":"PHL_GetConstraints","requestId":"cceb3c05-0411-4c8f-b031-eec161ed786e","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:53:01.8657 DEBUG  OnNotification connection=True eventType=0 param='The parameter exceeds the print limit'  HandleEvent.AoqvD925w => HandleEvent.F8qhfqP79NikargHFRZ => ZLog.Debug
+2026-09-26 07:53:18.3257 DEBUG  GetTaskAsync param = {"functionName":"Setting_GlobalData","requestId":"4acabfda-1fb3-4219-b6dc-3b239819fcb9","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:53:18.3257 DEBUG  GetTaskAsync param = {"functionName":"GetPairDevices","requestId":"a475cf3f-a975-48fd-8adc-26ae004d4ae3","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  GetTaskAsync param = {"functionName":"Device_OtherDeviceChange","requestId":"fa2ed15a-34f9-447e-938f-be804350429c","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  ----------------- 开始扫描设备 scanType = Other -----------------  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  ==> UsbList count=12 
+\\?\hid#vid_0000&pid_0001&mi_01&col02#9&0000008&0&0001#{4d1e55b2-f16f-11cf-88cb-001111000030}\kbd
+\\?\hid#vid_0000&pid_0001&mi_00#9&00000009&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}\kbd
+\\?\hid#vid_0000&pid_0003&mi_03#8&0000000d&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#hid_device_system_vhf#9&00000007&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0001&mi_01&col01#9&0000008&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col01#9&0000000b&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}\kbd
+\\?\hid#vid_0000&pid_0002&mi_01&col02#9&0000000b&0&0001#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_00#9&00000c&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col03#9&0000000b&0&0002#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col04#9&0000000b&0&0003#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col05#9&0000000b&0&0004#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0001&mi_02#9&0000000a&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+==================> UsbList End  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  ==> UsbDevices count=4 
+\\?\usb#vid_0000&pid_0002#serialmouse1#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+\\?\usb#vid_0000&pid_0001#serialkeyboard01#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+\\?\usb#vid_0000&pid_0003#serialaudiodevice1#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+\\?\usb#vid_2109&pid_8884#0000000000000001#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+==================> UsbDevices End  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  ==> UsbHubs count=5 
+\\?\usb#root_hub30#5&0000001&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#vid_2109&pid_0211#7&00000003&4&4#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#vid_2109&pid_0817#msft30000000000#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#root_hub30#5&00000002&1&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#vid_2109&pid_2817#msft20000000000#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+==================> UsbHubs End  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:01.1667 DEBUG  Task Run ConnectionChecked RongYuan_KeyboardSPK8708_BLE  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:02.6820 DEBUG  ConnectionCheckedTime RongYuan_KeyboardSPK8708_BLE==> 1512  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 07:54:02.6820 DEBUG  UsbDeviceChangeTime==> 0  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:02.7269 DEBUG  Effect_SyncTime==> 44  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:02.7269 INFO  [StartCapture] AudioSyncController stopping capture ...  EffectTimerMgr.augGcvYnA => EffectTimerMgr.QPPq6ebRgYc9UWcVQtA => ZLog.Info
+2026-09-26 07:54:02.7269 INFO  [StartCapture] AudioSyncController capture stopped.  EffectTimerMgr.augGcvYnA => EffectTimerMgr.QPPq6ebRgYc9UWcVQtA => ZLog.Info
+2026-09-26 07:54:02.7269 DEBUG  CheckSoftEffectTime==> 1  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:02.7269 DEBUG  ==================> 已接入设备数 count=1 
+PHL_CDeviceDisplay
+==================> End  SystemOper.GetConnectionDevice => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 07:54:02.7269 DEBUG  
+  SystemOper.OtherDeviceChange => SystemOper.GetConnectionDevice => ZLog.Debug
+2026-09-26 07:54:02.7269 DEBUG  GetTaskAsync param = {"functionName":"DisplayFW_GetDeviceList","requestId":"5895217a-dfa4-4f67-a23b-9b4b394cb4bf","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:54:14.6774 DEBUG  GetTaskAsync param = {"functionName":"Profile_GetDeviceData","requestId":"fb0638fa-064f-442e-b568-a75f93b7b20c","parms":[100000]}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:54:14.7046 DEBUG  GetTaskAsync param = {"functionName":"PHL_GetConstraints","requestId":"8270f541-ac8e-4bb4-b6f4-cb31dec3a542","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 07:54:14.7046 DEBUG  OnNotification connection=True eventType=0 param='The parameter exceeds the print limit'  HandleEvent.AoqvD925w => HandleEvent.F8qhfqP79NikargHFRZ => ZLog.Debug
+2026-09-26 08:02:31.7097 DEBUG  GetTaskAsync param = {"functionName":"FancyZones_GetVersion","requestId":"c553b299-76f6-49ab-8bf4-66881f27154f","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 08:02:36.2889 DEBUG  GetTaskAsync param = {"functionName":"DisplayFW_CheckUpstreamCable","requestId":"1217e515-d07b-418f-8f77-fab9d102fac6","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 08:02:36.2889 DEBUG  GetTaskAsync param = {"functionName":"DisplayFW_GetMonitorCount","requestId":"b5f49f9e-4652-4090-be69-c16e440dc23e","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 08:02:36.2889 DEBUG  GetTaskAsync param = {"functionName":"DisplayFW_GetDeviceList","requestId":"bf3dc111-6a6a-4d19-9224-e13b1f4e3e04","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 08:02:49.5917 DEBUG  GetTaskAsync param = {"functionName":"PHL_SetOSD","requestId":"2edaf9a0-a747-454a-a6f9-acf680fb2104","parms":["EXT_OP_E2A0_43_AutoWarning",1]}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 08:02:49.7214 DEBUG  Hub SetTPVExternValue command=e2a043 value=01 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:52.1148 DEBUG  GetTaskAsync param = {"functionName":"PHL_ReloadData","requestId":"759948c3-503b-47b6-94ed-7a32ceffa3b1","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 08:02:52.1148 ERROR  CheckENEUnPlugin bUsbChange=False bEnableENE=False needClearCache=True  CDevice_PHLDisplay.cN38cQJRKj => CDevice_PHLDisplay.DXV3mjwSqnOrNhEXVXU => ZLog.Error
+2026-09-26 08:02:52.1310 DEBUG  GetOSVersion: 10.0.26200 (Build 26200)  CWinVerCheck.IsWindows10BuildOrGreater => CWinVerCheck.GetOSVersion => ZLog.Debug
+2026-09-26 08:02:52.1310 DEBUG  GetHDRData Win11 24H2 Or Greater  CWinSysDisplayHDR.GetHDR => CWinSysDisplayHDR.wtuIGtrceM => ZLog.Debug
+2026-09-26 08:02:52.1310 DEBUG  GetHDRData Win11 24H2 Or Greater result = 0  CWinSysDisplayHDR.GetHDR => CWinSysDisplayHDR.wtuIGtrceM => ZLog.Debug
+2026-09-26 08:02:52.1310 DEBUG  GetValue<T> IsSmartImageHDR is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.1310 DEBUG  GetValue<T> HasUSBSetting is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  Hub GetStandardValue command=dc value=21 maxValue=35 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ModuleSmartImage is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ModuleSmartImageHDR is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ModuleGameMode is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ModuleAmbiglow is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ModuleInput is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ModuleAudio is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ModuleSystem is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ModuleSetup is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ENEEffectEnable is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> EffectInfo is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> DispalyData is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> EquipmentType is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> DeviceType is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ModelName is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.3224 DEBUG  GetValue<T> ExtModel is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:52.5088 DEBUG  Hub GetStandardValue command=10 value=64 maxValue=64 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:52.6976 DEBUG  Hub GetStandardValue command=12 value=32 maxValue=64 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:52.8851 DEBUG  Hub GetTPVExternValue command=e2a040 value=01 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:53.0718 DEBUG  Hub GetTPVExternValue command=e2a004 value=00 maxValue=02 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:53.2577 DEBUG  Hub GetTPVExternValue command=e2a044 value=00 maxValue=03 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:53.4608 DEBUG  Hub GetTPVExternValue command=e2a006 value=00 maxValue=03 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:53.6467 DEBUG  Hub GetTPVExternValue command=e2a007 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:53.8330 DEBUG  Hub GetTPVExternValue command=e2a008 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:54.0327 DEBUG  Hub GetTPVExternValue command=e2a009 value=01 maxValue=07 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:54.2176 DEBUG  Hub GetTPVExternValue command=e2a00a value=64 maxValue=64 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:54.4047 DEBUG  Hub GetTPVExternValue command=e2a00b value=32 maxValue=64 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:54.5907 DEBUG  Hub GetTPVExternValue command=e2a00c value=00 maxValue=05 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:54.7767 DEBUG  Hub GetTPVExternValue command=e2a00d value=00 maxValue=00 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:54.9635 DEBUG  Hub GetTPVExternValue command=e2a019 value=00 maxValue=07 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:55.1512 DEBUG  Hub GetTPVExternValue command=e2a01a value=06 maxValue=0d result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:55.3543 DEBUG  Hub GetTPVExternValue command=e2a01b value=00 maxValue=03 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:55.5413 DEBUG  Hub GetTPVExternValue command=e2a01c value=02 maxValue=02 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:55.7447 DEBUG  Hub GetTPVExternValue command=e2a01d value=00 maxValue=02 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:55.7447 DEBUG  GetValue<T> EffectEnable is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:55.9322 DEBUG  Hub GetStandardValue command=ed value=01 maxValue=01 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:56.1181 DEBUG  Hub GetStandardValue command=60 value=0f maxValue=3616 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:56.3041 DEBUG  Hub GetStandardValue command=a5 value=00 maxValue=200 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:56.4899 DEBUG  Hub GetStandardValue command=ec value=00 maxValue=00 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:56.6770 DEBUG  Hub GetStandardValue command=f6 value=00 maxValue=00 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:56.6770 DEBUG  GetValue<T> InputSourceList is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:56.6770 DEBUG  GetValue<T> PIPPBPSourceList is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:56.6770 DEBUG  GetValue<T> InputSourceInfo is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:56.6770 DEBUG  GetValue<T> PIPLocationList is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:56.8634 DEBUG  Hub GetStandardValue command=62 value=00 maxValue=64 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:57.0502 DEBUG  Hub GetStandardValue command=8d value=02 maxValue=02 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:57.2358 DEBUG  Hub GetTPVExternValue command=e2a000 value=46 maxValue=4b result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:57.4238 DEBUG  Hub GetStandardValue command=e0 value=03 maxValue=08 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:02:57.4238 DEBUG  GetValue<T> EQItems is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:02:57.5319 DEBUG  Hub SetTPVExternValue command=e2a001 value=00 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:57.8297 DEBUG  Hub GetTPVExternValue command=e2a039 value=08 maxValue=10 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:57.9386 DEBUG  Hub SetTPVExternValue command=e2a001 value=01 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:58.2356 DEBUG  Hub GetTPVExternValue command=e2a039 value=08 maxValue=10 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:58.3438 DEBUG  Hub SetTPVExternValue command=e2a001 value=02 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:58.6372 DEBUG  Hub GetTPVExternValue command=e2a039 value=08 maxValue=10 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:58.7462 DEBUG  Hub SetTPVExternValue command=e2a001 value=03 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:59.0426 DEBUG  Hub GetTPVExternValue command=e2a039 value=08 maxValue=10 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:59.1494 DEBUG  Hub SetTPVExternValue command=e2a001 value=04 result=0  Extension_AttributeInfo.SetValue => Display.SetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:59.4431 DEBUG  Hub GetTPVExternValue command=e2a039 value=08 maxValue=10 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:59.6446 DEBUG  Hub GetTPVExternValue command=e2a00e value=32 maxValue=64 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:02:59.8296 DEBUG  Hub GetTPVExternValue command=e2a00f value=32 maxValue=64 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:00.0181 DEBUG  Hub GetTPVExternValue command=e2a010 value=00 maxValue=04 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:00.2066 DEBUG  Hub GetTPVExternValue command=e2a011 value=02 maxValue=04 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:00.3926 DEBUG  Hub GetStandardValue command=86 value=02 maxValue=23 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:03:00.5795 DEBUG  Hub GetTPVExternValue command=e2a012 value=01 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:00.7662 DEBUG  Hub GetTPVExternValue command=e2a013 value=01 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:00.9681 DEBUG  Hub GetTPVExternValue command=e2a015 value=00 maxValue=02 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:01.1564 DEBUG  Hub GetTPVExternValue command=e2a016 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:01.3439 DEBUG  Hub GetStandardValue command=54 value=02 maxValue=04 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:03:01.5308 DEBUG  Hub GetStandardValue command=da value=02 maxValue=08 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:03:01.7166 DEBUG  Hub GetStandardValue command=f2 value=01 maxValue=04 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:03:01.9014 DEBUG  Hub GetStandardValue command=cc value=02 maxValue=24 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:03:02.0886 DEBUG  Hub GetStandardValue command=e9 value=00 maxValue=02 result=0  Display.GetStandardValue => Display.umKFj1LEvjflH421NdO => ZLog.Debug
+2026-09-26 08:03:02.2758 DEBUG  Hub GetTPVExternValue command=e2a017 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:02.4628 DEBUG  Hub GetTPVExternValue command=e2a035 value=02 maxValue=03 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:02.6486 DEBUG  Hub GetTPVExternValue command=e2a034 value=03 maxValue=04 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:02.8354 DEBUG  Hub GetTPVExternValue command=e2a036 value=00 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:03.0376 DEBUG  Hub GetTPVExternValue command=e2a043 value=01 maxValue=01 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:03.0376 DEBUG  GetValue<T> WorkingTime is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:03:03.0376 DEBUG  GetValue<T> TimeAfterPixelRefresh is not AttributeInfo  CDevice_PHLDisplay.vtt8qbfXNV => Extension_AttributeInfo.GetValue => ZLog.Debug
+2026-09-26 08:03:03.2237 DEBUG  Hub GetTPVExternValue command=e2a041 value=01 maxValue=02 result=0  Extension_AttributeInfo.GetValue => Display.GetTPVExternValue => ZLog.Debug
+2026-09-26 08:03:03.2237 DEBUG  CacheDeviceDataLoad    TotalMilliseconds=11108,3039    True  CDevice_PHLDisplay.vtt8qbfXNV => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 08:03:03.2237 DEBUG  PHLDisplay ParameterToDevice    TotalMilliseconds=0,2742    PHL 34M2C8600  CDevice_PHLDisplay.ParameterToDevice => CDevice_PHLDisplay.tMxXFcwdfH90lqjUJ9k => ZLog.Debug
+2026-09-26 08:03:03.2586 DEBUG  PHLDisplay ParameterToDevice end  CDevice_PHLDisplay.ReloadOSD => CDevice_PHLDisplay.ParameterToDevice => ZLog.Debug
+2026-09-26 08:03:03.2586 DEBUG  GetTaskAsync param = {"functionName":"Profile_GetDeviceData","requestId":"11bb0eb6-ff23-4be6-b462-18b8be14b2bb","parms":[100000]}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  GetTaskAsync param = {"functionName":"Device_OtherDeviceChange","requestId":"ec51f020-4f3e-4023-90fd-92ba40d9a4c6","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  ----------------- 开始扫描设备 scanType = Other -----------------  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  ==> UsbList count=12 
+\\?\hid#vid_0000&pid_0001&mi_01&col02#9&0000008&0&0001#{4d1e55b2-f16f-11cf-88cb-001111000030}\kbd
+\\?\hid#vid_0000&pid_0001&mi_00#9&00000009&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}\kbd
+\\?\hid#vid_0000&pid_0003&mi_03#8&0000000d&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#hid_device_system_vhf#9&00000007&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0001&mi_01&col01#9&0000008&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col01#9&0000000b&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}\kbd
+\\?\hid#vid_0000&pid_0002&mi_01&col02#9&0000000b&0&0001#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_00#9&00000c&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col03#9&0000000b&0&0002#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col04#9&0000000b&0&0003#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0002&mi_01&col05#9&0000000b&0&0004#{4d1e55b2-f16f-11cf-88cb-001111000030}
+\\?\hid#vid_0000&pid_0001&mi_02#9&0000000a&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}
+==================> UsbList End  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  ==> UsbDevices count=4 
+\\?\usb#vid_0000&pid_0002#serialmouse1#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+\\?\usb#vid_0000&pid_0001#serialkeyboard01#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+\\?\usb#vid_0000&pid_0003#serialaudiodevice1#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+\\?\usb#vid_2109&pid_8884#0000000000000001#{a5dcbf10-6530-11d2-901f-00c04fb951ed}
+==================> UsbDevices End  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  ==> UsbHubs count=5 
+\\?\usb#root_hub30#5&0000001&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#vid_2109&pid_0211#7&00000003&4&4#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#vid_2109&pid_0817#msft30000000000#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#root_hub30#5&00000002&1&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+\\?\usb#vid_2109&pid_2817#msft20000000000#{f18a0e88-c30c-11d0-8815-00a0c906bed8}
+==================> UsbHubs End  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  
+  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:26.7087 DEBUG  Task Run ConnectionChecked RongYuan_KeyboardSPK8708_BLE  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:28.2207 DEBUG  ConnectionCheckedTime RongYuan_KeyboardSPK8708_BLE==> 1509  <>c__DisplayClass3_0.rSv97tHvbR => <>c__DisplayClass3_0.O1fbF8Mqo15e3UVrRwM => ZLog.Debug
+2026-09-26 08:24:28.2207 DEBUG  UsbDeviceChangeTime==> 0  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:28.2503 DEBUG  Effect_SyncTime==> 29  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:28.2503 INFO  [StartCapture] AudioSyncController stopping capture ...  EffectTimerMgr.augGcvYnA => EffectTimerMgr.QPPq6ebRgYc9UWcVQtA => ZLog.Info
+2026-09-26 08:24:28.2503 INFO  [StartCapture] AudioSyncController capture stopped.  EffectTimerMgr.augGcvYnA => EffectTimerMgr.QPPq6ebRgYc9UWcVQtA => ZLog.Info
+2026-09-26 08:24:28.2503 DEBUG  CheckSoftEffectTime==> 0  SystemOper.R2ygqVCq2 => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:28.2503 DEBUG  ==================> 已接入设备数 count=1 
+PHL_CDeviceDisplay
+==================> End  SystemOper.GetConnectionDevice => SystemOper.UNnTUUPK32RM9RS16Ap => ZLog.Debug
+2026-09-26 08:24:28.2503 DEBUG  
+  SystemOper.OtherDeviceChange => SystemOper.GetConnectionDevice => ZLog.Debug
+2026-09-26 08:24:28.2503 DEBUG  GetTaskAsync param = {"functionName":"DisplayFW_GetDeviceList","requestId":"78e422fa-77c1-45aa-974b-b858b79bd93f","parms":null}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug
+2026-09-26 08:24:29.1799 DEBUG  GetTaskAsync param = {"functionName":"Profile_GetDeviceData","requestId":"d471e192-8372-4d99-b5eb-befef152819e","parms":[100000]}  ilJyJrtQQjemYjDm7n.W78OBaD7h => ilJyJrtQQjemYjDm7n.h5dTT6njXsnTA4mLjmd => ZLog.Debug

@@ -1,0 +1,36 @@
+#!/bin/sh
+# postinst for evnia-precision-center
+set -e
+
+APP_DIR=/opt/evnia-precision-center
+
+case "$1" in
+  configure)
+    # Electron's setuid sandbox helper must be root-owned and setuid, otherwise the app would have to
+    # run with --no-sandbox (https://www.electronjs.org/docs/latest/tutorial/sandbox). It is kept
+    # 0755 inside the archive and made setuid here, where ownership is known to be root.
+    if [ -f "$APP_DIR/chrome-sandbox" ]; then
+      chown root:root "$APP_DIR/chrome-sandbox"
+      chmod 4755 "$APP_DIR/chrome-sandbox"
+    fi
+
+    # DDC/CI fallback needs /dev/i2c-N now; modules-load.d loads the module on later boots.
+    modprobe i2c-dev >/dev/null 2>&1 || true
+
+    # Apply the uaccess rules to devices that are already present (no replug or reboot needed).
+    if command -v udevadm >/dev/null 2>&1; then
+      udevadm control --reload-rules >/dev/null 2>&1 || true
+      udevadm trigger --action=change --subsystem-match=usb --attr-match=idVendor=2109 --attr-match=idProduct=8884 >/dev/null 2>&1 || true
+      udevadm trigger --action=change --subsystem-match=usb --attr-match=idVendor=0cf2 --attr-match=idProduct=a201 >/dev/null 2>&1 || true
+      udevadm trigger --action=change --subsystem-match=i2c-dev >/dev/null 2>&1 || true
+    fi
+    ;;
+  abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+  *)
+    echo "postinst called with unknown argument '$1'" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,29 @@
+# Install-test image for the .deb (test/install/run.sh): a CLEAN distribution image in which apt installs
+# the package from the local file and resolves its Depends from the distribution archive, exactly as a user
+# would. Needs BuildKit (named build contexts):
+#
+#   docker build -f docker/Dockerfile.install-test --no-cache \
+#     --build-arg BASE=debian:trixie --build-arg DEB=evnia-precision-center_<ver>_amd64.deb \
+#     --build-context pkg=dist --build-context tests=test/install -t evnia-install-test:debian-trixie .
+#
+# Only this build uses the network (apt). The checks and the app run afterwards in
+# "docker run --network none" (test/install/in-container.sh verify).
+ARG BASE=debian:trixie
+FROM ${BASE}
+ARG DEB
+ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# 1. The package alone, Recommends off, so Depends must suffice (in-container.sh install).
+RUN --mount=type=bind,from=pkg,target=/pkg --mount=type=bind,from=tests,target=/test \
+    test -n "$DEB" && mkdir -p /install-results \
+ && bash /test/in-container.sh install "/pkg/$DEB" 2>&1 | tee /install-results/install.log
+
+# 2. Still in that state: every shared object of the package resolves, and each direct NEEDED library comes
+#    from a package in Depends. The outcome is recorded, not fatal here; "verify" asserts it.
+RUN --mount=type=bind,from=tests,target=/test \
+    bash /test/in-container.sh deps > /install-results/deps.log 2>&1; echo $? > /install-results/deps.status
+
+# 3. The Recommends (each must exist in this distribution), then the test tools.
+RUN --mount=type=bind,from=tests,target=/test \
+    bash /test/in-container.sh tools 2>&1 | tee /install-results/tools.log

@@ -1,0 +1,39 @@
+{
+  "name": "evnia-precision-center-linux",
+  "productName": "Evnia Precision Center",
+  "version": "1.13.0-linux.1",
+  "private": true,
+  "description": "Offline Linux port of Philips Evnia Precision Center (monitor features only)",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "build/app/main.cjs",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "postinstall": "install-electron",
+    "import-ui": "node scripts/import-vendor-ui.mjs",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node --test --test-reporter=spec \"test/unit/**/*.test.ts\" \"test/contract/**/*.test.ts\"",
+    "start": "npm run build && electron . --no-sandbox",
+    "start:mock": "npm run build && EVNIA_MOCK_MONITOR=34M2C8600 electron . --no-sandbox",
+    "cli": "node src/backend/cli.ts",
+    "test:e2e": "node --test --test-reporter=spec \"test/e2e/**/*.test.ts\"",
+    "dist:deb": "node scripts/package-deb.mjs"
+  },
+  "dependencies": {
+    "koffi": "3.3.1",
+    "usb": "2.18.0",
+    "ws": "8.21.3"
+  },
+  "devDependencies": {
+    "@electron/asar": "^4.0.0",
+    "@electron/packager": "20.3.0",
+    "@microsoft/signalr": "7.0.14",
+    "@types/node": "^24.0.0",
+    "@types/ws": "8.18.1",
+    "electron": "44.4.5",
+    "esbuild": "0.28.2",
+    "playwright-core": "1.63.0",
+    "typescript": "5.9.3"
+  }
+}

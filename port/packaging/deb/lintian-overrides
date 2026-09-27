@@ -1,0 +1,26 @@
+# Self-contained Electron application installed as add-on software under /opt (FHS 3.13), which is
+# the intended home of a package built outside Debian from the user's own vendor copy.
+evnia-precision-center: dir-or-file-in-opt *
+# Electron's Chromium statically links its own copies of these libraries.
+evnia-precision-center: embedded-library *
+# Electron ships its bundled libvulkan as released upstream.
+evnia-precision-center: unstripped-binary-or-object *
+# koffi's loader module starts with a shebang but is only ever require()d.
+evnia-precision-center: script-not-executable *
+# The udev rules grant the logged-in user access to the monitor's own USB functions (2109:8884,
+# 0cf2:a201) for this program. The package is installed from a local file, never from an archive
+# whose AppStream catalogue could advertise it for that hardware, so it ships no metainfo.
+evnia-precision-center: appstream-metadata-missing-modalias-provide *
+# Prebuilt upstream binaries (Electron, usb and koffi prebuilds) are shipped unmodified, as their
+# upstreams build them: hardening flags and ELF sections are theirs.
+evnia-precision-center: binary-has-unneeded-section *
+evnia-precision-center: hardening-no-bindnow *
+evnia-precision-center: hardening-no-fortify-functions *
+evnia-precision-center: exit-in-shared-library *
+evnia-precision-center: spelling-error-in-binary *
+# The licence texts and READMEs of the bundled components stay next to them in the self-contained
+# /opt tree; debian/copyright points there.
+evnia-precision-center: extra-license-file *
+evnia-precision-center: package-contains-documentation-outside-usr-share-doc *
+# Directory layout of the upstream npm packages (koffi/src/koffi/src, usb/dist/usb).
+evnia-precision-center: repeated-path-segment *

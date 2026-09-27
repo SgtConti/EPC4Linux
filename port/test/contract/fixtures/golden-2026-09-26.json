@@ -1,0 +1,1451 @@
+{
+  "$comment": [
+    "Golden transcript of the user's real session 2026-09-26 (34M2C8600 over USB-DDC, ENE absent, no peripherals).",
+    "Generated from docs/re/20-backend-host-tail.md section 5 (replies, N0), docs/re/20-enum-valuelist-catalog.md section 5",
+    "(Profile_GetDeviceData Tag, file profile-getdevicedata-tag.json) and port/test/fixtures/windows/logs/EvniaServe-2026-09-26.txt",
+    "(verbatim requests). Steps 16.1-16.3 are the follow-up requests of step 16 (LOG:1079-1082). Steps 17 and 18 use the synthetic",
+    "request ids of section 5. golden-transcript.test.ts re-verifies every entry against the documents when they are present."
+  ],
+  "steps": [
+    {
+      "step": "2",
+      "log": "LOG:8-1005",
+      "functionName": "Start",
+      "request": "{\"functionName\":\"Start\",\"requestId\":\"683a49b0-ff8e-4e9e-aa25-30a2e8d09b87\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "683a49b0-ff8e-4e9e-aa25-30a2e8d09b87",
+        "Tag": true,
+        "FunctionName": "Start",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "3",
+      "log": "LOG:1005-1010",
+      "functionName": "Device_GetConnectList",
+      "request": "{\"functionName\":\"Device_GetConnectList\",\"requestId\":\"d85976b8-9e88-45b6-8a28-d76cef48b3f7\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "d85976b8-9e88-45b6-8a28-d76cef48b3f7",
+        "Tag": [
+          {
+            "StrFwVersion": null,
+            "FwVersion": 0,
+            "ExtDeviceInfo": {
+              "CurSN": "AU00000000001",
+              "DisplayList": [
+                {
+                  "DisplayName": "PHL 34M2C8600",
+                  "MonitorName": "PHL 34M2C8600",
+                  "DeviceName": "\\\\.\\DISPLAY1",
+                  "DisplaySN": "AU00000000001"
+                }
+              ]
+            },
+            "DeviceType": 100000,
+            "FactoryType": 1,
+            "EquipmentType": 1,
+            "ModelName": "PHL 34M2C8600",
+            "ExtModel": "",
+            "HasBattery": false,
+            "Vid": 0,
+            "Pid": 0,
+            "IUSB_USAGE_PAGE": 0,
+            "IUSB_USAGE": 0,
+            "CreateDevice": 0,
+            "CheckFState": 0,
+            "SupEffect": true,
+            "SupSync": true,
+            "ProfileCount": 1,
+            "SupGameMode": false,
+            "Extra": "",
+            "ConnectMode": -1
+          }
+        ],
+        "FunctionName": "Device_GetConnectList",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "4",
+      "log": "LOG:1011",
+      "functionName": "DisplayFW_GetDeviceList",
+      "request": "{\"functionName\":\"DisplayFW_GetDeviceList\",\"requestId\":\"1b8c40f7-f55f-44f7-abb8-57c86bc286c9\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "1b8c40f7-f55f-44f7-abb8-57c86bc286c9",
+        "Tag": [],
+        "FunctionName": "DisplayFW_GetDeviceList",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      },
+      "vendorReply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": null,
+        "RequestId": "1b8c40f7-f55f-44f7-abb8-57c86bc286c9",
+        "Tag": [
+          {
+            "ShowName": "34M2C8600",
+            "StrFwVersion": "V1.01",
+            "FwVersion": 101,
+            "ScalerModelName": "34M2C8600",
+            "ScalerBomInfo": "100GPRS2003NA1SXXY",
+            "UsbHubCount": 0,
+            "DeviceType": 1,
+            "AdmWarning": false
+          }
+        ],
+        "FunctionName": "DisplayFW_GetDeviceList",
+        "CurrItem": null
+      },
+      "note": "port form: OTA removed, Tag [] (20-backend-host-tail 3.1)"
+    },
+    {
+      "step": "5",
+      "log": "LOG:1012",
+      "functionName": "Theme_GetThemeInfos",
+      "request": "{\"functionName\":\"Theme_GetThemeInfos\",\"requestId\":\"e6efb073-8cf5-4399-ab31-7f09a738530d\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "e6efb073-8cf5-4399-ab31-7f09a738530d",
+        "Tag": [
+          {
+            "Name": "User",
+            "IsDefault": true,
+            "SelProfileName": "Default",
+            "ProfileNames": [
+              "Default"
+            ],
+            "CycleProfileNames": [
+              "Default"
+            ],
+            "BindAppInfos": []
+          }
+        ],
+        "FunctionName": "Theme_GetThemeInfos",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "6",
+      "log": "LOG:1013",
+      "functionName": "SyncEffect_GetData",
+      "request": "{\"functionName\":\"SyncEffect_GetData\",\"requestId\":\"4c8b0e31-fe1a-4706-b27a-bbb8b8e70da9\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "4c8b0e31-fe1a-4706-b27a-bbb8b8e70da9",
+        "Tag": {
+          "EffectDetailInfo": {
+            "Effect": {
+              "Name": "Off",
+              "Text": "关闭",
+              "Value": 0
+            },
+            "Speed": 2,
+            "Brightness": 2,
+            "IsRandomColor": false,
+            "IsRainbowColor": false,
+            "CurRGB": {
+              "R": 255,
+              "G": 0,
+              "B": 0
+            },
+            "BgRGB": {
+              "R": 0,
+              "G": 0,
+              "B": 0
+            },
+            "CurDir": -1,
+            "CurRegion": 0,
+            "CurStarCount": 1
+          },
+          "SyncDevices": []
+        },
+        "FunctionName": "SyncEffect_GetData",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "7",
+      "log": "LOG:1015",
+      "functionName": "Effect_GetColorData",
+      "request": "{\"functionName\":\"Effect_GetColorData\",\"requestId\":\"9a28612b-c44a-4ae5-9a09-f5e07f38eeb5\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "9a28612b-c44a-4ae5-9a09-f5e07f38eeb5",
+        "Tag": {
+          "DefColors": [
+            {
+              "R": 255,
+              "G": 255,
+              "B": 255
+            },
+            {
+              "R": 255,
+              "G": 0,
+              "B": 0
+            },
+            {
+              "R": 255,
+              "G": 0,
+              "B": 127
+            },
+            {
+              "R": 127,
+              "G": 0,
+              "B": 127
+            },
+            {
+              "R": 127,
+              "G": 0,
+              "B": 255
+            },
+            {
+              "R": 0,
+              "G": 0,
+              "B": 255
+            },
+            {
+              "R": 0,
+              "G": 127,
+              "B": 255
+            },
+            {
+              "R": 0,
+              "G": 255,
+              "B": 255
+            },
+            {
+              "R": 0,
+              "G": 255,
+              "B": 127
+            },
+            {
+              "R": 0,
+              "G": 255,
+              "B": 0
+            },
+            {
+              "R": 127,
+              "G": 255,
+              "B": 0
+            },
+            {
+              "R": 255,
+              "G": 255,
+              "B": 0
+            },
+            {
+              "R": 255,
+              "G": 127,
+              "B": 0
+            }
+          ],
+          "SelfColors": ""
+        },
+        "FunctionName": "Effect_GetColorData",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "8",
+      "log": "LOG:1016",
+      "functionName": "Theme_GetCurTheme",
+      "request": "{\"functionName\":\"Theme_GetCurTheme\",\"requestId\":\"c2f07275-18af-4f8a-b4dc-24b60a8070a7\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "c2f07275-18af-4f8a-b4dc-24b60a8070a7",
+        "Tag": {
+          "Name": "User",
+          "IsDefault": true,
+          "SelProfileName": "Default",
+          "ProfileNames": [
+            "Default"
+          ],
+          "CycleProfileNames": [
+            "Default"
+          ],
+          "BindAppInfos": []
+        },
+        "FunctionName": "Theme_GetCurTheme",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "9",
+      "log": "LOG:1017",
+      "functionName": "Macro_GetFuncMenu",
+      "request": "{\"functionName\":\"Macro_GetFuncMenu\",\"requestId\":\"90e03aab-43d2-406f-a766-12126d985ce9\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "90e03aab-43d2-406f-a766-12126d985ce9",
+        "Tag": {
+          "Items": [
+            {
+              "ChildList": [
+                {
+                  "ExtData": "",
+                  "Name": "LaunchExe",
+                  "Text": "启动exe程序",
+                  "Value": 864
+                }
+              ],
+              "Name": "LaunchExe",
+              "Text": "启动exe程序",
+              "Value": 864
+            },
+            {
+              "ChildList": [
+                {
+                  "ExtData": "",
+                  "Name": "LaunchWebsite",
+                  "Text": "启动网页",
+                  "Value": 865
+                }
+              ],
+              "Name": "LaunchWebsite",
+              "Text": "启动网页",
+              "Value": 865
+            },
+            {
+              "ChildList": [
+                {
+                  "ExtData": "",
+                  "Name": "Media_Mute",
+                  "Text": "静音",
+                  "Value": 880
+                },
+                {
+                  "ExtData": "",
+                  "Name": "Media_VolumeDown",
+                  "Text": "音量减少",
+                  "Value": 881
+                },
+                {
+                  "ExtData": "",
+                  "Name": "Media_VolumeUp",
+                  "Text": "音量增大",
+                  "Value": 882
+                },
+                {
+                  "ExtData": "",
+                  "Name": "Media_PreviousTrack",
+                  "Text": "上一曲",
+                  "Value": 883
+                },
+                {
+                  "ExtData": "",
+                  "Name": "Media_NextTrack",
+                  "Text": "下一曲",
+                  "Value": 884
+                },
+                {
+                  "ExtData": "",
+                  "Name": "Media_PlayOrPause",
+                  "Text": "播放/暂停",
+                  "Value": 885
+                },
+                {
+                  "ExtData": "",
+                  "Name": "Media_Stop",
+                  "Text": "停止",
+                  "Value": 886
+                }
+              ],
+              "Name": "Media",
+              "Text": "多媒体",
+              "Value": 10
+            },
+            {
+              "ChildList": [
+                {
+                  "ExtData": "",
+                  "Name": "User_LaunchCalc",
+                  "Text": "LaunchCalc",
+                  "Value": 928
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_LaunchMspaint",
+                  "Text": "LaunchMspaint",
+                  "Value": 929
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_LaunchNotepad",
+                  "Text": "LaunchNotepad",
+                  "Value": 930
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_LaunchSnippingtool",
+                  "Text": "LaunchSnippingtool",
+                  "Value": 931
+                }
+              ],
+              "Name": "Productivity",
+              "Text": "Productivity",
+              "Value": 0
+            },
+            {
+              "ChildList": [
+                {
+                  "ExtData": "",
+                  "Name": "User_ShowDesktop",
+                  "Text": "ShowDesktop",
+                  "Value": 944
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_LockScreen",
+                  "Text": "LockScreen",
+                  "Value": 945
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenGameBar",
+                  "Text": "OpenGameBar",
+                  "Value": 946
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenSearch",
+                  "Text": "OpenSearch",
+                  "Value": 947
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenNarrator",
+                  "Text": "OpenNarrator",
+                  "Value": 948
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenActionCenter",
+                  "Text": "OpenActionCenter",
+                  "Value": 949
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_FocusNotifyArea",
+                  "Text": "FocusNotifyArea",
+                  "Value": 950
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenExplorer",
+                  "Text": "OpenExplorer",
+                  "Value": 951
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenSetting",
+                  "Text": "OpenSetting",
+                  "Value": 952
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenConnect",
+                  "Text": "OpenConnect",
+                  "Value": 953
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_MiniAllWins",
+                  "Text": "MiniAllWins",
+                  "Value": 954
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_RunDialog",
+                  "Text": "RunDialog",
+                  "Value": 955
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_CycleTaskBarApps",
+                  "Text": "CycleTaskApps",
+                  "Value": 956
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenEaseOfAccess",
+                  "Text": "OpenEaseOfAccess",
+                  "Value": 957
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenTaskView",
+                  "Text": "OpenTaskView",
+                  "Value": 958
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenMagnifier",
+                  "Text": "OpenMagnifier",
+                  "Value": 959
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenEmojiPanel",
+                  "Text": "OpenEmojiPanel",
+                  "Value": 960
+                }
+              ],
+              "Name": "Windows",
+              "Text": "Windows",
+              "Value": 1
+            },
+            {
+              "ChildList": [
+                {
+                  "ExtData": "",
+                  "Name": "User_Copy",
+                  "Text": "Copy",
+                  "Value": 976
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_Paste",
+                  "Text": "Paste",
+                  "Value": 977
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_Cut",
+                  "Text": "Cut",
+                  "Value": 978
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_Redo",
+                  "Text": "Redo",
+                  "Value": 979
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_Undo",
+                  "Text": "Undo",
+                  "Value": 980
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_SelectAll",
+                  "Text": "SelectAll",
+                  "Value": 981
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_Save",
+                  "Text": "Save",
+                  "Value": 982
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_New",
+                  "Text": "New",
+                  "Value": 983
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_Open",
+                  "Text": "Open",
+                  "Value": 984
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_NewTab",
+                  "Text": "NewTab",
+                  "Value": 985
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_CloseTab",
+                  "Text": "CloseTab",
+                  "Value": 986
+                }
+              ],
+              "Name": "Editing",
+              "Text": "Editing",
+              "Value": 2
+            },
+            {
+              "ChildList": [
+                {
+                  "ExtData": "",
+                  "Name": "User_GoBack",
+                  "Text": "GoBack",
+                  "Value": 992
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_GoForward",
+                  "Text": "GoForward",
+                  "Value": 993
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenStart",
+                  "Text": "OpenStart",
+                  "Value": 994
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_OpenTaskManager",
+                  "Text": "OpenTaskManager",
+                  "Value": 995
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_ExitActiveApp",
+                  "Text": "ExitActiveApp",
+                  "Value": 996
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_SwitchBetweenApps",
+                  "Text": "SwitchBetweenApps",
+                  "Value": 997
+                },
+                {
+                  "ExtData": "",
+                  "Name": "User_CycleThroughApps",
+                  "Text": "CycleThroughApps",
+                  "Value": 998
+                }
+              ],
+              "Name": "Navigation",
+              "Text": "Navigation",
+              "Value": 3
+            }
+          ],
+          "ExtFuncDef": [
+            {
+              "Name": "ApplyToThemeCycleProfiles",
+              "Text": "将功能应用到当前主题下所有循环Profile中",
+              "Value": 0
+            },
+            {
+              "Name": "ApplyToThemeCycleOnBoards",
+              "Text": "将功能应用到所有板载中",
+              "Value": 1
+            }
+          ]
+        },
+        "FunctionName": "Macro_GetFuncMenu",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "10",
+      "log": "LOG:1018",
+      "functionName": "Macro_GetList",
+      "request": "{\"functionName\":\"Macro_GetList\",\"requestId\":\"985de1ec-19ce-4f11-b657-603396bb0226\",\"parms\":[\"User\"]}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "985de1ec-19ce-4f11-b657-603396bb0226",
+        "Tag": [],
+        "FunctionName": "Macro_GetList",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "11",
+      "log": "LOG:1019-1020",
+      "functionName": "PHL_SwitchDisplay",
+      "request": "{\"functionName\":\"PHL_SwitchDisplay\",\"requestId\":\"23e6864d-0493-4b6a-a9fb-1e691a96ea0d\",\"parms\":[\"AU00000000001\"]}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "23e6864d-0493-4b6a-a9fb-1e691a96ea0d",
+        "Tag": {
+          "$fixture": "profile-getdevicedata-tag.json"
+        },
+        "FunctionName": "PHL_SwitchDisplay",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "12",
+      "log": "LOG:1021",
+      "functionName": "Profile_GetDeviceData",
+      "request": "{\"functionName\":\"Profile_GetDeviceData\",\"requestId\":\"b09910ba-8ed2-4ce9-b184-dc5f5ea0495b\",\"parms\":[100000]}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "b09910ba-8ed2-4ce9-b184-dc5f5ea0495b",
+        "Tag": {
+          "$fixture": "profile-getdevicedata-tag.json"
+        },
+        "FunctionName": "Profile_GetDeviceData",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "optional",
+        "allowed": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "13",
+      "log": "LOG:1022-1023",
+      "functionName": "PHL_GetConstraints",
+      "request": "{\"functionName\":\"PHL_GetConstraints\",\"requestId\":\"cceb3c05-0411-4c8f-b031-eec161ed786e\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "cceb3c05-0411-4c8f-b031-eec161ed786e",
+        "Tag": {
+          "FuncItems": [
+            {
+              "FuncId": 16,
+              "FuncName": "OP_10_Luminance",
+              "State": 1
+            },
+            {
+              "FuncId": 18,
+              "FuncName": "OP_12_Contrast",
+              "State": 1
+            },
+            {
+              "FuncId": 240,
+              "FuncName": "OP_F0_SmartContrast",
+              "State": 2
+            },
+            {
+              "FuncId": 14852128,
+              "FuncName": "EXT_OP_E2A0_20_ColorSpace",
+              "State": 1
+            },
+            {
+              "FuncId": 20,
+              "FuncName": "OP_14_SelectColorPreset",
+              "State": 1
+            },
+            {
+              "FuncId": 14852132,
+              "FuncName": "EXT_OP_E2A0_24_DLBL",
+              "State": 2
+            },
+            {
+              "FuncId": 14852160,
+              "FuncName": "EXT_OP_E2A0_40_AdaptiveSync",
+              "State": 1
+            },
+            {
+              "FuncId": 14852098,
+              "FuncName": "EXT_OP_E2A0_02_MBR",
+              "State": 2
+            },
+            {
+              "FuncId": 14852099,
+              "FuncName": "EXT_OP_E2A0_03_MBRSync",
+              "State": 1
+            },
+            {
+              "FuncId": 14852100,
+              "FuncName": "EXT_OP_E2A0_04_SmartCrosshair",
+              "State": 1
+            },
+            {
+              "FuncId": 14852164,
+              "FuncName": "EXT_OP_E2A0_44_StarkShadowBoost",
+              "State": 2
+            },
+            {
+              "FuncId": 14852165,
+              "FuncName": "EXT_OP_E2A0_45_ShadowBoost",
+              "State": 2
+            },
+            {
+              "FuncId": 14852102,
+              "FuncName": "EXT_OP_E2A0_06_SharpShooter_Size",
+              "State": 2
+            },
+            {
+              "FuncId": 14852103,
+              "FuncName": "EXT_OP_E2A0_07_LowInputLag",
+              "State": 1
+            },
+            {
+              "FuncId": 235,
+              "FuncName": "OP_EB_SmartResponse",
+              "State": 1
+            },
+            {
+              "FuncId": 14852172,
+              "FuncName": "EXT_OP_E2A0_4C_Overclock",
+              "State": 1
+            },
+            {
+              "FuncId": 14852104,
+              "FuncName": "EXT_OP_E2A0_08_SmartFrame",
+              "State": 2
+            },
+            {
+              "FuncId": 14852122,
+              "FuncName": "EXT_OP_E2A0_1A_AmbiglowColors",
+              "State": 1
+            },
+            {
+              "FuncId": 14852123,
+              "FuncName": "EXT_OP_E2A0_1B_AmbiglowLightPosition",
+              "State": 1
+            },
+            {
+              "FuncId": 14852124,
+              "FuncName": "EXT_OP_E2A0_1C_AmbiglowLightBrightness",
+              "State": 1
+            },
+            {
+              "FuncId": 14852125,
+              "FuncName": "EXT_OP_E2A0_1D_AmbiglowLightSpeed",
+              "State": 2
+            },
+            {
+              "FuncId": 14852126,
+              "FuncName": "EXT_OP_E2A0_1E_AmbiglowLightDirection",
+              "State": 1
+            },
+            {
+              "FuncId": 224,
+              "FuncName": "OP_E0_AudioSource",
+              "State": 2
+            },
+            {
+              "FuncId": 134,
+              "FuncName": "OP_86_DisplayScaling",
+              "State": 1
+            },
+            {
+              "FuncId": 84,
+              "FuncName": "OP_54_PerformancePreservation",
+              "State": 1
+            },
+            {
+              "FuncId": 218,
+              "FuncName": "OP_DA_ScanMode",
+              "State": 1
+            }
+          ],
+          "ModuleGameMode": 1,
+          "AudioEQ": 1
+        },
+        "FunctionName": "PHL_GetConstraints",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "exact",
+        "expected": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "14",
+      "log": "LOG:1024",
+      "functionName": "Setting_GlobalData",
+      "request": "{\"functionName\":\"Setting_GlobalData\",\"requestId\":\"4acabfda-1fb3-4219-b6dc-3b239819fcb9\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "4acabfda-1fb3-4219-b6dc-3b239819fcb9",
+        "Tag": {
+          "TurnOffLightsWhenIdle": false,
+          "TurnOffLightsWhenIdleDuration": 5
+        },
+        "FunctionName": "Setting_GlobalData",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "none"
+      }
+    },
+    {
+      "step": "15",
+      "log": "LOG:1025",
+      "functionName": "GetPairDevices",
+      "request": "{\"functionName\":\"GetPairDevices\",\"requestId\":\"a475cf3f-a975-48fd-8adc-26ae004d4ae3\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "a475cf3f-a975-48fd-8adc-26ae004d4ae3",
+        "Tag": [],
+        "FunctionName": "GetPairDevices",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "none"
+      }
+    },
+    {
+      "step": "16",
+      "log": "LOG:1026-1078",
+      "functionName": "Device_OtherDeviceChange",
+      "request": "{\"functionName\":\"Device_OtherDeviceChange\",\"requestId\":\"fa2ed15a-34f9-447e-938f-be804350429c\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "fa2ed15a-34f9-447e-938f-be804350429c",
+        "Tag": [
+          {
+            "StrFwVersion": null,
+            "FwVersion": 0,
+            "ExtDeviceInfo": {
+              "CurSN": "AU00000000001",
+              "DisplayList": [
+                {
+                  "DisplayName": "PHL 34M2C8600",
+                  "MonitorName": "PHL 34M2C8600",
+                  "DeviceName": "\\\\.\\DISPLAY1",
+                  "DisplaySN": "AU00000000001"
+                }
+              ]
+            },
+            "DeviceType": 100000,
+            "FactoryType": 1,
+            "EquipmentType": 1,
+            "ModelName": "PHL 34M2C8600",
+            "ExtModel": "",
+            "HasBattery": false,
+            "Vid": 0,
+            "Pid": 0,
+            "IUSB_USAGE_PAGE": 0,
+            "IUSB_USAGE": 0,
+            "CreateDevice": 0,
+            "CheckFState": 0,
+            "SupEffect": true,
+            "SupSync": true,
+            "ProfileCount": 1,
+            "SupGameMode": false,
+            "Extra": "",
+            "ConnectMode": -1
+          }
+        ],
+        "FunctionName": "Device_OtherDeviceChange",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "none"
+      }
+    },
+    {
+      "step": "16.1",
+      "log": "LOG:1079",
+      "functionName": "DisplayFW_GetDeviceList",
+      "request": "{\"functionName\":\"DisplayFW_GetDeviceList\",\"requestId\":\"5895217a-dfa4-4f67-a23b-9b4b394cb4bf\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "5895217a-dfa4-4f67-a23b-9b4b394cb4bf",
+        "Tag": [],
+        "FunctionName": "DisplayFW_GetDeviceList",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "none"
+      }
+    },
+    {
+      "step": "16.2",
+      "log": "LOG:1080",
+      "functionName": "Profile_GetDeviceData",
+      "request": "{\"functionName\":\"Profile_GetDeviceData\",\"requestId\":\"fb0638fa-064f-442e-b568-a75f93b7b20c\",\"parms\":[100000]}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "fb0638fa-064f-442e-b568-a75f93b7b20c",
+        "Tag": {
+          "$fixture": "profile-getdevicedata-tag.json"
+        },
+        "FunctionName": "Profile_GetDeviceData",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "none"
+      }
+    },
+    {
+      "step": "16.3",
+      "log": "LOG:1081-1082",
+      "functionName": "PHL_GetConstraints",
+      "request": "{\"functionName\":\"PHL_GetConstraints\",\"requestId\":\"8270f541-ac8e-4bb4-b6f4-cb31dec3a542\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "8270f541-ac8e-4bb4-b6f4-cb31dec3a542",
+        "Tag": {
+          "FuncItems": [
+            {
+              "FuncId": 16,
+              "FuncName": "OP_10_Luminance",
+              "State": 1
+            },
+            {
+              "FuncId": 18,
+              "FuncName": "OP_12_Contrast",
+              "State": 1
+            },
+            {
+              "FuncId": 240,
+              "FuncName": "OP_F0_SmartContrast",
+              "State": 2
+            },
+            {
+              "FuncId": 14852128,
+              "FuncName": "EXT_OP_E2A0_20_ColorSpace",
+              "State": 1
+            },
+            {
+              "FuncId": 20,
+              "FuncName": "OP_14_SelectColorPreset",
+              "State": 1
+            },
+            {
+              "FuncId": 14852132,
+              "FuncName": "EXT_OP_E2A0_24_DLBL",
+              "State": 2
+            },
+            {
+              "FuncId": 14852160,
+              "FuncName": "EXT_OP_E2A0_40_AdaptiveSync",
+              "State": 1
+            },
+            {
+              "FuncId": 14852098,
+              "FuncName": "EXT_OP_E2A0_02_MBR",
+              "State": 2
+            },
+            {
+              "FuncId": 14852099,
+              "FuncName": "EXT_OP_E2A0_03_MBRSync",
+              "State": 1
+            },
+            {
+              "FuncId": 14852100,
+              "FuncName": "EXT_OP_E2A0_04_SmartCrosshair",
+              "State": 1
+            },
+            {
+              "FuncId": 14852164,
+              "FuncName": "EXT_OP_E2A0_44_StarkShadowBoost",
+              "State": 2
+            },
+            {
+              "FuncId": 14852165,
+              "FuncName": "EXT_OP_E2A0_45_ShadowBoost",
+              "State": 2
+            },
+            {
+              "FuncId": 14852102,
+              "FuncName": "EXT_OP_E2A0_06_SharpShooter_Size",
+              "State": 2
+            },
+            {
+              "FuncId": 14852103,
+              "FuncName": "EXT_OP_E2A0_07_LowInputLag",
+              "State": 1
+            },
+            {
+              "FuncId": 235,
+              "FuncName": "OP_EB_SmartResponse",
+              "State": 1
+            },
+            {
+              "FuncId": 14852172,
+              "FuncName": "EXT_OP_E2A0_4C_Overclock",
+              "State": 1
+            },
+            {
+              "FuncId": 14852104,
+              "FuncName": "EXT_OP_E2A0_08_SmartFrame",
+              "State": 2
+            },
+            {
+              "FuncId": 14852122,
+              "FuncName": "EXT_OP_E2A0_1A_AmbiglowColors",
+              "State": 1
+            },
+            {
+              "FuncId": 14852123,
+              "FuncName": "EXT_OP_E2A0_1B_AmbiglowLightPosition",
+              "State": 1
+            },
+            {
+              "FuncId": 14852124,
+              "FuncName": "EXT_OP_E2A0_1C_AmbiglowLightBrightness",
+              "State": 1
+            },
+            {
+              "FuncId": 14852125,
+              "FuncName": "EXT_OP_E2A0_1D_AmbiglowLightSpeed",
+              "State": 2
+            },
+            {
+              "FuncId": 14852126,
+              "FuncName": "EXT_OP_E2A0_1E_AmbiglowLightDirection",
+              "State": 1
+            },
+            {
+              "FuncId": 224,
+              "FuncName": "OP_E0_AudioSource",
+              "State": 2
+            },
+            {
+              "FuncId": 134,
+              "FuncName": "OP_86_DisplayScaling",
+              "State": 1
+            },
+            {
+              "FuncId": 84,
+              "FuncName": "OP_54_PerformancePreservation",
+              "State": 1
+            },
+            {
+              "FuncId": 218,
+              "FuncName": "OP_DA_ScanMode",
+              "State": 1
+            }
+          ],
+          "ModuleGameMode": 1,
+          "AudioEQ": 1
+        },
+        "FunctionName": "PHL_GetConstraints",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "exact",
+        "expected": [
+          "N0"
+        ]
+      }
+    },
+    {
+      "step": "17",
+      "log": "synthetic",
+      "functionName": "Device_DetectionDisplay",
+      "request": "{\"functionName\":\"Device_DetectionDisplay\",\"requestId\":\"00000000-0000-4000-8000-000000000017\",\"parms\":null}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "00000000-0000-4000-8000-000000000017",
+        "Tag": [
+          {
+            "StrFwVersion": null,
+            "FwVersion": 0,
+            "ExtDeviceInfo": {
+              "CurSN": "AU00000000001",
+              "DisplayList": [
+                {
+                  "DisplayName": "PHL 34M2C8600",
+                  "MonitorName": "PHL 34M2C8600",
+                  "DeviceName": "\\\\.\\DISPLAY1",
+                  "DisplaySN": "AU00000000001"
+                }
+              ]
+            },
+            "DeviceType": 100000,
+            "FactoryType": 1,
+            "EquipmentType": 1,
+            "ModelName": "PHL 34M2C8600",
+            "ExtModel": "",
+            "HasBattery": false,
+            "Vid": 0,
+            "Pid": 0,
+            "IUSB_USAGE_PAGE": 0,
+            "IUSB_USAGE": 0,
+            "CreateDevice": 0,
+            "CheckFState": 0,
+            "SupEffect": true,
+            "SupSync": true,
+            "ProfileCount": 1,
+            "SupGameMode": false,
+            "Extra": "",
+            "ConnectMode": -1
+          }
+        ],
+        "FunctionName": "Device_DetectionDisplay",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "none"
+      }
+    },
+    {
+      "step": "18",
+      "log": "synthetic",
+      "functionName": "Theme_GetDevicesBasicInfo",
+      "request": "{\"functionName\":\"Theme_GetDevicesBasicInfo\",\"requestId\":\"00000000-0000-4000-8000-000000000018\",\"parms\":[-1]}",
+      "reply": {
+        "err_code": 0,
+        "IsSucc": true,
+        "err_msg": "",
+        "RequestId": "00000000-0000-4000-8000-000000000018",
+        "Tag": {
+          "SyncEquipment": "",
+          "Display": [
+            {
+              "LightSync": "Off",
+              "LightMode": "StaticMode",
+              "Resolution": "3440x1440",
+              "RefreshRate": "175Hz",
+              "SmartImage": "/",
+              "Input": "Normal_DisplayPort1",
+              "AdaptiveSync": "On",
+              "Connect": true,
+              "EquipmentType": 1,
+              "DeviceType": 100000,
+              "ModelName": "PHL 34M2C8600",
+              "ExtModel": null
+            }
+          ],
+          "Keyboard": [],
+          "Mouse": [],
+          "MousePad": [],
+          "Headset": []
+        },
+        "FunctionName": "Theme_GetDevicesBasicInfo",
+        "CurrItem": null
+      },
+      "notifications": {
+        "mode": "none"
+      }
+    }
+  ],
+  "notifications": {
+    "N0": {
+      "err_code": 0,
+      "IsSucc": true,
+      "err_msg": null,
+      "RequestId": null,
+      "Tag": {
+        "FuncItems": [
+          {
+            "FuncId": 16,
+            "FuncName": "OP_10_Luminance",
+            "State": 1
+          },
+          {
+            "FuncId": 18,
+            "FuncName": "OP_12_Contrast",
+            "State": 1
+          },
+          {
+            "FuncId": 240,
+            "FuncName": "OP_F0_SmartContrast",
+            "State": 2
+          },
+          {
+            "FuncId": 14852128,
+            "FuncName": "EXT_OP_E2A0_20_ColorSpace",
+            "State": 1
+          },
+          {
+            "FuncId": 20,
+            "FuncName": "OP_14_SelectColorPreset",
+            "State": 1
+          },
+          {
+            "FuncId": 14852132,
+            "FuncName": "EXT_OP_E2A0_24_DLBL",
+            "State": 2
+          },
+          {
+            "FuncId": 14852160,
+            "FuncName": "EXT_OP_E2A0_40_AdaptiveSync",
+            "State": 1
+          },
+          {
+            "FuncId": 14852098,
+            "FuncName": "EXT_OP_E2A0_02_MBR",
+            "State": 2
+          },
+          {
+            "FuncId": 14852099,
+            "FuncName": "EXT_OP_E2A0_03_MBRSync",
+            "State": 1
+          },
+          {
+            "FuncId": 14852100,
+            "FuncName": "EXT_OP_E2A0_04_SmartCrosshair",
+            "State": 1
+          },
+          {
+            "FuncId": 14852164,
+            "FuncName": "EXT_OP_E2A0_44_StarkShadowBoost",
+            "State": 2
+          },
+          {
+            "FuncId": 14852165,
+            "FuncName": "EXT_OP_E2A0_45_ShadowBoost",
+            "State": 2
+          },
+          {
+            "FuncId": 14852102,
+            "FuncName": "EXT_OP_E2A0_06_SharpShooter_Size",
+            "State": 2
+          },
+          {
+            "FuncId": 14852103,
+            "FuncName": "EXT_OP_E2A0_07_LowInputLag",
+            "State": 1
+          },
+          {
+            "FuncId": 235,
+            "FuncName": "OP_EB_SmartResponse",
+            "State": 1
+          },
+          {
+            "FuncId": 14852172,
+            "FuncName": "EXT_OP_E2A0_4C_Overclock",
+            "State": 1
+          },
+          {
+            "FuncId": 14852104,
+            "FuncName": "EXT_OP_E2A0_08_SmartFrame",
+            "State": 2
+          },
+          {
+            "FuncId": 14852122,
+            "FuncName": "EXT_OP_E2A0_1A_AmbiglowColors",
+            "State": 1
+          },
+          {
+            "FuncId": 14852123,
+            "FuncName": "EXT_OP_E2A0_1B_AmbiglowLightPosition",
+            "State": 1
+          },
+          {
+            "FuncId": 14852124,
+            "FuncName": "EXT_OP_E2A0_1C_AmbiglowLightBrightness",
+            "State": 1
+          },
+          {
+            "FuncId": 14852125,
+            "FuncName": "EXT_OP_E2A0_1D_AmbiglowLightSpeed",
+            "State": 2
+          },
+          {
+            "FuncId": 14852126,
+            "FuncName": "EXT_OP_E2A0_1E_AmbiglowLightDirection",
+            "State": 1
+          },
+          {
+            "FuncId": 224,
+            "FuncName": "OP_E0_AudioSource",
+            "State": 2
+          },
+          {
+            "FuncId": 134,
+            "FuncName": "OP_86_DisplayScaling",
+            "State": 1
+          },
+          {
+            "FuncId": 84,
+            "FuncName": "OP_54_PerformancePreservation",
+            "State": 1
+          },
+          {
+            "FuncId": 218,
+            "FuncName": "OP_DA_ScanMode",
+            "State": 1
+          }
+        ],
+        "ModuleGameMode": 1,
+        "AudioEQ": 1
+      },
+      "FunctionName": "NotifyUIDisplayFuncConstraintsChange",
+      "CurrItem": null
+    }
+  }
+}
