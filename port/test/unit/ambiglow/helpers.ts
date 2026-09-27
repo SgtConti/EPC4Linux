@@ -230,6 +230,8 @@ export interface RigOptions {
   service?: Partial<AmbiglowServiceOptions>;
   /** Connect and load the display (default true). */
   load?: boolean;
+  /** The backend logger of the service (default silent). */
+  log?: Logger;
 }
 
 export interface Rig {
@@ -285,7 +287,7 @@ export async function rig(options: RigOptions = {}): Promise<Rig> {
     onChanged: () => () => undefined,
   } as unknown as MonitorManager;
   const core: CoreServices = {
-    log: silentLog,
+    log: options.log ?? silentLog,
     notifier,
     host,
     events: new EventBus<BackendEvents>(),

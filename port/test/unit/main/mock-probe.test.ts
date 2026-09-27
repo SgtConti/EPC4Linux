@@ -51,6 +51,14 @@ test('snapshot: controls, the host writes in order, the ENE registers; null befo
     assert.equal(after.vcp[0x10], 42);
     assert.ok(Array.isArray(after.ene?.frame) && after.ene.frame.length === 3 * hw.ene.frameLeds, 'JSON-safe frame buffer');
     assert.deepEqual(after.ene?.violations, []);
+    assert.deepEqual(after.ene?.frameWrites, { count: 0, recent: [] }, 'no frame uploaded yet');
+    // Frame-buffer writes as the MCU received them (the "Fast LED upload" steps: six segments or one burst).
+    const out = (reg: number, length: number) =>
+      hw.ene.controlOut({ bmRequestType: 0x40, bRequest: 0x80, wValue: 0, wIndex: reg }, new Uint8Array(length));
+    out(0xe300, 9);
+    out(0xe300, 138);
+    assert.deepEqual(probe.snapshot()!.ene?.frameWrites, { count: 2, recent: [[0xe300, 9], [0xe300, 138]] });
+    assert.deepEqual(JSON.parse(JSON.stringify(probe.snapshot()!.ene?.frameWrites)), { count: 2, recent: [[0xe300, 9], [0xe300, 138]] }, 'JSON-safe');
     // a change on the monitor itself: applied, but not a host write
     assert.equal(probe.osdSet(0xdc, 0), true);
     assert.equal(probe.snapshot()!.vcp[0xdc], 0);

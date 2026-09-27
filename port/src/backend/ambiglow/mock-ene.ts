@@ -83,6 +83,9 @@ export const MOCK_ENE_DEFAULTS = {
 
 const REGISTER_SPACE = 0x10000;
 
+/** How many of the most recent frame-buffer writes MockEneDevice.recentFrameWrites() keeps (four frames of six). */
+export const MOCK_ENE_FRAME_WRITE_HISTORY = 24;
+
 /**
  * The registers the simulated device accepts writes to (1 = writable), per the tables of 09 §4.2:
  * written out here rather than taken from the driver, see the header.
@@ -108,8 +111,11 @@ export class MockEneDevice implements FakeUsbHandler {
   readonly serialNumber: string;
   /** LEDs in the frame buffer: those of the groups the device reports (groups 1..3 have counts). */
   readonly frameLeds: number;
+  /** Accepted writes into the frame buffer (0xE300…) since construction: six per follow-video frame, or one burst. */
+  frameWriteCount = 0;
   readonly #writable: Uint8Array;
   readonly #latched = new Map<EneGroup, MockEneGroupState>();
+  readonly #frameWrites: Array<[number, number]> = [];
 
   constructor(options: MockEneOptions = {}) {
     const d = MOCK_ENE_DEFAULTS;
@@ -164,10 +170,24 @@ export class MockEneDevice implements FakeUsbHandler {
       throw this.#stall('OUT', setup, data.length);
     }
     this.registers.set(data, reg);
+    if (reg >= EneReg.FRAME_BUFFER && reg < EneReg.FRAME_BUFFER + 3 * this.frameLeds) {
+      this.frameWriteCount++;
+      this.#frameWrites.push([reg, data.length]);
+      if (this.#frameWrites.length > MOCK_ENE_FRAME_WRITE_HISTORY) this.#frameWrites.shift();
+    }
     for (const g of ENE_GROUPS) {
       const apply = groupReg(g, EneField.APPLY);
       if (apply >= reg && apply < reg + data.length && this.registers[apply] === 1) this.#latch(g);
     }
+  }
+
+  /**
+   * The most recent accepted frame-buffer writes as [register, length], oldest first (at most
+   * MOCK_ENE_FRAME_WRITE_HISTORY): a follow-video frame is six segments (9 B @E300 … 42 B @E360 on the 34M2C8600), or
+   * one 138-byte transfer at 0xE300 with the experimental frame burst.
+   */
+  recentFrameWrites(): Array<[number, number]> {
+    return this.#frameWrites.map(([reg, length]): [number, number] => [reg, length]);
   }
 
   state(): MockEneState {

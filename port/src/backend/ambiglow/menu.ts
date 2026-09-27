@@ -4,8 +4,10 @@
 // 3962 bytes) and §6.2 (no ENE, string_0 = "", 3277 bytes); 09 §10.1.
 //
 // Deliberate deviation (impl-ambiglow §5 item 17): with an ENE the served menu's FollowVideo item offers the
-// Speed slider (SupSpeed true, 1..3 step 1) for the host's follow-video speed tiers. vendorEffectMenu() is
-// the byte-exact vendor menu; displayEffectMenu() is what Effect_GetMenu answers. §6.2 (no ENE) is unchanged.
+// Speed slider (SupSpeed true, 1..3 step 1) for the host's follow-video speed tiers and the Brightness slider
+// (SupBrightness true, 1..3 step 1: Bright / Brighter / Brightest) for the host-side dimming of the frames.
+// vendorEffectMenu() is the byte-exact vendor menu; displayEffectMenu() is what Effect_GetMenu answers. §6.2 (no
+// ENE) is unchanged.
 //
 // Member order is BaseEffectMenuItem's declaration order (ENT/BaseEffectMenuItem.cs): Effect, SupSync,
 // SupSpeed, MinSpeed, MaxSpeed, SpeedStep, SupBrightness, MinBrightness, MaxBrightness, BrightnessStep,
@@ -156,16 +158,31 @@ export function vendorEffectMenu(layouts: readonly EneModelLayout[], modelName: 
 export const FOLLOW_VIDEO_SPEED_MENU = Object.freeze({ SupSpeed: true, MinSpeed: 1, MaxSpeed: 3, SpeedStep: 1 } as const);
 
 /**
+ * The other port change of the ENE menu's FollowVideo item (deviation 17): the Brightness slider, whose
+ * EffectDetail.Brightness 1..3 dims the frames on the host before they are uploaded (follow-video.ts
+ * followVideoBrightness: 1/3, 2/3, full). The ENE cannot dim a streamed frame: the ParameterSet of mode 14 always
+ * carries Brightest (Class0.method_5, ene-params.ts normalizeParameterSet), so no ParameterSet is sent for it.
+ *
+ * The renderer builds it (Ambiglow-Dvqon39u.js:1040-1058) from the same merged EffectDetail: with SupBrightness,
+ * `MaxBrightness && MinBrightness != null`, the range runs from MinBrightness while <= MaxBrightness by
+ * BrightnessStep, and mark i is labelled na[i] = ["Bright", "Brighter", "Brightest"][i]. The vendor item already has
+ * the BaseEffectMenuItem range 1..3 step 1, so only SupBrightness changes and the slider shows exactly the three
+ * marks 1..3 (menu.test.ts replays that code).
+ */
+export const FOLLOW_VIDEO_BRIGHTNESS_MENU = Object.freeze({ SupBrightness: true, MinBrightness: 1, MaxBrightness: 3, BrightnessStep: 1 } as const);
+
+/**
  * Effect_GetMenu as the port serves it: the vendor's DisplayEffectMenu.Default(modelName), except that with an ENE
- * (modelName non-empty) the FollowVideo item offers the Speed slider (FOLLOW_VIDEO_SPEED_MENU). Without an ENE the
- * monitor firmware renders FollowVideo (E2A019 = 1); the host cannot change its rate, so the vendor item stays and
- * the §6.2 menu is byte-exact.
+ * (modelName non-empty) the FollowVideo item offers the Speed slider (FOLLOW_VIDEO_SPEED_MENU) and the Brightness
+ * slider (FOLLOW_VIDEO_BRIGHTNESS_MENU). Without an ENE the monitor firmware renders FollowVideo (E2A019 = 1); the
+ * host can change neither its rate nor its colours, so the vendor item stays and the §6.2 menu is byte-exact.
+ * FollowAudio keeps the vendor item in both menus.
  */
 export function displayEffectMenu(layouts: readonly EneModelLayout[], modelName: string): DisplayEffectMenu {
   const menu = vendorEffectMenu(layouts, modelName);
   if (modelName === '') return menu;
   for (const item of menu.EffectList) {
-    if (item.Effect.Name === 'FollowVideo') Object.assign(item, FOLLOW_VIDEO_SPEED_MENU);
+    if (item.Effect.Name === 'FollowVideo') Object.assign(item, FOLLOW_VIDEO_SPEED_MENU, FOLLOW_VIDEO_BRIGHTNESS_MENU);
   }
   return menu;
 }

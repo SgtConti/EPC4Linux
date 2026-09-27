@@ -50,7 +50,8 @@ See "Integration status" at the end.
 | `port/src/main/autostart.ts`, `foreground-app.ts`, `window-geometry.ts`, `logfile.ts`, `paths.ts` | Linux replacements for the Windows integrations, plus pure helpers |
 | `port/src/main/renderer-log.ts` | The renderer's electron-log lines (`window.__electronLog`) into the main log: message sanitizing (see "IPC") |
 | `port/src/main/mock-probe.ts` | Test probe of the simulated hardware, installed on main's `globalThis` only with `EVNIA_MOCK_MONITOR` (impl-walkthrough §3) |
-| `port/src/preload/api.ts`, `index.ts` | `window.ipc`, `window.store`, `window.nodeApi`, `window.__EVNIA__`, `window.noop`, `window.__electronLog`. `api.ts` builds them over an injected `ipcRenderer`; `index.ts` exposes them |
+| `port/src/main/experimental.ts` | `ExperimentalSettings`: the port's opt-in experiments in `config.json` (`linuxExperimental`), today the Ambiglow page's "Fast LED upload (experimental)" checkbox; follows the store and forwards every change to the backend (see "IPC", "Persisted settings") |
+| `port/src/preload/api.ts`, `index.ts` | `window.ipc`, `window.store`, `window.nodeApi`, `window.__EVNIA__` (`hubToken`, `platform`, `experimental`), `window.noop`, `window.__electronLog`. `api.ts` builds them over an injected `ipcRenderer`; `index.ts` exposes them |
 | `port/src/capture/{capture.html,page.ts,preload.ts,protocol.ts}` | Hidden follow-video capture page and its bridge |
 | `port/scripts/build.mjs` | esbuild → `build/app` |
 | `port/scripts/package-deb.mjs`, `port/scripts/lib/fuses.ts`, `port/packaging/deb/*` | `@electron/packager` → `.deb`, with the Electron fuses, the shared-library check, user docs (README.Debian, man page) and md5sums |
@@ -79,6 +80,8 @@ The first `startupBackendService` call does four things:
 Later calls return the same port. The renderer re-invokes 3 s after every SignalR reconnect (02 §4.7). A failure resolves `-1` (the vendor's failure value) and is retried on the next call. A `stop()` during a start waits for that start, so its services are stopped too.
 
 The token comes from `generateHubToken()` once per launch. The preload exposes it to the main window only, as `window.__EVNIA__.hubToken`. The vendor-ui patch `HUB-URL` builds `ws://127.0.0.1:<port>/EvniaHub?k=<token>` from it.
+
+The backend is created with the stored "Fast LED upload (experimental)" setting (`BackendHostOptions.eneFrameBurst`, read at creation and passed as `overrides.ambiglow.eneFrameBurst` when on), and `BackendHost.setEneFrameBurst(enabled)` forwards every later change to `services.ambiglow.setEneFrameBurst` (a no-op before the backend exists, and for an ambiglow service without the optional member).
 
 ### `HostServices` (`host-services.ts`)
 
@@ -250,6 +253,12 @@ Listeners receive an empty event object instead of `IpcRendererEvent`. The vendo
 - `renderer-log.ts rendererLogLine` treats the message as untrusted: only `level` and `data`, or `errorName` and `error` for the error handler, are used. Unknown levels become `info`, verbose/silly become `debug`, the text is flattened to one line (newlines → ` | `, control characters → space) and cut at 4096 characters.
 - The line lands in the main log under the scope `main/app/renderer`, e.g. `[info] [main/app/renderer] [renderer/useConnectDetection] To overview device list empty`, where the vendor's electron-log main wrote it into the same `logs/YY-MM-DD.log`.
 
+**`window.__EVNIA__.experimental`** (user request 2026-09-27) is the narrow API of the port's opt-in experiments, used only by the FAST-LED-UPLOAD renderer patch, the Ambiglow page's "Fast LED upload (experimental)" checkbox (impl-vendor-ui §3):
+- `get()` is synchronous: `{eneFrameBurst, forcedByEnv}`. `eneFrameBurst` is read from the window's store snapshot (`config.json linuxExperimental.eneFrameBurst`, true only when exactly `true`), so the first render shows the stored state and every later write (the window's own, main's broadcasts) is followed. `forcedByEnv` (`EVNIA_ENE_FRAME_BURST=1` in the app's environment) comes with the bootstrap (`BootstrapData.experimental`). Windows other than the main window see both false.
+- `setEneFrameBurst(enabled)` rejects a non-boolean in the preload, then invokes the internal channel `evnia:experimental-set`. Main (`ipc.ts`) accepts it only from the main window's top frame (the notice window, the capture window and subframes are refused and logged) and only with a boolean (anything else: `TypeError`, logged, nothing written). `ExperimentalSettings.setEneFrameBurst` (`experimental.ts`) stores it in `config.json` (a real change only) and returns the new state; the preload puts it into its snapshot at once, since main's broadcast of the same write may come after the reply.
+- `ExperimentalSettings` follows the store: any change of `linuxExperimental` or `linuxExperimental.eneFrameBurst`, whoever writes it (also `window.store`), reaches the backend (`BackendHost.setEneFrameBurst` → `AmbiglowService.setEneFrameBurst`, from the next frame, impl-usb-ene §2.2). `config.json` is the one source of truth.
+- The page cannot reach the channel through `window.ipc` (not in the allowlist) and the vendor bundle references no new channel.
+
 **`window.store`** is a synchronous snapshot taken at load through `evnia:bootstrap` (sendSync):
 - `get`/`set`/`delete`, with dot paths and electron-store validation errors.
 - Writes go through to main, which is the only writer of `config.json`.
@@ -294,6 +303,7 @@ The file uses the electron-store format: one tab-indented JSON object, schema de
 | `skipLoginState` | Pinned `true` |
 | `userInfo`, `email`, `password`, `latestSoftwareInfo` | Removed on load; writes are refused |
 | Invalid JSON | Moved to `config.json.invalid-<ts>`, then the app starts from defaults |
+| `linuxExperimental` (port-only) | The port's opt-in experiments: `{"eneFrameBurst": boolean}`, the Ambiglow page's "Fast LED upload (experimental)" checkbox (see "IPC"). Global, not per profile, and not in the backend's `Config/SoftConfig.data`. In the schema as an `object` **without a default**: a fresh file gets it only when the user ticks the checkbox, a missing key means off, and the user's Windows `config.json` loads unchanged. A non-object value is dropped on load. The Windows app ignores the key (electron-store keeps unknown keys, like the installer's `languageTemp`) |
 
 ## Network kill-switch (defence in depth)
 
@@ -553,14 +563,16 @@ Screenshots of the installed package on Home: `port/test/install/artifacts/<dist
 
 | Command (inside `evnia-port-dev`) | Covers |
 |---|---|
-| `node --test "test/unit/main/**/*.test.ts"` (160 tests) | See the unit-test list below |
+| `node --test "test/unit/main/**/*.test.ts"` (167 tests) | See the unit-test list below |
 | `xvfb-run -a -s "-screen 0 1920x1080x24" node --test "test/e2e/**/*.test.ts"` (51 tests: 17 shell and capture tests plus the 34-step walkthrough of `walkthrough.test.ts`, about 5 min; run with `--network none`) | See the e2e list below |
-| The whole project: `npx tsc -p tsconfig.json && node --test "test/unit/**/*.test.ts" "test/contract/**/*.test.ts"` | 870 tests, none fail (Follow video speed change; the LAN-interface hub test skips under `--network none`; MAINTAINING "Test layers") |
+| The whole project: `npx tsc -p tsconfig.json && node --test "test/unit/**/*.test.ts" "test/contract/**/*.test.ts"` | 902 tests, none fail (Follow video brightness and "Fast LED upload", with the installer at `../Evnia Precision Center`; the LAN-interface hub test skips under `--network none`; MAINTAINING "Test layers") |
 | On the Docker host: `test/install/run.sh` (10 to 15 min with the build, mostly apt downloads) | The `.deb` in clean `debian:trixie` and `ubuntu:24.04`, see "Install test" |
 
 **Unit tests**
-- **Store:** schema and file format, with the real Windows `config.json`. The Linux `autoStartup` default applies to a fresh file only.
+- **Store:** schema and file format, with the real Windows `config.json`. The Linux `autoStartup` default applies to a fresh file only. `linuxExperimental`: an object without a default, dropped when not an object, kept across loads.
+- **Experiments** (`experimental.test.ts`): the checkbox path stores `linuxExperimental.eneFrameBurst` and reaches the backend once per change, the same value writes nothing, a non-boolean is refused, any writer of the key is followed (and none after `dispose()`); `EVNIA_ENE_FRAME_BURST=1` reported, not stored.
 - **IPC** (`ipc.test.ts`): `registerIpcHandlers` with the real preload API on a fake bus.
+  - `window.__EVNIA__.experimental`: the synchronous snapshot at load (also after a reload and for a fresh `ConfigStore`), `setEneFrameBurst` persisting `config.json` and switching the (fake) backend once per change, a write through `window.store` followed, `forcedByEnv` reported; refused for the notice window, the capture window, subframes and frameless senders, and for every non-boolean (in the preload and in main), with nothing written; not reachable through `window.ipc`.
   - `window.store` write-through to disk and the broadcast to the other window only, including main's own writes.
   - Pinned and invalid writes.
   - The hub token for the main window only.
@@ -592,6 +604,7 @@ Screenshots of the installed package on Home: `port/test/install/artifacts/<dist
   - log names, format, rotation and retention;
   - `WM_CLASS` and Flatpak-cgroup parsing, the app picker and save-extension rules, `processPath`, the Wayland screen grant.
 - **Backend host** (`backend-host.test.ts`):
+  - the "Fast LED upload" setting: passed at creation only when on, later changes forwarded to the ambiglow service (none before it exists, none to a service without the member);
   - the option mapping (mock → `noHardware`, real → the shared `usb`, `appTempDir`);
   - main's host services;
   - `startupBackendService` over the production composition with the simulated 34M2C8600: `Start`, the monitor listed, `Profile_GetDeviceData` carrying `3440x1440`/`175Hz`, the theme store's `PATH_APP_TEMP`;
@@ -632,7 +645,7 @@ Screenshots of the installed package on Home: `port/test/install/artifacts/<dist
 
 **E2E tests**
 - **Placeholder suite:**
-  - preload shape (no `require`/`process`) and the 880-wide splash;
+  - preload shape (no `require`/`process`) and the 880-wide splash; `window.__EVNIA__.experimental` across the real contextBridge (off, and a non-boolean refused);
   - the full shell contract and hub token enforcement;
   - the working-size resize;
   - the kill-switch probe blocked and logged, and zero non-local requests;
@@ -715,6 +728,7 @@ Screenshots of the installed package on Home: `port/test/install/artifacts/<dist
 35. **udev:** the i2c rule excludes the GPU adapters the backend never probes (AMDGPU SMU, SMBus, …). The Windows app needed no such rule; ddcutil's `60-ddcutil-i2c.rules`, which the rule otherwise follows, tags every i2c bus of a display adapter.
 36. **Capture retune** (`setVideoInterval`): the capture keeps its session when the Follow video speed changes, and while FollowVideo's uploads are paused. The Wayland portal stream is opened at the 30 fps ceiling and then constrained to the asked rate, and an X11 desktop stream that cannot reach a faster rate is re-opened silently. The vendor captured with GDI on its own fixed 300 ms thread and had nothing to retune.
 37. **Frame-driven sampling** (2026-09-27): the page samples each frame of the screen source as it arrives (`MediaStreamTrackProcessor`), at the asked rate, instead of a timer sampling a `<video>` element out of phase with the source. The vendor grabbed a GDI screenshot at the moment it sampled, so its frames had no age; frame-driven sampling brings the port's lag to the same level. The timer remains as the fallback.
+38. **Port experiments in `config.json`** (2026-09-27): the key `linuxExperimental` ("Fast LED upload (experimental)", impl-usb-ene deviation 20) and its narrow preload API `window.__EVNIA__.experimental` over the internal channel `evnia:experimental-set` (main window only, booleans only). The vendor has neither; its `Qd` schema is otherwise unchanged.
 
 ## Known limitations
 

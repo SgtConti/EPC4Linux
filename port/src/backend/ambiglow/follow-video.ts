@@ -29,6 +29,15 @@
 // A speed change retunes the running capture (CaptureHost.setVideoInterval) and the upload scheduling at once,
 // without a new capture session (on Wayland each session is a portal dialog).
 //
+// Brightness = the FollowVideo entry's EffectDetail.Brightness, set with the Ambiglow page's Brightness slider (also
+// offered for FollowVideo with an ENE only, menu.ts; deviation 17): 1 Bright, 2 Brighter, 3 Brightest (default, also
+// for a missing, 0 or out-of-range value: the frames as captured, the behaviour before the slider). The frames are
+// dimmed on the host after the grid → LED mapping, by clamp(Brightness, 1, 3) / 3 like the vendor's host-side
+// breathing curve (SystemOper.smethod_13, breathing.ts breathingBrightness), rounded to the nearest integer
+// (EneDevice.writeVideoFrame gain, ene-frame.ts dimFrameWrites). The ENE cannot do it: its ParameterSet of mode 14
+// always carries Brightest, so no ParameterSet is sent. A change applies to the newest frame at once (re-sent), with
+// the same capture session; the Effect_GetLEDs mirror holds the dimmed colours.
+//
 // Capture session vs. uploads. On GNOME Wayland every CaptureHost.startVideo shows the xdg-desktop-portal
 // ScreenCast dialog (impl-electron-shell "Capture host"), so the session is kept for as long as FollowVideo is
 // the selected, enabled effect: setWanted() starts/stops the capture, setPaused() only stops the uploads (idle
@@ -39,6 +48,7 @@
 //
 // Deviations (docs/port/impl-ambiglow.md §5):
 //   - the speed tiers above (deviation 17): only Low keeps the vendor cadence;
+//   - the brightness levels above (deviation 17): the vendor streams the frames as captured (Brightest keeps that);
 //   - a frame is uploaded once: the vendor's frame thread re-sends the same screenshot twice between captures
 //     (09 §16 quirk 3), which only doubles the USB traffic; after a pause the newest frame is sent again;
 //   - frames are skipped while the ENE is busy (a ParameterSet or the previous frame), never queued
@@ -92,6 +102,30 @@ export const FOLLOW_VIDEO_DEFAULT_SPEED: FollowVideoSpeed = 2;
 /** The tier of EffectDetail.Speed: 1 Low, 2 Normal, 3 High; anything else (missing, 0, 7, "2") is Normal. */
 export function followVideoCadence(speed: unknown): FollowVideoCadence {
   return speed === 1 || speed === 2 || speed === 3 ? FOLLOW_VIDEO_CADENCES[speed] : FOLLOW_VIDEO_CADENCES[FOLLOW_VIDEO_DEFAULT_SPEED];
+}
+
+/** EffectDetail.Brightness of the FollowVideo entry as the Brightness slider sets it (menu.ts: 1..3). */
+export type FollowVideoBrightness = 1 | 2 | 3;
+
+/** The Brightness slider's marks (Ambiglow-Dvqon39u.js na = ["Bright", "Brighter", "Brightest"]). */
+export const FOLLOW_VIDEO_BRIGHTNESS_NAMES: Readonly<Record<FollowVideoBrightness, 'Bright' | 'Brighter' | 'Brightest'>> = Object.freeze({
+  1: 'Bright',
+  2: 'Brighter',
+  3: 'Brightest',
+} as const);
+
+/** The level of a missing, 0 or out-of-range brightness: full, the frames as captured (DisplayEffectInfo.Default stores 3). */
+export const FOLLOW_VIDEO_DEFAULT_BRIGHTNESS: FollowVideoBrightness = 3;
+
+/** The level of EffectDetail.Brightness: 1, 2 or 3 as given; anything else (missing, 0, 4, "2", 2.5) is 3, full. */
+export function followVideoBrightness(brightness: unknown): FollowVideoBrightness {
+  return brightness === 1 || brightness === 2 || brightness === 3 ? brightness : FOLLOW_VIDEO_DEFAULT_BRIGHTNESS;
+}
+
+/** The factor the frames are dimmed by: level / 3 (1/3, 2/3, 1), the vendor's clamp(b, 1, 3) / 3 of the breathing curve. */
+export function followVideoGain(brightness: unknown): number {
+  const level = followVideoBrightness(brightness);
+  return level === FOLLOW_VIDEO_DEFAULT_BRIGHTNESS ? 1 : level / 3;
 }
 
 /** "capture every 100 ms, LED upload of every new frame" (log text). */
@@ -170,6 +204,8 @@ export interface FollowVideoOptions {
   timers?: EffectTimers;
   /** Initial EffectDetail.Speed (default Normal); the owner follows the profile with setSpeed(). */
   speed?: number;
+  /** Initial EffectDetail.Brightness (default 3, full); the owner follows the profile with setBrightness(). */
+  brightness?: number;
 }
 
 type State = 'stopped' | 'starting' | 'running' | 'failed';
@@ -180,6 +216,7 @@ export class FollowVideoEngine {
   readonly #target: () => EneDevice | null;
   readonly #timers: EffectTimers;
   #cadence: FollowVideoCadence;
+  #brightness: FollowVideoBrightness;
   #state: State = 'stopped';
   #session = 0;
   /** Speed Low: the fixed upload tick. */
@@ -205,6 +242,7 @@ export class FollowVideoEngine {
     this.#target = options.target;
     this.#timers = options.timers ?? realTimers;
     this.#cadence = followVideoCadence(options.speed);
+    this.#brightness = followVideoBrightness(options.brightness);
   }
 
   /** 'running' while frames are requested; 'failed' after a start the host refused (until setWanted(false)). */
@@ -215,6 +253,16 @@ export class FollowVideoEngine {
   /** The speed tier in use (and asked of the next capture start). */
   get cadence(): FollowVideoCadence {
     return this.#cadence;
+  }
+
+  /** The brightness level in use: 1 Bright, 2 Brighter, 3 Brightest (full). */
+  get brightness(): FollowVideoBrightness {
+    return this.#brightness;
+  }
+
+  /** The factor the uploaded colours are dimmed by (followVideoGain: 1/3, 2/3 or 1). */
+  get gain(): number {
+    return followVideoGain(this.#brightness);
   }
 
   /** Frames handed to the ENE since construction. */
@@ -269,6 +317,22 @@ export class FollowVideoEngine {
     this.#log.info(`FollowVideo speed ${next.name}: ${describeCadence(next)} (same capture session${this.#paused ? '; from when the uploads resume' : ''})`);
     this.#schedule();
     this.#retuneCapture();
+    this.#pump();
+  }
+
+  /**
+   * The FollowVideo entry's EffectDetail.Brightness (followVideoBrightness: 1 Bright, 2 Brighter, 3 Brightest, else 3).
+   * Idempotent. The capture session is not touched (no retune, no new session): the level applies to the next
+   * upload, and a live session sends its newest frame again at once (Low: on the next tick), so the LEDs and the
+   * Effect_GetLEDs mirror follow the slider without waiting for a screen change. While paused it applies on resume.
+   */
+  setBrightness(brightness: unknown): void {
+    const next = followVideoBrightness(brightness);
+    if (next === this.#brightness) return;
+    this.#brightness = next;
+    if (!this.#live()) return;
+    this.#log.info(`FollowVideo brightness ${FOLLOW_VIDEO_BRIGHTNESS_NAMES[next]}: frame colours x ${next}/3 on the host (same capture session)`);
+    this.#sent = null;
     this.#pump();
   }
 
@@ -433,7 +497,7 @@ export class FollowVideoEngine {
     this.#uploads++;
     this.#inFlight = true;
     ene
-      .writeVideoFrame(frame)
+      .writeVideoFrame(frame, { gain: this.gain })
       .catch((e: unknown) => {
         this.#log.debug(`FollowVideo: frame upload failed: ${e instanceof Error ? e.message : String(e)}`);
       })

@@ -18,7 +18,11 @@ interface ShellWindow {
   ipc?: { invoke(channel: string, ...args: unknown[]): Promise<unknown> };
   store?: { get(key: string): unknown };
   nodeApi?: { pathJoin(...p: string[]): string };
-  __EVNIA__?: { platform: string; hubToken: string };
+  __EVNIA__?: {
+    platform: string;
+    hubToken: string;
+    experimental?: { get(): { eneFrameBurst: boolean; forcedByEnv: boolean }; setEneFrameBurst(on: unknown): Promise<void> };
+  };
   require?: unknown;
   process?: unknown;
   __placeholderResult?: { done: boolean; hubPort: number; steps: Record<string, { ok: boolean; detail: unknown }> };
@@ -94,6 +98,18 @@ for (const ui of availableUis()) {
         };
       });
       assert.deepEqual(shape, { ipc: 'function', store: 'function', nodeApi: 'function', platform: 'linux', require: 'undefined', process: 'undefined' });
+      // The port's experiments across the real contextBridge (the FAST-LED-UPLOAD checkbox's API): a synchronous
+      // snapshot, and a setter that main refuses for anything but a boolean.
+      const experimental = await s.window.evaluate(async () => {
+        const x = (window as unknown as ShellWindow).__EVNIA__?.experimental;
+        const refused = await x?.setEneFrameBurst('yes').then(
+          () => 'accepted',
+          (e: unknown) => String(e),
+        );
+        return { get: x?.get(), refused };
+      });
+      assert.deepEqual(experimental.get, { eneFrameBurst: false, forcedByEnv: false });
+      assert.match(String(experimental.refused), /setEneFrameBurst expects a boolean/);
       assert.deepEqual(await s.window.evaluate(() => window.innerWidth), 880, 'splash window is 880 wide (01 §4)');
       await snapshot(s.window, join(built.artifacts, 'boot.png'));
     });

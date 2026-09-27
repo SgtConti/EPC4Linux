@@ -218,6 +218,34 @@ class Walk {
     );
   }
 
+  /**
+   * A frameless window of one colour over the whole (Xvfb) screen, opened from main, so the Follow video capture sees
+   * a known picture: every LED gets the same colour. Shown inactive (the app window keeps the focus; Playwright's
+   * input goes to the page over CDP, whatever covers it on the screen). Test environment only.
+   */
+  async solidScreen(css: string): Promise<string> {
+    return this.s.app.evaluate(async ({ BrowserWindow, screen }, colour) => {
+      const display = screen.getPrimaryDisplay().bounds;
+      const win = new BrowserWindow({ ...display, frame: false, show: false, focusable: false, skipTaskbar: true, backgroundColor: colour });
+      (globalThis as Record<string, unknown>).__evniaWalkSolidScreen = win;
+      await win.loadURL(`data:text/html,${encodeURIComponent(`<body style="margin:0;background:${colour}"></body>`)}`);
+      win.showInactive();
+      win.setBounds(display);
+      await new Promise((r) => setTimeout(r, 300));
+      const main = BrowserWindow.getAllWindows().map((w) => `${w.id}:${JSON.stringify(w.getBounds())}:${w.isVisible()}`);
+      return `display ${JSON.stringify(display)}, solid ${JSON.stringify(win.getBounds())}, windows ${main.join(' ')}`;
+    }, css);
+  }
+
+  async closeSolidScreen(): Promise<void> {
+    await this.s.app.evaluate(() => {
+      const g = globalThis as Record<string, unknown>;
+      const win = g.__evniaWalkSolidScreen as { isDestroyed(): boolean; destroy(): void } | undefined;
+      if (win && !win.isDestroyed()) win.destroy();
+      delete g.__evniaWalkSolidScreen;
+    });
+  }
+
   /** A change made on the monitor itself (OSD keys / the source switching HDR). */
   osdSet(code: number, value: number): Promise<boolean> {
     return this.s.app.evaluate(
@@ -267,6 +295,11 @@ class Walk {
       },
       timeoutMs,
     );
+  }
+
+  /** An extra screenshot inside the current step's action: NN-<label>.png next to the step's own NN-<name>.png. */
+  async shot(label: string): Promise<void> {
+    await snapshot(this.w, join(this.dir, `${String(this.#n - 1).padStart(2, '0')}-${label}.png`));
   }
 
   /** One walkthrough step: act, settle, screenshot NN-<name>.png, then the global assertions. */
@@ -368,6 +401,57 @@ class Walk {
 function dataTheme(configHome: string): { ThemeInfos: Array<{ Name: string; SelProfileName: string; ProfileNames: string[] }> } {
   const text = readFileSync(join(configHome, 'EvniaServe', 'Theme', 'DataTheme.cfg'), 'utf8').replace(/^﻿/, '');
   return JSON.parse(text.split(/\r?\n/)[0]);
+}
+
+/** ~/.config/evnia/config.json (main's electron-store compatible settings, tab-indented JSON). */
+function configJson(configHome: string): Record<string, unknown> {
+  return JSON.parse(readFileSync(join(configHome, 'evnia', 'config.json'), 'utf8')) as Record<string, unknown>;
+}
+
+/** The six segment writes of one 34M2C8600 frame (09 §7.3) as the mock probe lists them ([register, length]). */
+const SIX_WRITES: Array<[number, number]> = [
+  [0xe300, 9],
+  [0xe309, 12],
+  [0xe315, 12],
+  [0xe321, 9],
+  [0xe32a, 54],
+  [0xe360, 42],
+];
+
+/**
+ * Recent frame-buffer writes that hold a whole frame as the six segments, in order, and no single-transfer burst. (A
+ * snapshot can fall in the middle of a frame, so the list need not start or end on a frame boundary.)
+ */
+function sixWritesOnly(recent: ReadonlyArray<readonly [number, number]>): boolean {
+  const inner = (list: ReadonlyArray<readonly [number, number]>) => JSON.stringify(list).slice(1, -1);
+  return !recent.some(([, length]) => length === 138) && inner(recent).includes(inner(SIX_WRITES));
+}
+
+/** R,G,B per LED of a frame buffer (or of an Effect_GetLEDs reply). */
+const ledTriples = (frame: readonly number[]): Array<[number, number, number]> =>
+  Array.from({ length: Math.floor(frame.length / 3) }, (_, i): [number, number, number] => [frame[3 * i], frame[3 * i + 1], frame[3 * i + 2]]);
+const nearColour = (a: readonly number[], b: readonly number[], tolerance = 2) => a.every((v, i) => Math.abs(v - b[i]) <= tolerance);
+/** LEDs whose cell the X pointer may cover: desktopCapturer draws the cursor into the screen frames. */
+const POINTER_LEDS = 4;
+
+/**
+ * The colour (about) every LED shows, lit: the full-screen test colour. Up to POINTER_LEDS LEDs may differ (the X
+ * pointer over their cell). null otherwise.
+ */
+function solidColour(frame: readonly number[]): [number, number, number] | null {
+  const leds = ledTriples(frame);
+  let best: [number, number, number] | null = null;
+  let most = 0;
+  for (const candidate of leds) {
+    const n = leds.filter((c) => nearColour(c, candidate)).length;
+    if (n > most) [best, most] = [candidate, n];
+  }
+  return best && most >= leds.length - POINTER_LEDS && best.some((v) => v > 0) ? best : null;
+}
+
+/** Whether (about) every LED of `leds` is `colour` (±1), the pointer's cells aside. */
+function allNear(leds: ReadonlyArray<readonly number[]>, colour: readonly number[]): boolean {
+  return leds.length > 0 && leds.filter((c) => nearColour(c, colour, 1)).length >= leds.length - POINTER_LEDS;
 }
 
 function softConfig(configHome: string): Record<string, unknown> {
@@ -660,6 +744,87 @@ for (const run of RUNS) {
           assert.equal(after.retunes, before.retunes + 1);
           assert.deepEqual((await walk.probe()).ene!.violations, []);
         });
+        await walk.step('ambiglow-follow-video-brightness-burst', async () => {
+          // The port's Follow Video Brightness (impl-ambiglow deviation 17): the vendor's own Brightness slider, offered
+          // by Effect_GetMenu with SupBrightness for FollowVideo; it dims the frames on the host (Brighter = x 2/3). And
+          // the "Fast LED upload (experimental)" checkbox of the FAST-LED-UPLOAD patch (impl-usb-ene §2.2): one control
+          // transfer per frame instead of six, stored in config.json. A full-screen window of one colour gives the
+          // capture a known picture (every LED that colour, but for the cells under the X pointer, which desktopCapturer
+          // draws into the frames).
+          const brightness = w.locator('.vc-slider').filter({ hasText: 'Brightness' }).first();
+          await brightness.waitFor({ state: 'visible' });
+          assert.deepEqual((await brightness.locator('.mark-line span').allInnerTexts()).map((t) => t.trim()), ['Bright', 'Brighter', 'Brightest']);
+          const fast = w.locator('.evnia-fast-led-upload');
+          await fast.waitFor({ state: 'visible' });
+          const box = fast.locator('.vc-checkbox');
+          assert.equal((await box.innerText()).trim(), 'Fast LED upload (experimental)');
+          assert.match(await fast.innerText(), /Sends each frame in one USB transfer\. Turn off if the lights flicker or freeze\./);
+          const ticked = async () => (await box.locator('.checkbox-input-checked').count()) === 1;
+          assert.equal(await ticked(), false, 'off by default');
+          assert.equal((await walk.probe()).capture!.starts, 1, 'one capture session so far');
+          const geometry = await walk.solidScreen('rgb(240, 160, 64)');
+          try {
+            let lastFrame: number[] = [];
+            const full = await until(
+              'the test colour on every LED (Brightest, the first-run level)',
+              async () => solidColour((lastFrame = (await walk.probe()).ene!.frame)),
+              30_000,
+            ).catch((e: unknown) => {
+              throw new Error(`${e instanceof Error ? e.message : String(e)}; ${geometry}; last frame ${JSON.stringify(lastFrame)}`);
+            });
+            const expected = full.map((v) => Math.round((v * 2) / 3));
+            const near = (c: readonly number[] | null) => c !== null && c.every((v, i) => Math.abs(v - expected[i]) <= 1);
+
+            // Brighter: the uploaded frames are the captured colours x 2/3, and the preview mirror shows the same.
+            const calls = s.rpc.calls.length;
+            await setSlider(w, brightness, 2, 1, 3);
+            await until('Effect_BrightnessChange(100000, 2)', () =>
+              s.rpc.calls.slice(calls).some((c) => c.fn === 'Effect_BrightnessChange' && JSON.stringify(c.parms) === '[100000,2]' && c.reply?.errCode === 0),
+            );
+            const dimmed = await until(`the LEDs at 2/3 of ${JSON.stringify(full)} (Brighter)`, async () => {
+              const c = solidColour((await walk.probe()).ene!.frame);
+              return near(c) ? c : null;
+            });
+            await until('the Effect_GetLEDs preview at 2/3', () =>
+              s.rpc.calls.slice(calls).some((c) => {
+                const tag = c.fn === 'Effect_GetLEDs' && c.reply?.errCode === 0 ? (c.reply.tag as Array<{ R: number; G: number; B: number }>) : null;
+                return tag !== null && tag.length === 46 && allNear(tag.map((led) => [led.R, led.G, led.B]), expected);
+              }),
+            );
+            const probe = await walk.probe();
+            assert.equal(probe.capture!.starts, 1, 'the same capture session (no ScreenCast dialog on Wayland)');
+            assert.equal(s.rpc.calls.slice(calls).filter((c) => c.fn === 'Effect_BrightnessChange').length, 1);
+            assert.ok(sixWritesOnly(probe.ene!.frameWrites.recent), `so far the vendor's six paced writes per frame: ${JSON.stringify(probe.ene!.frameWrites.recent)}`);
+
+            // Fast LED upload on: one 138-byte transfer per frame from the next frame; stored in config.json.
+            let count = probe.ene!.frameWrites.count;
+            await box.click();
+            await until('the checkbox ticked', ticked);
+            await until('frames as one control transfer at 0xE300', async () => {
+              const fw = (await walk.probe()).ene!.frameWrites;
+              return fw.count >= count + 3 && fw.recent.slice(-3).every(([reg, length]) => reg === 0xe300 && length === 138);
+            });
+            assert.deepEqual(configJson(s.configHome).linuxExperimental, { eneFrameBurst: true }, 'persisted');
+            assert.ok(near(solidColour((await walk.probe()).ene!.frame)), `the same dimmed colours through the burst: ${JSON.stringify(dimmed)}`);
+            await walk.shot('ambiglow-follow-video-brightness-burst-ticked');
+
+            // Off again: the six writes.
+            count = (await walk.probe()).ene!.frameWrites.count;
+            await box.click();
+            await until('the checkbox unticked', async () => !(await ticked()));
+            await until('frames as the six paced writes again', async () => {
+              const fw = (await walk.probe()).ene!.frameWrites;
+              return fw.count >= count + 12 && sixWritesOnly(fw.recent.slice(-12));
+            });
+            assert.deepEqual(configJson(s.configHome).linuxExperimental, { eneFrameBurst: false });
+            const end = await walk.probe();
+            assert.equal(end.capture!.starts, 1, 'no capture restart for the checkbox either');
+            assert.deepEqual(end.ene!.violations, []);
+            assert.ok(/"Fast LED upload \(experimental\)" on/.test(s.mainLog()) && /"Fast LED upload \(experimental\)" off/.test(s.mainLog()));
+          } finally {
+            await walk.closeSolidScreen();
+          }
+        });
         await walk.step('ambiglow-ene-breathing-again', async () => {
           await chooseOption(w, effectSelect, 'Breathing');
           await until('ENE Breathing again', async () => (await walk.probe()).ene!.groups['1']?.mode === walk.noted('breathingMode'));
@@ -703,6 +868,15 @@ for (const run of RUNS) {
           assert.deepEqual([probe.capture!.starts, probe.capture!.intervalMs], [0, null], 'no screen capture over DDC');
           assert.equal(s.rpc.calls.filter((c) => c.fn === 'Effect_GetMenu').length, 0, 'the renderer asks for the ENE menu only with an ENE');
           assert.equal(s.rpc.calls.filter((c) => c.fn === 'Effect_SpeedChange').length, 0);
+        });
+        await walk.step('ambiglow-ddc-no-fast-upload', async () => {
+          // The FAST-LED-UPLOAD checkbox belongs to the ENE page (the host uploads the frames); over DDC the monitor
+          // renders Follow Video itself, so there is nothing to upload: no checkbox, and no host brightness either.
+          await w.locator('.vc-slider').filter({ hasText: 'Speed' }).first().waitFor({ state: 'visible' });
+          assert.equal(await w.locator('.evnia-fast-led-upload').count(), 0, 'no "Fast LED upload" checkbox without the ENE');
+          assert.equal(await w.getByText('Fast LED upload (experimental)').count(), 0);
+          assert.equal(s.rpc.calls.filter((c) => c.fn === 'Effect_BrightnessChange').length, 0);
+          assert.equal('linuxExperimental' in configJson(s.configHome), false, "the migrated Windows config.json gets no port key");
         });
         await walk.step('ambiglow-ddc-colorwave-again', async () => {
           await chooseOption(w, effectSelect, 'Color Wave');

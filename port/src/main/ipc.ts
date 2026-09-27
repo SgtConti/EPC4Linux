@@ -2,7 +2,8 @@
 // internal store/nodeApi channels of our preload. Stripped channels have no handler at all; the
 // preload answers them inertly (02 §L.2). Every handler checks that the sender is the top frame of the
 // main or notice window, so neither the capture page nor a subframe nor any other web contents can
-// use them. Electron is injected (IpcElectron) so the handlers are unit-tested with fakes.
+// use them. Electron is injected (IpcElectron) so the handlers are unit-tested with fakes. The hub token and the
+// port's experiments (window.__EVNIA__.experimental, INTERNAL_CHANNELS.experimentalSet) are for the main window only.
 //
 // window.store write-through (02 §2.2): main owns config.json (01 §6). A change is broadcast on
 // INTERNAL_CHANNELS.storeChanged to every trusted window except the one that made it, which already
@@ -19,7 +20,14 @@ import type { PathGuard } from './fs-guard.ts';
 import type { MonitorJsonConfig } from './monitor-info.ts';
 import type { AppPaths } from './paths.ts';
 import { rendererLogLine } from './renderer-log.ts';
-import { type BootstrapData, ELECTRON_STORE_SYNC_CHANNEL, type FsSyncResult, INTERNAL_CHANNELS } from './shared/channels.ts';
+import {
+  type BootstrapData,
+  ELECTRON_STORE_SYNC_CHANNEL,
+  EXPERIMENTAL_NONE,
+  type ExperimentalState,
+  type FsSyncResult,
+  INTERNAL_CHANNELS,
+} from './shared/channels.ts';
 import { VENDOR_APP_VERSION } from './shared/store-schema.ts';
 import type { ConfigStore } from './store.ts';
 import type { MainWindowController, NoticeWindowController } from './windows.ts';
@@ -54,6 +62,13 @@ export interface IpcHost {
   setLanguage(language: string): void;
   setAutoStartUp(enabled: boolean | undefined, minimized: boolean | undefined): void;
   setTrayFlags(flags: { exitDisabled?: boolean; functionDisabled?: boolean }): void;
+  /** The port's experiments for window.__EVNIA__.experimental.get() (config.json linuxExperimental, EVNIA_ENE_FRAME_BURST). */
+  experimental(): ExperimentalState;
+  /**
+   * The Ambiglow page's "Fast LED upload (experimental)" checkbox: store config.json linuxExperimental.eneFrameBurst and
+   * switch the backend's ENE frame burst (AmbiglowService.setEneFrameBurst); the new state.
+   */
+  setEneFrameBurst(enabled: boolean): ExperimentalState;
 }
 
 /** The Electron APIs the handlers use (the real modules in index.ts, fakes in tests). */
@@ -240,11 +255,28 @@ export function registerIpcHandlers(h: IpcHost, electron: IpcElectron): void {
   onSync(ELECTRON_STORE_SYNC_CHANNEL, () => ({ defaultCwd: h.paths.userData, appVersion: VENDOR_APP_VERSION }), null);
 
   // ── preload internals ──
+  const isMainWindow = (e: IpcMainEvent | IpcMainInvokeEvent) => e.sender === h.main.window.webContents;
   onSync(
     INTERNAL_CHANNELS.bootstrap,
-    (e): BootstrapData => ({ store: h.store.snapshot(), hubToken: e.sender === h.main.window.webContents ? h.hubToken : '' }),
-    { store: {}, hubToken: '' },
+    (e): BootstrapData => {
+      const main = isMainWindow(e);
+      return { store: h.store.snapshot(), hubToken: main ? h.hubToken : '', experimental: main ? h.experimental() : { ...EXPERIMENTAL_NONE } };
+    },
+    { store: {}, hubToken: '', experimental: { ...EXPERIMENTAL_NONE } },
   );
+  // The Ambiglow page's "Fast LED upload (experimental)" checkbox (window.__EVNIA__.experimental.setEneFrameBurst, the
+  // FAST-LED-UPLOAD patch): the main window only, and a boolean only; anything else is refused and changes nothing.
+  handle(INTERNAL_CHANNELS.experimentalSet, (e, enabled) => {
+    if (!isMainWindow(e)) {
+      log.warn(`IPC ${INTERNAL_CHANNELS.experimentalSet} refused for this sender (main window only)`);
+      throw new Error(`IPC ${INTERNAL_CHANNELS.experimentalSet} refused for this sender`);
+    }
+    if (typeof enabled !== 'boolean') {
+      log.warn(`IPC ${INTERNAL_CHANNELS.experimentalSet} refused: expected a boolean, got ${typeof enabled}`);
+      throw new TypeError(`${INTERNAL_CHANNELS.experimentalSet}: expected a boolean`);
+    }
+    return h.setEneFrameBurst(enabled);
+  });
   on(INTERNAL_CHANNELS.storeSet, (e, key, value) => {
     withStoreOrigin(e.sender, () => {
       try {

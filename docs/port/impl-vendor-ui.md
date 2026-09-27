@@ -16,7 +16,7 @@ Module owner: vendor-ui. Sources:
 | `port/scripts/lib/io.ts` | Wrapping file-system errors in coded `ImportError`s |
 | `port/scripts/lib/types.ts` | Table and result types |
 
-Tests: `port/test/unit/vendor-ui/` — `audit.test.ts` (7), `csp.test.ts` (4), `import-vendor-ui.test.ts` (29; two suites run the real import against the installer's `app.asar` and are skipped without it, one uses synthetic archives), `output-swap.test.ts` (17), `patch-engine.test.ts` (10), `removals.test.ts` (6). 73 tests, `node --test "test/unit/vendor-ui/*.test.ts"`, about 20 s.
+Tests: `port/test/unit/vendor-ui/` — `audit.test.ts` (7), `csp.test.ts` (4), `fast-led-upload.test.ts` (4; the FAST-LED-UPLOAD render expression evaluated in a stand-in of the page's render scope, no archive needed), `import-vendor-ui.test.ts` (30; two suites run the real import against the installer's `app.asar` and are skipped without it, one uses synthetic archives), `output-swap.test.ts` (17), `patch-engine.test.ts` (10), `removals.test.ts` (6). 78 tests, `node --test "test/unit/vendor-ui/*.test.ts"`, about 20 s.
 
 Specs: `docs/re/02-renderer-shell.md` §1.2, §3, §4, §7, §11, §L.3 (P1–P11), Online touchpoints; `03-renderer-monitor-pages.md` §4.9–§4.11, §9, §11; `04-renderer-peripheral-pages.md` §3, §9, Online touchpoints; `14-online-sweep.md` N01–N40; `20-online-sweep-tail.md` (summary only, the file ends in §9.1); `20-theme-profile-engine.md` §9, §10.2. Ground truth: `work/app/out/renderer/**` (byte-identical to the asar) and the prettified copy `work/app-pretty/renderer/**`.
 
@@ -94,9 +94,9 @@ The CLI prints the audit table and the IPC channels the patched UI references.
 
 ## 3. Patch table (`scripts/ui-patches.mjs`)
 
-Pinned files (1.13.0): `assets/styles-DAnQi2A8.js` (glob `assets/styles-*.js`), `assets/main-CDosWiM3.js` (`assets/main-*.js`), `index.html`, `notice/notice.html`. The globs identify a chunk across vendor builds; the exact name and hash pin this build.
+Pinned files (1.13.0): `assets/styles-DAnQi2A8.js` (glob `assets/styles-*.js`), `assets/main-CDosWiM3.js` (`assets/main-*.js`), `index.html`, `notice/notice.html`, `assets/Ambiglow-Dvqon39u.js` (`assets/Ambiglow-*.js`, the monitor's Ambiglow page; the glob also matches the three peripheral Ambiglow chunks, which only a `PIN_MISSING` message would list). The globs identify a chunk across vendor builds; the exact name and hash pin this build.
 
-31 patches, all with `expectCount` 1:
+32 patches, all with `expectCount` 1:
 
 | Id | File | Effect | Spec |
 |---|---|---|---|
@@ -127,6 +127,24 @@ Pinned files (1.13.0): `assets/styles-DAnQi2A8.js` (glob `assets/styles-*.js`), 
 | `BULB-OFF` | main | `setBulbEnabled(false)` at start-up, no `checkNodeAvailable` call | 03 §4.11 |
 | `ROUTE-BULB` | styles | `/bulb`, `/bulb/ambiScape` routes removed | 03 §4.11 |
 | `IMG-PATH`, `IMG-PATH-OVERVIEW` | styles | bundled product images resolve as `../<dir>/<model>.png` relative to `assets/`, not `../../../[out/renderer/]…` relative to the asar root | 02 §11.3 |
+| `FAST-LED-UPLOAD` | Ambiglow | **Port feature**, not a removal: the "Fast LED upload (experimental)" checkbox (below). Inserted between the Speed slider block (`onChange:ia`) and the StarCount block of the page's render | impl-usb-ene §2.2 deviation 20; impl-electron-shell "IPC" |
+
+**`FAST-LED-UPLOAD`** (user request 2026-09-27) is the only patch that adds UI. It inserts one v-if block, in the vendor's own render style, into the setting column of the monitor Ambiglow page (Ambiglow-Dvqon39u.js:1435-1454 prettified):
+
+```js
+c(Z)&&1===Ae.value&&window.__EVNIA__?.experimental ? (t=>(n(),u("div",{key:4,class:"slider-item evnia-fast-led-upload",title:HINT},[
+  r(s("Checkbox"),{modelValue:t.eneFrameBurst||t.forcedByEnv,label:"Fast LED upload (experimental)",i18n:!1,
+    disabled:!Ce.value||t.forcedByEnv,onChange:e=>{window.__EVNIA__.experimental.setEneFrameBurst(e).catch(x=>{
+      const msg=REFUSED+(x&&x.message||x);console.warn(msg);window.__electronLog?.warn(msg)})}},null,8,["modelValue","disabled"]),
+  S("div",{class:"evnia-fast-led-upload-hint",style:{…}},t.forcedByEnv?"On because EVNIA_ENE_FRAME_BURST=1 is set; …":HINT,1)
+])))(window.__EVNIA__.experimental.get()) : m("",!0)
+```
+
+- **When:** only with the ENE (`Z` = the store's `ENEEffectEnable` ref) and the Follow Video effect (`Ae` = the current `EffectType`, 1), and only when the preload offers `window.__EVNIA__.experimental` (another preload shows nothing). Disabled while the effect is off (`Ce`), like the page's sliders; ticked and disabled when `EVNIA_ENE_FRAME_BURST=1` forces the burst on.
+- **What:** the vendor's own global `Checkbox` component (`main-CDosWiM3.js:4052`), resolved with the page's `resolveComponent` (`s`), in a row with the page's scoped `slider-item` class (the new vnodes get the page's scope id), `i18n:false` for the English label, and a second line of hint text (`Sends each frame in one USB transfer. Turn off if the lights flicker or freeze.`, also the row's tooltip). `key:4` is free among the column's v-if blocks (0 position/direction, 1 brightness, 2 speed, 3 star count). The checkbox keeps its toggled state itself: `useModel` without an `onUpdate:modelValue` listener updates its local value (`styles-DAnQi2A8.js:2503-2540`), and the next render passes the stored value, which the preload has updated by then.
+- **A refused call** (`setEneFrameBurst` rejects: main refuses the sender or the type, or the IPC call itself fails; not expected from the main window with the checkbox's boolean, since main accepts it and neither a failed config write nor a failing backend throws there) is logged, not dropped: one `console.warn` and one `window.__electronLog.warn` line (the preload's electron-log bridge, so it lands in the main log under `renderer`, src/main/renderer-log.ts; a plain `console.warn` does not reach any log file), `REFUSED` = `Fast LED upload not changed; the checkbox shows the wrong state until the row is shown again (another effect and back, or the page reopened): ` followed by the reason. **Known limitation:** the box keeps showing the value that was refused until the row is created again (another effect and back to Follow Video, leaving and reopening the Ambiglow page, or the ENE going away and back), which reads `get()` afresh. The page cannot put it right sooner: the vendor `Checkbox` has already toggled its local `useModel` value and emits only `change(value)` (no handle to reset it), `get()` is not reactive, and nothing in the page re-renders on a refusal. A vnode key built from the stored value would not help either: a refusal leaves the stored value, and so the key, unchanged, so a re-render would reuse the same Checkbox. Binding `onUpdate:modelValue` would need reactive page state that the patch does not have (and the Checkbox would then emit the old value in `change`).
+- **How it reaches the backend:** `window.__EVNIA__.experimental` is a narrow preload API (`get()` synchronous, from the store snapshot of the bootstrap; `setEneFrameBurst(boolean)`), over the internal invoke channel `evnia:experimental-set`, which main accepts from the main window's top frame only and for a boolean only, stores in `config.json linuxExperimental.eneFrameBurst` and forwards to the ambiglow service (impl-electron-shell "IPC", "Persisted settings"). No `window.ipc` channel, no URL: the audit's IPC tally and URL findings are unchanged.
+- **Tests:** `fast-led-upload.test.ts` evaluates the inserted expression with stand-ins for the page's helpers and state (visibility, bindings, the click, a refused call logged to the console and `window.__electronLog` without an unhandled rejection, no URL or `window.ipc`); the real-archive suite checks the patched chunk (once, after the Speed and before the StarCount block, key 4 free, the peripheral Ambiglow chunks untouched, the module still parses); the e2e walkthrough ticks it on the real page (impl-walkthrough §4).
 
 Removed files (11): `feedback/feedback.html`, `assets/feedback-NPrjkfNw.js`, `assets/feedback-DH816rEa.css`, `assets/index-BYSWl2m0.js` (undici), `assets/SmartDesktop-By8ZEPkl.js`, `assets/SmartDesktop-DDdFid7d.css`, `assets/Bulb-vdvqR6Jj.js`, `assets/AmbiScape-B35D_GM2.js` (zxing-wasm from fastly.jsdelivr.net, camera QR reader, `GetWifiList`), `assets/AmbiScape-CSqmg1LO.css`, `assets/matter_scan_tip-DSFC2GUj.png`, `smart_bulb.png` (unreferenced). `mapDepsEntries` is 1 for the two SmartDesktop files (styles table indices 30/31) and for `Bulb`/`AmbiScape` JS and CSS (indices 88–90), 0 for the rest; the preload calls that used those indices were the routes removed by `ROUTE-SMARTDESKTOP` / `ROUTE-BULB`.
 
@@ -182,7 +200,7 @@ Scans every `.js/.html/.css` of the output:
 - The tables are exact: an allowlist entry, reviewed site or reviewed scheme literal that no longer matches (or matches a different number of times, or whose file glob matches no file) also fails, so they cannot rot, and a new site next to a reviewed one is caught by the count.
 - IPC channels (`window.ipc.send|invoke|on|once("…")`) are tallied for the preload review, not judged.
 
-Result on 1.13.0: 97 files scanned, 29 findings (13 reviewed API sites, 3 reviewed scheme literals, 10 allowlisted URLs, 3 loopback: the hub template and the CSP source in both pages), 0 failures. `PATCHES.json` `audit.remoteUrls` lists every remaining URL and scheme literal with its reason; `audit.reviewedSites` counts API sites only.
+Result on 1.13.0 (unchanged by FAST-LED-UPLOAD, which adds no URL, network API or IPC channel): 97 files scanned, 29 findings (13 reviewed API sites, 3 reviewed scheme literals, 10 allowlisted URLs, 3 loopback: the hub template and the CSP source in both pages), 0 failures. `PATCHES.json` `audit.remoteUrls` lists every remaining URL and scheme literal with its reason; `audit.reviewedSites` counts API sites only.
 
 ## 6. Verification done
 

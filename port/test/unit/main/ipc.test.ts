@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, test } from 'node:test';
 import { createLogger } from '../../../src/backend/core/log.ts';
 import { DeviceChangeGate } from '../../../src/main/device-events.ts';
+import { ExperimentalSettings } from '../../../src/main/experimental.ts';
 import { PathGuard } from '../../../src/main/fs-guard.ts';
 import { FILE_SELECT_MAX_BUFFER, type IpcElectron, type IpcHost, isTrustedSender, registerIpcHandlers } from '../../../src/main/ipc.ts';
 import { resolveAppPaths } from '../../../src/main/paths.ts';
@@ -102,6 +103,10 @@ let requests: string[];
 let openOptions: unknown[];
 let saveOptions: unknown[];
 let saveAnswer: { canceled: boolean; filePath: string };
+/** What the fake backend was told (BackendHost.setEneFrameBurst), in order. */
+let applied: boolean[];
+/** EVNIA_ENE_FRAME_BURST=1 as main would report it. */
+let forcedByEnv: boolean;
 
 beforeEach(() => {
   logged.length = 0;
@@ -121,10 +126,16 @@ beforeEach(() => {
   saveOptions = [];
   saveAnswer = { canceled: true, filePath: '' };
   const mainWindow = { isDestroyed: () => false, webContents: mainWc, minimize: () => requests.push('minimize') };
+  const store = new ConfigStore(join(userData, 'config.json'), log);
+  applied = [];
+  forcedByEnv = false;
+  // The real settings object main uses (src/main/experimental.ts) over the real store, with a fake backend.
+  const experimental = new ExperimentalSettings({ store, backend: { setEneFrameBurst: (on) => void applied.push(on) }, forcedByEnv: false, log });
+  const state = () => ({ ...experimental.state(), forcedByEnv });
   host = {
     log,
     paths,
-    store: new ConfigStore(join(userData, 'config.json'), log),
+    store,
     guard: new PathGuard({ readRoots: [userData, paths.serveDataDir], scratchDir: userData }),
     gate: new DeviceChangeGate(() => {}, log),
     main: { window: mainWindow, resetToStartSize: () => requests.push('reset') } as unknown as MainWindowController,
@@ -138,6 +149,11 @@ beforeEach(() => {
     setLanguage: () => {},
     setAutoStartUp: () => {},
     setTrayFlags: () => {},
+    experimental: state,
+    setEneFrameBurst: (on) => {
+      experimental.setEneFrameBurst(on);
+      return state();
+    },
   };
   const electron: IpcElectron = {
     ipcMain: bus as unknown as IpcElectron['ipcMain'],
@@ -221,6 +237,59 @@ test('hub token only for the main window; the capture window and subframes are r
   bus.send(mainWc, mainWc.mainFrame, 'interfaceInitializeCompleted');
   assert.deepEqual(requests, ['init']);
   assert.equal(isTrustedSender({ sender: mainWc, senderFrame: mainWc.mainFrame } as never, [mainWc as never]), true);
+});
+
+test('window.__EVNIA__.experimental (the "Fast LED upload" checkbox): a synchronous snapshot at load; setEneFrameBurst persists config.json linuxExperimental.eneFrameBurst and reaches the backend', async () => {
+  const main = preload(mainWc);
+  assert.deepEqual(main.evnia.experimental.get(), { eneFrameBurst: false, forcedByEnv: false }, 'off: config.json has no linuxExperimental');
+  assert.equal('linuxExperimental' in onDisk(), false, 'a fresh config.json gets no port key until the user ticks it');
+
+  await main.evnia.experimental.setEneFrameBurst(true);
+  assert.deepEqual(main.evnia.experimental.get(), { eneFrameBurst: true, forcedByEnv: false });
+  assert.deepEqual(onDisk().linuxExperimental, { eneFrameBurst: true }, 'persisted');
+  assert.deepEqual(applied, [true], 'the backend switched at once');
+  assert.equal(main.store.get('linuxExperimental.eneFrameBurst'), true, "window.store's snapshot agrees");
+  // The next load (a reload, the next launch) shows it before any request: the bootstrap snapshot.
+  assert.deepEqual(preload(mainWc).evnia.experimental.get(), { eneFrameBurst: true, forcedByEnv: false });
+  assert.deepEqual(new ConfigStore(join(userData, 'config.json'), log).get('linuxExperimental'), { eneFrameBurst: true }, 'the file loads back');
+
+  await main.evnia.experimental.setEneFrameBurst(true);
+  assert.deepEqual(applied, [true], 'the same value again: nothing written, nothing switched');
+  await main.evnia.experimental.setEneFrameBurst(false);
+  assert.deepEqual([main.evnia.experimental.get().eneFrameBurst, onDisk().linuxExperimental, applied], [false, { eneFrameBurst: false }, [true, false]]);
+
+  // Written through window.store instead (not the checkbox's path): config.json is the source of truth, followed too.
+  main.store.set('linuxExperimental.eneFrameBurst', true);
+  assert.deepEqual(applied, [true, false, true]);
+  assert.equal(main.evnia.experimental.get().eneFrameBurst, true);
+  main.store.set('linuxExperimental', { eneFrameBurst: 'yes' });
+  assert.deepEqual(applied, [true, false, true, false], 'only exactly true is on');
+
+  // EVNIA_ENE_FRAME_BURST=1: reported, so the checkbox shows ticked and disabled; the setting itself is unchanged.
+  forcedByEnv = true;
+  assert.deepEqual(preload(mainWc).evnia.experimental.get(), { eneFrameBurst: false, forcedByEnv: true });
+});
+
+test('window.__EVNIA__.experimental: main window only, booleans only; anything else is refused and changes nothing', async () => {
+  const notice = preload(noticeWc);
+  assert.deepEqual(notice.evnia.experimental.get(), { eneFrameBurst: false, forcedByEnv: false }, 'other windows see nothing');
+  await assert.rejects(notice.evnia.experimental.setEneFrameBurst(true), /refused/);
+  const sub = { top: false };
+  for (const [wc, frame] of [[captureWc, captureWc.mainFrame], [mainWc, sub], [mainWc, null], [noticeWc, noticeWc.mainFrame]] as const) {
+    await assert.rejects(bus.invoke(wc, frame, INTERNAL_CHANNELS.experimentalSet, true), /refused/);
+  }
+  const main = preload(mainWc);
+  await assert.rejects(main.evnia.experimental.setEneFrameBurst('yes' as unknown as boolean), TypeError, 'the preload checks the type');
+  for (const bad of ['true', 1, null, undefined, {}, [true]]) {
+    await assert.rejects(bus.invoke(mainWc, mainWc.mainFrame, INTERNAL_CHANNELS.experimentalSet, bad), TypeError, `main checks it too: ${JSON.stringify(bad)}`);
+  }
+  assert.equal('linuxExperimental' in onDisk(), false);
+  assert.deepEqual(applied, []);
+  assert.ok(logged.some((l) => l.level === 'warn' && l.text.includes('expected a boolean')));
+  assert.ok(logged.some((l) => l.level === 'warn' && l.text.includes('main window only')));
+  // The page can reach it only through the preload's narrow API: window.ipc does not forward the internal channel.
+  assert.equal(await main.ipc.invoke(INTERNAL_CHANNELS.experimentalSet, true), undefined);
+  assert.deepEqual(applied, []);
 });
 
 test('nodeApi: profile import temp copy and cleanup work; app state is never overwritten or deleted', async () => {
