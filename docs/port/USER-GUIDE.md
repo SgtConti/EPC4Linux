@@ -58,7 +58,7 @@ The app reaches the monitor in two ways. It prefers the first one.
 Download or build the package (see [Building from source](#building-from-source)), then install it with `apt`, which also installs the libraries it needs:
 
 ```sh
-sudo apt install ./evnia-precision-center_1.13.0-linux.1_amd64.deb
+sudo apt install ./evnia-precision-center_1.13.0-linux.2_amd64.deb
 ```
 
 - Keep the `./`. Without it, apt looks for a package of that name in the archive.
@@ -529,7 +529,7 @@ docker run --rm -v "$PWD:/repo" -w /repo/port evnia-port-dev bash -c 'npm ci'
 # 3. Import the vendor UI, build, package
 docker run --rm -v "$PWD:/repo" -w /repo/port evnia-port-dev \
   bash -c 'npm run import-ui && npm run build && npm run dist:deb'
-# → port/dist/evnia-precision-center_1.13.0-linux.1_amd64.deb
+# → port/dist/evnia-precision-center_1.13.0-linux.2_amd64.deb
 ```
 
 - **Git Bash on Windows:** prefix each `docker run` with `MSYS_NO_PATHCONV=1`, and give the volume as a Windows path, e.g. `-v "C:\path\to\repo:/repo"`.
