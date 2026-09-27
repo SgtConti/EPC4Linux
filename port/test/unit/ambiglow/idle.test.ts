@@ -8,6 +8,10 @@ import { createLogger } from '../../../src/backend/core/log.ts';
 import { enumItem } from '../../../src/backend/monitor/model/enum-items.ts';
 import { getFrame, setFrame, specWith } from '../monitor/helpers.ts';
 import { ManualTimers, flush, rgbaFrame, rig, writesOnly, type Rig } from './helpers.ts';
+import { FOLLOW_VIDEO_CADENCES, FOLLOW_VIDEO_PAUSED_CAPTURE_MS } from '../../../src/backend/ambiglow/follow-video.ts';
+
+/** The capture interval of the user's profile: FollowVideo Speed 2 = Normal (follow-video.ts). */
+const NORMAL_MS = FOLLOW_VIDEO_CADENCES[2].captureMs;
 
 test('CheckIdle: idle only when enabled and input idle ≥ duration minutes', () => {
   assert.equal(isIdle({ TurnOffLightsWhenIdle: false, TurnOffLightsWhenIdleDuration: 1 }, 9999), false);
@@ -68,6 +72,7 @@ test('ENE: idle switches the effect off (LEDOFF, 0x0023 ← 0) and pauses the up
     assert.equal(r.capture.videoStops, 0);
     assert.equal(r.service.followVideo.state, 'running');
     assert.equal(r.service.followVideo.paused, true);
+    assert.deepEqual(r.capture.videoIntervals, [FOLLOW_VIDEO_PAUSED_CAPTURE_MS], 'the kept session slowed to 1 fps while idle (same session)');
     const uploads = r.service.followVideo.uploads;
     r.capture.frame(rgbaFrame(() => [7, 7, 7]));
     r.timers.advance(500);
@@ -82,7 +87,8 @@ test('ENE: idle switches the effect off (LEDOFF, 0x0023 ← 0) and pauses the up
     assert.equal(r.mock!.state().groups[1]?.mode, 14, 'FollowVideo (UserDefine) again');
     assert.equal(r.service.followVideo.state, 'running');
     assert.equal(r.service.followVideo.paused, false);
-    assert.deepEqual(r.capture.videoStarts, [300], 'idle → wake starts no second capture (no second portal dialog)');
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS], 'idle → wake starts no second capture (no second portal dialog)');
+    assert.deepEqual(r.capture.videoIntervals, [FOLLOW_VIDEO_PAUSED_CAPTURE_MS, NORMAL_MS], 'wake: back to the tier interval');
     // The newest frame (captured while idle) goes out on the next tick.
     r.timers.advance(100);
     await flush();
@@ -156,7 +162,7 @@ test('ENE: the monitor goes to standby during idle (the ENE leaves on a USB chan
     await goIdle(r, false);
     assert.equal(r.mock!.state().groups[1]?.mode, 14);
     assert.equal(r.service.followVideo.paused, false);
-    assert.deepEqual(r.capture.videoStarts, [300], 'no second portal dialog');
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS], 'no second portal dialog');
   } finally {
     await r.cleanup();
   }
@@ -174,7 +180,8 @@ test('ENE: a capture start that failed is tried once more on the next wake', asy
     await goIdle(r, true);
     r.capture.videoResult = true;
     await goIdle(r, false);
-    assert.deepEqual(r.capture.videoStarts, [300, 300]);
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS, NORMAL_MS], 'the wake resumes before it starts: the tier interval, not the paused one');
+    assert.deepEqual(r.capture.videoIntervals, [], 'and no retune right after the start');
     assert.equal(r.service.followVideo.state, 'running');
   } finally {
     await r.cleanup();

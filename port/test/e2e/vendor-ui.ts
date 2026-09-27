@@ -72,7 +72,8 @@ export async function setSlider(w: Page, slider: Locator, value: number, min: nu
   const runway = slider.locator('.slider-runway').first();
   const box = await runway.boundingBox();
   if (!box) throw new Error('slider runway not visible');
-  const x = box.x + ((value - min) / (max - min)) * box.width;
+  // The runway's last pixel for the maximum (box.x + box.width is already outside it).
+  const x = Math.min(box.x + ((value - min) / (max - min)) * box.width, box.x + box.width - 1);
   const y = box.y + box.height / 2;
   await w.mouse.move(x, y);
   await w.mouse.down();

@@ -83,6 +83,20 @@ test('release forgets a failed or ended session only if nothing newer happened',
   assert.equal(slot.sink(s2), null);
 });
 
+test('current: the session a setVideoInterval retunes (a start in flight or the running capture), null after stop or release', () => {
+  const slot = new CaptureSlot<Sink>();
+  assert.equal(slot.current, null);
+  const s1 = slot.begin(() => {});
+  assert.equal(slot.current, s1);
+  const s2 = slot.begin(() => {});
+  assert.equal(slot.current, s2, 'the newer start');
+  slot.stop();
+  assert.equal(slot.current, null);
+  const s3 = slot.begin(() => {});
+  slot.release(s3);
+  assert.equal(slot.current, null);
+});
+
 test('withTimeout: resolves with the promise, or with the timeout value', async () => {
   assert.equal(await withTimeout(Promise.resolve(true), 1000, () => false), true);
   let timedOut = false;

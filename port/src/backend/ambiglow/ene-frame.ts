@@ -119,6 +119,23 @@ export function planFrame(layout: EneModelLayout, counts: EneLedCounts): FramePl
 }
 
 /**
+ * The frame as ONE write (EneDeviceOptions.frameBurst, 09 plan A.7): the segments concatenated when each starts
+ * where the previous one ended (the normal case: 9+12+12+9+54+42 = 138 bytes from 0xE300 on the 34M2C8600), else
+ * null (a gap, or a JSON border that spills into the central LEDs; the caller keeps the segment writes).
+ */
+export function burstFrameWrite(writes: readonly FrameWrite[]): FrameWrite | null {
+  if (writes.length === 0) return null;
+  let end = writes[0].reg;
+  for (const w of writes) {
+    if (w.reg !== end) return null;
+    end += w.data.length;
+  }
+  const data = new Uint8Array(end - writes[0].reg);
+  for (const w of writes) data.set(w.data, w.reg - writes[0].reg);
+  return { reg: writes[0].reg, data };
+}
+
+/**
  * Sample a grid into the plan's frame-buffer writes. The grid must be exactly 50×40 (the vendor's
  * fixed CalcRGBs(50, 40) size; it rejects smaller grids and ignores anything beyond 50×40).
  */

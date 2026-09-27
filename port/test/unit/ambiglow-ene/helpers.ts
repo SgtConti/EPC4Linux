@@ -57,7 +57,7 @@ export interface Rig {
 }
 
 /** Fake bus (unbounded journal) + mock ENE at usb:3-2.1 + opened driver with a recording (instant) sleep. */
-export async function openRig(mockOptions: MockEneOptions = {}): Promise<Rig> {
+export async function openRig(mockOptions: MockEneOptions = {}, deviceOptions: Partial<EneDeviceOptions> = {}): Promise<Rig> {
   const usb = new FakeUsbBackend({ journalLimit: Infinity });
   const mock = new MockEneDevice(mockOptions);
   const info = usb.attach(mock.spec({ busNumber: 3, portNumbers: [2, 1] }));
@@ -70,6 +70,7 @@ export async function openRig(mockOptions: MockEneOptions = {}): Promise<Rig> {
       sleeps.push(ms);
     },
     onLost: (d) => lost.push(d),
+    ...deviceOptions,
   };
   const device = await EneDevice.open(usb, info, options);
   return {

@@ -5,17 +5,25 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { tmpdir } from 'node:os';
 import { serialize } from '../../../src/backend/core/json.ts';
 import { parameterSetWrites, toEneParameterSet } from '../../../src/backend/ambiglow/ene-params.ts';
-import { ENE_LOST_GRACE_MS } from '../../../src/backend/ambiglow/service.ts';
+import { ENE_LOST_GRACE_MS, createAmbiglowService } from '../../../src/backend/ambiglow/service.ts';
+import { FOLLOW_VIDEO_CADENCES, FOLLOW_VIDEO_PAUSED_CAPTURE_MS } from '../../../src/backend/ambiglow/follow-video.ts';
+import { EventBus } from '../../../src/backend/core/events.ts';
+import type { CoreServices } from '../../../src/backend/index.ts';
 import { DisplayEffectInfo } from '../../../src/backend/monitor/model/effect.ts';
 import { NOTIFY_EFFECT } from '../../../src/backend/monitor/display.ts';
 import type { DisplayDevice } from '../../../src/backend/services.ts';
-import { setFrame } from '../monitor/helpers.ts';
+import { CapturingNotifier, setFrame } from '../monitor/helpers.ts';
+import { captureLogger } from '../rpc/helpers.ts';
 import { w } from '../ambiglow-ene/helpers.ts';
 import { flush, rig, rgbaFrame, writesOnly, type Rig } from './helpers.ts';
+import { vendorMenuText } from '../../fixtures/effect-menu.ts';
 
 const sha256 = (s: string) => createHash('sha256').update(Buffer.from(s, 'utf8')).digest('hex');
+/** The capture interval of the user's profile: FollowVideo Speed 2 = Normal (follow-video.ts). */
+const NORMAL_MS = FOLLOW_VIDEO_CADENCES[2].captureMs;
 
 /** The ParameterSet the vendor sends for the display's current EffectInfo (method_17, sent once). */
 function expectedParameterSet(r: Rig): string[] {
@@ -44,7 +52,7 @@ test('load with the ENE present: checkEne → ENE mode, the stored FollowVideo i
     assert.equal(data.EffectInfo?.CurrEffect.Name, 'FollowVideo', 'the stored EffectInfo is kept (method_12 ENE branch)');
     const writes = writesOnly(r.eneSince(0));
     assert.deepEqual(writes, USER_FOLLOW_VIDEO, 'identification is read-only; then exactly the logged ParameterSet');
-    assert.deepEqual(r.capture.videoStarts, [300]);
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS]);
     assert.equal(r.service.followVideo.state, 'running');
     assert.equal(r.notifier.named(NOTIFY_EFFECT).length, 0, 'no plug notification at load (vendor: only on a USB change)');
     // A frame reaches the LEDs and the preview.
@@ -61,14 +69,16 @@ test('load with the ENE present: checkEne → ENE mode, the stored FollowVideo i
   }
 });
 
-test('Effect_GetMenu with the ENE = 20-enum §6.1 byte for byte', async () => {
+test('Effect_GetMenu with the ENE = 20-enum §6.1 byte for byte, except the FollowVideo Speed slider (deviation 17)', async () => {
   const r = await rig();
   try {
     const reply = await r.call('Effect_GetMenu', [100000]);
     assert.equal(reply.err_code, 0);
     assert.equal(reply.err_msg, '');
     const tag = serialize(reply.Tag, 'ui');
-    assert.equal(sha256(tag), '516cd5fad0f6938f314663ae956a79b845a816d272b7446b6bf605f77b290af2');
+    assert.equal(sha256(vendorMenuText(tag)), '516cd5fad0f6938f314663ae956a79b845a816d272b7446b6bf605f77b290af2');
+    const followVideo = reply.Tag.EffectList.find((i: { Effect: { Name: string } }) => i.Effect.Name === 'FollowVideo');
+    assert.deepEqual([followVideo.SupSpeed, followVideo.MinSpeed, followVideo.MaxSpeed, followVideo.SpeedStep], [true, 1, 3, 1]);
   } finally {
     await r.cleanup();
   }
@@ -132,6 +142,101 @@ test('Effect_SpeedChange / Effect_BrightnessChange: stored, but no ParameterSet 
     m = r.eneMark();
     await r.call('Effect_BrightnessChange', [100000, 1]);
     assert.ok(writesOnly(r.eneSince(m)).includes(w(0xe029, 0x04)), 'brightness Bright = 0x04');
+  } finally {
+    await r.cleanup();
+  }
+});
+
+/** The FollowVideo entry's Speed in the saved display section (Theme/<T>/<P>.pcenter ProfileContent). */
+function storedFollowVideoSpeed(r: Rig): number | undefined {
+  const content = JSON.parse(r.themes.contents.get('100000|PHL 34M2C8600')!) as { EffectInfo: { EffectList: Array<{ Effect: { Value: number }; Speed: number }> } };
+  return content.EffectInfo.EffectList.find((d) => d.Effect.Value === 1)?.Speed;
+}
+
+test('Effect_SpeedChange on FollowVideo retunes the running capture in place (High 40 ms, Low 300 + 100 ms tick): no new session, no ParameterSet, saved', async () => {
+  const r = await rig();
+  try {
+    assert.equal(r.service.followVideo.cadence.name, 'Normal', "the user's profile: FollowVideo Speed 2");
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS]);
+    const m = r.eneMark();
+    const saves = r.themes.saves;
+    let reply = await r.call('Effect_SpeedChange', [100000, 3]);
+    assert.equal(reply.err_code, 0);
+    assert.equal(reply.Tag.EffectDetail.Speed, 3);
+    assert.equal(r.service.followVideo.cadence.name, 'High');
+    assert.deepEqual(r.capture.videoIntervals, [40], 'CaptureHost.setVideoInterval(40)');
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS], 'the same capture session (no portal dialog on Wayland)');
+    assert.equal(r.capture.videoStops, 0);
+    assert.deepEqual(writesOnly(r.eneSince(m)), [], 'no ParameterSet for FollowVideo (vendor :1088-1103)');
+    assert.ok(r.themes.saves > saves);
+    assert.equal(storedFollowVideoSpeed(r), 3, 'EffectDetail.Speed of the FollowVideo entry, saved in the profile');
+    // High is event-driven: a new frame reaches the LEDs without waiting for a tick.
+    r.capture.frame(rgbaFrame(() => [9, 8, 7], 1));
+    await flush();
+    assert.deepEqual([...r.mock!.state().frame.subarray(0, 3)], [9, 8, 7]);
+
+    // Low: the vendor cadence (300 ms capture, the newest frame on the 100 ms tick).
+    reply = await r.call('Effect_SpeedChange', [100000, 1]);
+    assert.equal(r.service.followVideo.cadence.name, 'Low');
+    assert.deepEqual(r.capture.videoIntervals, [40, 300]);
+    const uploads = r.service.followVideo.uploads;
+    r.capture.frame(rgbaFrame(() => [1, 2, 3], 2));
+    await flush();
+    assert.equal(r.service.followVideo.uploads, uploads, 'Low: not before the tick');
+    r.timers.advance(100);
+    await flush();
+    assert.equal(r.service.followVideo.uploads, uploads + 1);
+    assert.deepEqual([...r.mock!.state().frame.subarray(0, 3)], [1, 2, 3]);
+
+    // The same speed again changes nothing; an unknown speed is Normal.
+    await r.call('Effect_SpeedChange', [100000, 1]);
+    assert.deepEqual(r.capture.videoIntervals, [40, 300]);
+    await r.call('Effect_SpeedChange', [100000, 0]);
+    assert.deepEqual(r.capture.videoIntervals, [40, 300, 100]);
+    assert.equal(r.service.followVideo.cadence.name, 'Normal');
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS], 'still the first session');
+    assert.deepEqual(r.mock!.violations, []);
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('the speed of another effect does not touch the FollowVideo cadence; selecting FollowVideo again starts at its stored speed', async () => {
+  const r = await rig();
+  try {
+    await r.call('Effect_SpeedChange', [100000, 3]); // FollowVideo High
+    await r.call('Effect_Change', [100000, 3]); // ColorShift
+    assert.equal(r.service.followVideo.state, 'stopped');
+    await r.call('Effect_SpeedChange', [100000, 1]); // ColorShift Low: a ParameterSet, not a cadence
+    assert.deepEqual(r.capture.videoIntervals, [40]);
+    await r.call('Effect_Change', [100000, 1]); // FollowVideo again
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS, 40], 'the new session asks the stored High interval');
+    assert.equal(r.service.followVideo.cadence.name, 'High');
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('a profile apply or theme switch applies the new profile\'s FollowVideo speed to the running capture (same session)', async () => {
+  const r = await rig();
+  try {
+    const content = JSON.parse(r.display.purify()) as { EffectInfo: { EffectList: Array<{ Effect: { Value: number }; Speed: number }> } };
+    content.EffectInfo.EffectList.find((d) => d.Effect.Value === 1)!.Speed = 3;
+    await r.display.applyProfileContent(JSON.stringify(content));
+    await r.service.settled();
+    await flush();
+    assert.equal(r.service.followVideo.cadence.name, 'High');
+    assert.deepEqual(r.capture.videoIntervals, [40]);
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS], 'no new capture session');
+    assert.equal(r.service.followVideo.state, 'running');
+
+    // A theme switch whose profile has another speed: the store's onSwitched re-evaluates it.
+    r.display.profile()!.EffectInfo!.getEffectDetail(1).Speed = 1;
+    r.themes.emitSwitched('switch');
+    await flush();
+    assert.equal(r.service.followVideo.cadence.name, 'Low');
+    assert.deepEqual(r.capture.videoIntervals, [40, 300]);
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS]);
   } finally {
     await r.cleanup();
   }
@@ -235,7 +340,7 @@ test('a profile apply or reload re-pushes EffectInfo (onEffectInfoChanged → at
 test('an ENE that re-enumerates within ENE_LOST_GRACE_MS is re-opened without a DDC fallback; the capture session is kept', async () => {
   const r = await rig();
   try {
-    assert.deepEqual(r.capture.videoStarts, [300]);
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS]);
     const usb = r.t.bundle.usb;
     usb.detach(r.eneInfo!);
     const info = usb.attach(r.mock!.spec({ busNumber: 3, portNumbers: [2, 1], deviceAddress: 14 }));
@@ -247,6 +352,7 @@ test('an ENE that re-enumerates within ENE_LOST_GRACE_MS is re-opened without a 
     assert.equal(r.service.ene?.lost, true);
     assert.equal(r.service.followVideo.paused, true);
     assert.equal(r.service.followVideo.state, 'running');
+    assert.deepEqual(r.capture.videoIntervals, [FOLLOW_VIDEO_PAUSED_CAPTURE_MS], 'the ENE away: the kept session slowed to 1 fps');
     const d = r.ddcMark();
     const m = r.eneMark();
     r.timers.advance(ENE_LOST_GRACE_MS);
@@ -258,9 +364,10 @@ test('an ENE that re-enumerates within ENE_LOST_GRACE_MS is re-opened without a 
     assert.equal(r.notifier.named(NOTIFY_EFFECT).length, 0, 'no method_15/method_14 round trip');
     assert.deepEqual(r.ddcSince(d), [], 'no E2A019 write');
     assert.deepEqual(writesOnly(r.eneSince(m)).filter((x) => !x.startsWith('40 80 0000 E3')), USER_FOLLOW_VIDEO, 'the effect again');
-    assert.deepEqual(r.capture.videoStarts, [300], 'no second portal dialog');
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS], 'no second portal dialog');
     assert.equal(r.capture.videoStops, 0);
     assert.equal(r.service.followVideo.paused, false);
+    assert.deepEqual(r.capture.videoIntervals, [FOLLOW_VIDEO_PAUSED_CAPTURE_MS, NORMAL_MS], 'back: the tier interval, same session');
     r.capture.frame(rgbaFrame(() => [4, 5, 6], 2));
     r.timers.advance(100);
     await flush();
@@ -291,7 +398,7 @@ test('an ENE away longer than the grace: DDC fallback, the capture session is ke
     await flush();
     assert.equal(r.display.eneModel, '34M2C8600');
     assert.equal(r.service.followVideo.paused, false);
-    assert.deepEqual(r.capture.videoStarts, [300], 'the same session');
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS], 'the same session');
     // Gone again, this time for good: after the away window the session ends.
     usb.detach(info);
     r.capture.frame(rgbaFrame(() => [2, 2, 2], 2));
@@ -627,7 +734,7 @@ test('stop() does not wait for an attach queued behind a busy display; that atta
     await flush();
     assert.equal(r.service.ene, null, 'nothing re-opened');
     assert.deepEqual(writesOnly(r.eneSince(m)), [w(0x0023, 0)]);
-    assert.deepEqual(r.capture.videoStarts, [300]);
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS]);
     // A load after stop() asks checkEne: no probe, the last model is kept.
     assert.equal(await r.service.checkEne(r.display), '34M2C8600');
     assert.equal(r.service.ene, null);
@@ -652,6 +759,38 @@ test('stop() while the capture start is pending (portal dialog open): withdrawn,
     await flush();
     assert.equal(r.service.followVideo.state, 'stopped');
     assert.equal(r.capture.videoActive, false);
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('experimental frame burst (eneFrameBurst / EVNIA_ENE_FRAME_BURST=1): announced once at startup; frames reach the MCU as one transfer', async () => {
+  const { log, lines } = captureLogger('backend');
+  const core = {
+    log,
+    notifier: new CapturingNotifier(),
+    host: { serveDataDir: tmpdir(), resourcesDir: tmpdir() },
+    events: new EventBus(),
+    options: { noHardware: true },
+  } as unknown as CoreServices;
+  createAmbiglowService(core, {}, { usb: null, eneFrameBurst: true });
+  createAmbiglowService(core, {}, { usb: null, eneFrameBurst: false });
+  createAmbiglowService(core, {}, { usb: null }); // the test environment has no EVNIA_ENE_FRAME_BURST
+  const announced = lines.filter((l) => l.text.includes('ENE frame burst'));
+  assert.equal(announced.length, 1, lines.map((l) => l.text).join('\n'));
+  assert.equal(announced[0].level, 'warn');
+  assert.match(announced[0].text, /EVNIA_ENE_FRAME_BURST/);
+
+  const r = await rig({ service: { eneFrameBurst: true } });
+  try {
+    const m = r.eneMark();
+    r.capture.frame(rgbaFrame(() => [10, 20, 30], 1));
+    await flush();
+    const writes = writesOnly(r.eneSince(m));
+    assert.equal(writes.length, 1, 'one control transfer per frame');
+    assert.ok(writes[0].startsWith('40 80 0000 E300 008A | 0A 14 1E'), writes[0]);
+    assert.deepEqual([...r.mock!.state().frame.subarray(135, 138)], [10, 20, 30]);
+    assert.deepEqual(r.mock!.violations, []);
   } finally {
     await r.cleanup();
   }

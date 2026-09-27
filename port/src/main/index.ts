@@ -127,7 +127,13 @@ class EvniaApp implements IpcHost {
     });
     // Test probe of the simulated hardware (e2e walkthrough): mock mode only, never with real hardware.
     // Like the display mode, the input idle time is then part of the simulated environment.
-    const probe = mockMonitor ? installMockProbe(globalThis, () => this.#backend.backend, { deviceEvent: (name) => this.gate.trigger(name) }) : null;
+    const probe = mockMonitor
+      ? installMockProbe(globalThis, () => this.#backend.backend, {
+          deviceEvent: (name) => this.gate.trigger(name),
+          // what the backend asked of the capture host (Follow video speed tiers)
+          capture: () => this.#capture.videoStats,
+        })
+      : null;
     const idle = probe ? { seconds: () => probe.idleSeconds(() => idleSource.seconds()) } : idleSource;
     this.#backend = new BackendHost({
       host: createHostServices({

@@ -67,6 +67,10 @@ Desktop notes
   * Wayland: "Follow video" Ambiglow asks for screen-sharing permission
     (the desktop portal dialog) once per program run, and GNOME shows its
     screen-sharing indicator while it runs.
+  * Ambiglow "Follow video" has a Speed slider (with the USB Ambiglow
+    controller): Low is the Windows app's timing, Normal (default) follows
+    the screen faster, High more smoothly and with more CPU. Changing it
+    keeps the running screen capture (no new portal dialog).
   * Wayland: themes bound to an application do not switch automatically;
     the active window is only known on X11.
   * The tray icon needs a StatusNotifier host. On GNOME that is the

@@ -187,6 +187,13 @@ export interface CaptureHost {
   /** Start delivering an audio level 0..255 every ~40 ms (follow-audio, 09 §8). */
   startAudio(onLevel: (level: number, spectrum?: Float32Array) => void): Promise<boolean>;
   stopAudio(): void;
+  /**
+   * Change the frame interval of the current video capture (running, or a start still in flight) to roughly
+   * `intervalMs`, keeping its session: on GNOME Wayland a new session is a ScreenCast portal dialog. No-op while
+   * nothing is captured; never throws. Optional (appended for the Follow video speed tiers, impl-ambiglow §4.2):
+   * without it the capture keeps the interval of its start.
+   */
+  setVideoInterval?(intervalMs: number): void;
 }
 
 export interface DisplayModeInfo {

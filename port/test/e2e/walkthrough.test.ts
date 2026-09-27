@@ -640,6 +640,26 @@ for (const run of RUNS) {
             s.rpc.calls.some((c) => c.fn === 'Effect_GetLEDs' && c.reply?.errCode === 0 && Array.isArray(c.reply.tag) && c.reply.tag.length > 0),
           );
         });
+        await walk.step('ambiglow-follow-video-speed', async () => {
+          // The port's Follow Video Speed slider (impl-ambiglow deviation 17): the vendor's own Ambiglow slider,
+          // offered by Effect_GetMenu with SupSpeed for FollowVideo. Low = the Windows cadence (300 + 100 ms),
+          // Normal (the first-run default, Speed 2) = 100 ms, High = 40 ms; a change retunes the running capture.
+          const speed = w.locator('.vc-slider').filter({ hasText: 'Speed' }).first();
+          await speed.waitFor({ state: 'visible' });
+          assert.deepEqual((await speed.locator('.mark-line span').allInnerTexts()).map((t) => t.trim()), ['Low', 'Normal', 'High']);
+          const before = (await walk.probe()).capture!;
+          assert.equal(before.intervalMs, 100, 'Normal: the backend asked for a frame every 100 ms');
+          const calls = s.rpc.calls.length;
+          await setSlider(w, speed, 3, 1, 3);
+          await until('Effect_SpeedChange(100000, 3)', () =>
+            s.rpc.calls.slice(calls).some((c) => c.fn === 'Effect_SpeedChange' && JSON.stringify(c.parms) === '[100000,3]' && c.reply?.errCode === 0),
+          );
+          await until('the capture retuned to 40 ms (High)', async () => (await walk.probe()).capture!.intervalMs === 40);
+          const after = (await walk.probe()).capture!;
+          assert.equal(after.starts, before.starts, 'no new capture session (no ScreenCast dialog on Wayland)');
+          assert.equal(after.retunes, before.retunes + 1);
+          assert.deepEqual((await walk.probe()).ene!.violations, []);
+        });
         await walk.step('ambiglow-ene-breathing-again', async () => {
           await chooseOption(w, effectSelect, 'Breathing');
           await until('ENE Breathing again', async () => (await walk.probe()).ene!.groups['1']?.mode === walk.noted('breathingMode'));
@@ -667,6 +687,27 @@ for (const run of RUNS) {
         await walk.step('ambiglow-ddc-on-again', async () => {
           await w.locator('.vc-switch').filter({ hasText: 'Effect' }).locator('.switch-button').click();
           await walk.expectVcp(VCP.ambiglowMode, 4, 'Ambiglow back to ColorWave');
+        });
+        // The DDC page's Speed slider is the monitor's own Ambiglow speed (E2A0_1D, Ambiglow-Dvqon39u.js:1104-1114),
+        // enabled per mode by the monitor's function constraints; it is not the host's Follow Video speed.
+        const ddcSpeed = w.locator('.vc-slider').filter({ hasText: 'Speed' }).first();
+        const ddcSpeedDisabled = () => ddcSpeed.evaluate((e) => e.classList.contains('vc-slider__disabled'));
+        await walk.step('ambiglow-ddc-follow-video', async () => {
+          // Without the ENE the monitor firmware renders Follow Video (E2A019 = 1): the host captures nothing and
+          // offers no Follow Video speed (the ENE menu's Speed slider, deviation 17, is never requested here).
+          assert.equal(await ddcSpeedDisabled(), false, 'precondition: Color Wave has the monitor\'s own speed');
+          await chooseOption(w, effectSelect, 'Follow Video');
+          await walk.expectVcp(VCP.ambiglowMode, 1, 'Ambiglow FollowVideo (E2A0_19_E = 1)');
+          await until('no usable Speed slider for Follow Video over DDC (the monitor\'s E2A0_1D disabled)', ddcSpeedDisabled);
+          const probe = await walk.probe();
+          assert.deepEqual([probe.capture!.starts, probe.capture!.intervalMs], [0, null], 'no screen capture over DDC');
+          assert.equal(s.rpc.calls.filter((c) => c.fn === 'Effect_GetMenu').length, 0, 'the renderer asks for the ENE menu only with an ENE');
+          assert.equal(s.rpc.calls.filter((c) => c.fn === 'Effect_SpeedChange').length, 0);
+        });
+        await walk.step('ambiglow-ddc-colorwave-again', async () => {
+          await chooseOption(w, effectSelect, 'Color Wave');
+          await walk.expectVcp(VCP.ambiglowMode, 4, 'Ambiglow ColorWave again');
+          await until('the monitor\'s own Speed slider enabled again', async () => !(await ddcSpeedDisabled()));
         });
       }
     });

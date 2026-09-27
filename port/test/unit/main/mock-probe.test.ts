@@ -61,6 +61,24 @@ test('snapshot: controls, the host writes in order, the ENE registers; null befo
   }
 });
 
+test('capture: what the backend asked of main\'s capture host (sessions, retunes, interval), a copy per snapshot; null without the hook', async () => {
+  const hw = await hardware();
+  try {
+    assert.equal(createMockProbe(backendOf(hw)).snapshot()!.capture, null);
+    const stats = { starts: 1, retunes: 0, intervalMs: 100 as number | null };
+    const probe = createMockProbe(backendOf(hw), { capture: () => stats });
+    const before = probe.snapshot()!;
+    assert.deepEqual(before.capture, { starts: 1, retunes: 0, intervalMs: 100 });
+    stats.retunes = 1;
+    stats.intervalMs = 40; // Follow video High, same session
+    assert.deepEqual(probe.snapshot()!.capture, { starts: 1, retunes: 1, intervalMs: 40 });
+    assert.deepEqual(before.capture, { starts: 1, retunes: 0, intervalMs: 100 }, 'snapshots are copies');
+    assert.deepEqual(JSON.parse(JSON.stringify(probe.snapshot())).capture, { starts: 1, retunes: 1, intervalMs: 40 }, 'JSON-safe');
+  } finally {
+    await hw.cleanup();
+  }
+});
+
 test('simulated idle time: overrides the real source until reset with null', () => {
   const probe = createMockProbe(() => null);
   assert.equal(probe.idleSeconds(() => 7), 7);

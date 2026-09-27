@@ -167,11 +167,28 @@ Follow video samples the screen and sends its colours to the Ambiglow LEDs.
   - While it runs, GNOME shows its screen-sharing indicator in the top bar. That is expected.
   - If you stop sharing from that indicator, the LEDs keep the last colours until you select Follow video again.
   - If you close or ignore the dialog, the start gives up after 60 seconds. Select Follow video again to get a new dialog.
-  - A still screen sends no new frames, so the LEDs simply keep the right colours.
   - This path needs PipeWire, `xdg-desktop-portal` and a portal backend (`xdg-desktop-portal-gnome` on GNOME). All of them are part of a normal GNOME installation.
 - **X11:** there is no dialog. The app captures the **primary display**, as the Windows app did. If the Evnia is not your primary display, make it primary, or Follow video shows another screen's colours.
 
-The capture is reduced to 50×40 pixels at up to 10 frames per second before it leaves the capture window. Nothing is recorded or stored.
+The capture is reduced to 50×40 pixels before it leaves the capture window. Nothing is recorded or stored.
+
+#### Speed: how quickly the LEDs follow the screen
+
+With the Ambiglow controller connected over USB, the Ambiglow page shows a **Speed** slider for Follow video (the Windows app has none). It controls how often the screen is sampled and how soon the colours reach the LEDs:
+
+| Speed | What it does | LED updates per second | LEDs behind the picture |
+|---|---|---|---|
+| **Low** | The Windows app's timing: a new sample every 0.3 s, sent on a fixed 0.1 s tick | about 3 | about 0.25 s on average, up to about 0.5 s: the same as the Windows app |
+| **Normal** (default) | A sample every 0.1 s, sent to the LEDs as soon as it is taken | 10 | about 0.1 s on average, up to about 0.17 s |
+| **High** | 25 samples per second; the newest is sent whenever the controller is free | about 15 | about the same as Normal, but smoother |
+
+The delay is the wait for the next sample, plus Low's tick, plus the time the controller needs to take the update (about 65 ms). Each sample is taken the moment the screen is grabbed, as in the Windows app. So High mainly makes the colours change more smoothly; it does not shorten the delay much. The delay of the monitor's own picture is not included.
+
+- **High uses noticeably more CPU**, because the screen is captured and scaled 25 times per second. It keeps sending even while the screen does not change. If your computer is busy, or runs on battery, prefer Normal.
+- While the LEDs are off because you are away from the computer ("turn off lights when idle"), or while the Ambiglow controller is gone for a moment (monitor standby), the screen capture **slows to one sample per second** in every speed. It keeps running, so no new screen-sharing dialog appears when the lights come back.
+- The change applies immediately, while Follow video keeps running. **On Wayland, changing the speed does not show the screen-sharing dialog again**: the running screen capture is kept.
+- The speed is saved in the current profile, like the speed of the other effects. Profiles copied from Windows start at Normal, because the Windows app saves Normal (and ignores the value).
+- Without the USB Ambiglow controller, the monitor itself runs Follow video (see [The Ambiglow controller is missing](#the-ambiglow-controller-is-missing)). The Speed slider on that page is the monitor's own, and it is disabled for Follow video, as in the Windows app.
 
 ### Ambiglow "Follow audio"
 
@@ -282,6 +299,7 @@ A network kill-switch blocks every request that is not local and logs it. The ap
 ## Other differences from the Windows app
 
 - Start with the system is off by default. Without a tray icon, closing the window quits the app.
+- Ambiglow Follow video has a **Speed** slider (with the USB Ambiglow controller). Low is the Windows app's timing and delay. The default, Normal, updates the LEDs three times as often, with less than half the delay. See [Speed](#speed-how-quickly-the-leds-follow-the-screen).
 - The application picker for app-bound themes offers `.desktop` files instead of `.exe` files.
 - Export always adds `.pcenter` / `.macro` to the file name you type, as the Windows dialog did.
 - The app can read only the files you pick in its dialogs and its own data folders. It can write only the file you choose in the export dialog.
@@ -376,6 +394,20 @@ The same applies to other DDC/CI tools and GNOME brightness extensions based on 
 - Check that `xdg-desktop-portal` and `xdg-desktop-portal-gnome` are installed, and that PipeWire runs (`systemctl --user status pipewire`).
 - On X11, make the Evnia the primary display (see [Follow video](#ambiglow-follow-video-screen-capture)).
 - The application log shows what happened, for example `capture video-started`, `Screen capture was not granted (no source selected)` or `Screen capture did not start within 60000 ms; giving up`.
+
+### Follow video lags behind the picture
+
+- Set **Speed** to Normal or High on the Ambiglow page while Follow video is selected (see [Speed](#speed-how-quickly-the-leds-follow-the-screen)). Low is the Windows app's timing, which lags by up to about half a second.
+- The backend log (`~/.config/EvniaServe/logs/`) shows the speed in use, for example `FollowVideo speed High: screen capture every 40 ms, LED upload of every new frame`. The application log shows `Screen capture interval 40 ms (same session)` when the running capture was changed.
+- The application log should show `capture video-started: …; sampling each new source frame`. If it shows `sampling a <video> element every … ms` instead, this Electron build lacks the interface the app uses to take each screen frame as it arrives. The colours then lag by up to one more sample interval (up to about 0.3 s more at Low). Please report it.
+
+**Advanced, experimental: one USB transfer per LED update.** At High the controller is the limit: each LED update is six small USB writes of about 65 ms in total, as in the Windows app. Starting the app from a terminal with
+
+```sh
+EVNIA_ENE_FRAME_BURST=1 evnia-precision-center
+```
+
+sends each update as one transfer instead, which could allow the full 25 updates per second. It is **untested on a real monitor**: it relies on how the controller stores the colours, which is not confirmed. The backend log then shows `Experimental ENE frame burst on (EVNIA_ENE_FRAME_BURST)` near its start. If the controller refuses the single transfer, the backend log shows the warning `the experimental frame burst (EVNIA_ENE_FRAME_BURST=1) failed`. After three failures in a row the app goes back to the six writes by itself and logs `frame burst failed 3 times in a row; switched off`. If the LEDs show wrong colours, flicker or freeze, quit the app and start it normally. Nothing is stored: the setting lasts only for that run. Please report the result (see [Reporting a problem](#reporting-a-problem)).
 
 ### Follow audio shows nothing
 

@@ -45,7 +45,7 @@ import { bindBaseEffectDetailInfo, syncProfileJson, type BaseEffectDetailInfoMod
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { stripBom } from '../core/json.ts';
-import { EneDevice, findEneDevices } from './ene.ts';
+import { ENE_FRAME_BURST_ENV, EneDevice, eneFrameBurstFromEnv, findEneDevices } from './ene.ts';
 import { EneError, type EneTransportOptions } from './ene-transport.ts';
 import { loadAmbiglowInfo, matchEneModelName, type EneModelLayout } from './ene-layout.ts';
 import { toEneParameterSet } from './ene-params.ts';
@@ -121,7 +121,11 @@ export interface AmbiglowServiceOptions {
   timers?: EffectTimers;
   /** Clock for the DDC path's driver sleep (Effect_Reset's 200 ms). */
   clock?: DdcClock;
-  followVideo?: { captureIntervalMs?: number; sendIntervalMs?: number };
+  /**
+   * Experimental: follow-video frames as one control transfer at 0xE300 instead of six paced writes
+   * (EneDeviceOptions.frameBurst, impl-usb-ene §2.2). Default: EVNIA_ENE_FRAME_BURST=1 in the environment.
+   */
+  eneFrameBurst?: boolean;
   idleIntervalMs?: number;
   lostGraceMs?: number;
   /** ENE_AWAY_CAPTURE_MS. */
@@ -182,6 +186,8 @@ export class AmbiglowServiceImpl implements AmbiglowService {
   readonly #themes: ThemeStore | undefined;
   readonly #monitors: MonitorManager | undefined;
   readonly #opts: AmbiglowServiceOptions;
+  /** Experimental single-transfer follow-video frames (EneDeviceOptions.frameBurst). */
+  readonly #frameBurst: boolean;
   readonly #timers: EffectTimers;
   readonly #clock: DdcClock;
   readonly #lifecycle = new Mutex();
@@ -236,9 +242,13 @@ export class AmbiglowServiceImpl implements AmbiglowService {
       capture: core.host.capture,
       target,
       timers: this.#timers,
-      captureIntervalMs: options.followVideo?.captureIntervalMs,
-      sendIntervalMs: options.followVideo?.sendIntervalMs,
     });
+    this.#frameBurst = options.eneFrameBurst ?? eneFrameBurstFromEnv();
+    if (this.#frameBurst) {
+      this.#log.warn(
+        `Experimental ENE frame burst on (${ENE_FRAME_BURST_ENV}): Follow video frames go to the ENE as one control transfer at 0xE300 instead of six paced writes; unset ${ENE_FRAME_BURST_ENV} if the LEDs misbehave`,
+      );
+    }
     this.#audio = new FollowAudioEngine({ log: this.#log.child('audio'), capture: core.host.capture, target });
     this.#breathing = new BreathingEngine({ log: this.#log.child('breathing'), target, detail: () => this.#syncBreathingDetail(), timers: this.#timers });
     this.#idle = new IdleMonitor({
@@ -483,7 +493,9 @@ export class AmbiglowServiceImpl implements AmbiglowService {
 
   /**
    * Effect_SpeedChange: EffectDetail.Speed; no ParameterSet for FollowVideo/FollowAudio and synced Breathing
-   * (vendor :1088-1103 also skips firmware Breathing — deviation, impl-ambiglow §5 item 5).
+   * (vendor :1088-1103 also skips firmware Breathing — deviation, impl-ambiglow §5 item 5). For FollowVideo the
+   * speed is the host's cadence tier (Low/Normal/High, deviation 17): #checkSoftEffect retunes the running
+   * capture and uploads without a new capture session.
    */
   effectSpeedChange(display: DisplayDevice, speed: number): Promise<JsonResult> {
     return this.#eneEdit(display, (info) => {
@@ -711,6 +723,7 @@ export class AmbiglowServiceImpl implements AmbiglowService {
           log: this.#log.child('ene'),
           layouts: await this.#loadLayouts(),
           onLost: (d) => this.#handleLost(d),
+          frameBurst: this.#frameBurst,
           ...this.#opts.ene,
         });
         this.#eneOwner = display.key;
@@ -981,9 +994,15 @@ export class AmbiglowServiceImpl implements AmbiglowService {
     const enabled = this.#started && display !== null && info !== null && info.EffectEnable;
     const active = enabled && eneMode && ene !== null && !this.#idle.idle;
     const followVideo = enabled && effect === EFFECT.FollowVideo && ((eneMode && ene !== null) || this.#eneAway);
+    // The FollowVideo entry's Speed picks the cadence tier (follow-video.ts; deviation 17): set before a start,
+    // and a live session is retuned in place (Effect_SpeedChange, a profile apply or theme switch).
+    if (followVideo && info) this.#video.setSpeed(info.EffectDetail.Speed);
+    // Stop before pausing, resume before starting: a paused session is slowed to 1 fps (follow-video.ts
+    // FOLLOW_VIDEO_PAUSED_CAPTURE_MS), so a session that ends is not retuned first, and a start on wake asks the
+    // tier's interval at once.
     if (!followVideo) this.#video.setWanted(false);
-    else if (active) this.#video.setWanted(true, { retry: options.wake === true });
     this.#video.setPaused(!active);
+    if (followVideo && active) this.#video.setWanted(true, { retry: options.wake === true });
     this.#audio.setWanted(active && effect === EFFECT.FollowAudio);
     const canSync = display !== null && effect === EFFECT.Breathing && this.#canBreathingSync(display);
     this.#breathing.setWanted(active && canSync);

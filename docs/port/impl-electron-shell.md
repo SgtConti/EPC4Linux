@@ -161,7 +161,10 @@ The host calls `backend.hotplug('usb')` when a `USBChange` is sent and `backend.
   - capture is denied, no source exists, or the page fails;
   - a `stopVideo()` or a newer `startVideo()` was issued while it was still pending;
   - it has not succeeded within 60 s (`VIDEO_START_TIMEOUT_MS`), e.g. a Wayland portal dialog left open. The window is then released, which withdraws the dialog.
-- Frames are `{width:50, height:40, data: Uint8ClampedArray(8000) RGBA, timestamp}` every `max(intervalMs, 100)` ms.
+- Frames are `{width:50, height:40, data: Uint8ClampedArray(8000) RGBA, timestamp}` every `intervalMs`, clamped to 33..10000 ms (`src/capture/protocol.ts clampFrameInterval`; the floor was 100 ms before the Follow video speed tiers, whose High asks for 40 ms). The screen source is asked for `1000 / interval` fps, not rounded, between 1 and 30 (`frameRateFor`): 300 ms asks 3.33 fps, and the source then delivers a frame every 300 ms (3 fps would be 333 ms).
+- **Sampling: each source frame as it arrives.** The page reads the track's frames with `MediaStreamTrackProcessor`, which Chromium exposes to the page (checked on Electron 44 in the hidden capture window). It scales each frame when it arrives and closes it at once. At most about one frame per interval is taken (`minSampleSpacingMs`: the interval less min(15 ms, interval / 4)), which only thins a source that runs faster than asked, such as a portal stream the constraint did not slow down. A frame therefore reaches main a few ms after the screen was grabbed, and a screen change waits at most one source interval. This needs no rendering, so the hidden (unmapped) window does not matter.
+  - Fallback, when the page has no `MediaStreamTrackProcessor`: a `<video>` element sampled by a timer every interval, as before 2026-09-27. That timer runs out of phase with the source. It adds up to one interval of lag and sometimes posts the same source frame twice (measured at 300 ms under Xvfb: lag median 439 ms, against 149 ms with frame-driven sampling).
+  - The page names the sampling in its start status: `capture video-started: <label>; sampling each new source frame` (or `…; sampling a <video> element every <ms> ms (no MediaStreamTrackProcessor)`).
 - Frames are area-filtered (`imageSmoothingQuality:'high'`) from the full screen, i.e. the 09 plan B "smooth" mode. The vendor's 5-point sampling can be done on top of these by the ambiglow engine if bit-parity is wanted.
 - Source on X11: the primary display's `desktopCapturer` source.
 - Source on a Wayland session (`XDG_SESSION_TYPE=wayland`): `getDisplayMedia` through the xdg-desktop-portal ScreenCast dialog, where the user picks the screen.
@@ -178,6 +181,16 @@ The host calls `backend.hotplug('usb')` when a `USBChange` is sent and `backend.
   - The latest start wins. Earlier pending starts resolve `false`, and their callbacks never receive a frame.
 - The page (`src/capture/page.ts`) applies the same rule to its own awaits. A stream that opens after its start was superseded is stopped at once.
 - `stopVideo()` destroys the capture window. That ends every stream, the PipeWire session and GNOME's sharing indicator.
+
+**`setVideoInterval(intervalMs)`** (optional `CaptureHost` member, appended for the Follow video speed tiers, impl-ambiglow §4.2; FollowVideo also uses it to slow a kept session to 1000 ms while its uploads are paused): the current session changes its frame interval **in place**. There is no new session, so no ScreenCast dialog on Wayland.
+- The host clamps the interval like a start and remembers it for the current session. A start still in flight sends the latest interval with its page command. Otherwise the host runs the page command `window.evniaCapture.setVideoInterval({session, intervalMs})` (`src/capture/protocol.ts SetVideoIntervalCommand`) and logs `Screen capture interval <ms> ms (same session)`.
+- It is a no-op while nothing is captured, and for the same interval. It never throws.
+- The page (`src/capture/page.ts`) applies the new sampling interval at once (the frame spacing, or the fallback's timer). It then asks the stream's track for the new rate with `track.applyConstraints({frameRate: {max}})` and reads back `getSettings().frameRate`. On X11 under Xvfb, `applyConstraints` raises and lowers the desktop source in place (3.33 → 25 → 1 → 10 fps measured on a track read by `MediaStreamTrackProcessor`).
+  - X11: the desktop stream is opened at the asked rate. When `applyConstraints` cannot raise it, the page re-opens the same `desktopCapturer` source at the new rate, which needs no dialog on X11. It starts a sampler on the new stream within the same session, then stops the old sampler and stream. If the new stream cannot be sampled, the old one is kept.
+  - Wayland: the portal stream is opened at the 30 fps ceiling and then constrained to the asked rate. A later, faster speed therefore stays inside the stream, and the stream is never re-opened (that would be a new portal dialog).
+  - A start that is still opening takes the newest interval when its stream is up.
+- The page reports `capture video-retuned: every <ms> ms, source frame rate <n> fps[ (notes)]` (status kind `video-retuned`, info level).
+- `videoStats` (`{starts, retunes, intervalMs}`: sessions started, in-place retunes, the current session's interval or `null`) shows what the backend asked for. The mock probe exposes it to the walkthrough as `snapshot().capture`, in mock mode only.
 
 **`startAudio(onLevel)`**
 - Resolves `true` on the first audio data from the default sink's monitor. `onLevel(level 0..255, spectrum Float32Array)` is then called every 40 ms.
@@ -540,9 +553,9 @@ Screenshots of the installed package on Home: `port/test/install/artifacts/<dist
 
 | Command (inside `evnia-port-dev`) | Covers |
 |---|---|
-| `node --test "test/unit/main/**/*.test.ts"` (155 tests) | See the unit-test list below |
+| `node --test "test/unit/main/**/*.test.ts"` (160 tests) | See the unit-test list below |
 | `xvfb-run -a -s "-screen 0 1920x1080x24" node --test "test/e2e/**/*.test.ts"` (51 tests: 17 shell and capture tests plus the 34-step walkthrough of `walkthrough.test.ts`, about 5 min; run with `--network none`) | See the e2e list below |
-| The whole project: `npx tsc -p tsconfig.json && node --test "test/unit/**/*.test.ts" "test/contract/**/*.test.ts"` | 848 tests, all pass (security-review wave; the LAN-interface hub test skips under `--network none`) |
+| The whole project: `npx tsc -p tsconfig.json && node --test "test/unit/**/*.test.ts" "test/contract/**/*.test.ts"` | 870 tests, none fail (Follow video speed change; the LAN-interface hub test skips under `--network none`; MAINTAINING "Test layers") |
 | On the Docker host: `test/install/run.sh` (10 to 15 min with the build, mostly apt downloads) | The `.deb` in clean `debian:trixie` and `ubuntu:24.04`, see "Install test" |
 
 **Unit tests**
@@ -558,7 +571,7 @@ Screenshots of the installed package on Home: `port/test/install/artifacts/<dist
   - `exportFile` grants the backend one write of exactly the returned path; a cancelled dialog or the capture window grants nothing.
   - Picked and confined files: a FIFO and `/dev/zero` picked by name are no pick; a FIFO inside the roots gives `EINVAL` on every channel at once (no hang); a file above 20 MiB gives its size but no buffer and `EFBIG`; a directory `EISDIR`; the buffer is exactly the file's bytes.
 - **Renderer log** (`renderer-log.test.ts`): electron-log's message shapes, level mapping, and untrusted input (non-objects, one bounded line, control characters, circular data).
-- **Mock probe** (`mock-probe.test.ts`): Set VCP decoding, the snapshot (controls, host writes, JSON-safe ENE state), OSD-side changes without a host write, the simulated idle time, unplug/replug (connector status, VIA and ENE leave and return at new addresses, the three host events), and the non-enumerable, read-only install.
+- **Mock probe** (`mock-probe.test.ts`): Set VCP decoding, the snapshot (controls, host writes, JSON-safe ENE state, the capture host's video stats through the `capture` hook), OSD-side changes without a host write, the simulated idle time, unplug/replug (connector status, VIA and ENE leave and return at new addresses, the three host events), and the non-enumerable, read-only install.
 - **Allowlist coverage:** every renderer channel.
 - **Device-event timings.**
 - **MonitorInfo key derivation:** equality with the vendor expression, against the real v34 table.
@@ -608,7 +621,7 @@ Screenshots of the installed package on Home: `port/test/install/artifacts/<dist
   - `false` when `parec` is missing, failing or silent.
   - Stop during start, and double start.
   - The FFT/level heuristic: 500 random spectra vs the C# transcription.
-- **Capture sequencing** (`capture-slot.test.ts`): stop during start, overlapping starts, restart and timeout.
+- **Capture sequencing** (`capture-slot.test.ts`): stop during start, overlapping starts, restart and timeout, and `current` (the session a retune acts on). **Frame intervals** (`capture-protocol.test.ts`): the 33..10000 ms clamp, the source frame rate (1000 / interval, not rounded, 1..30 fps), the sample spacing (a source at the asked rate sampled frame by frame, a 30 fps one thinned to the asked rate), and every Follow video speed tier and the paused interval passing unchanged.
 - **Exit** (`exit.test.ts`): vendor order, and throwing or rejecting steps never skip the backend stop.
 - **`spawnTied`** (`child-process.test.ts`): a helper dies when its parent is SIGKILLed.
 - **Packaging:** udev (including `power/control` on the bridge), modules-load, control (Depends names, versioned libc6), maintainer scripts, `.desktop` validity, `StartupWMClass` = `desktopName` (the X11 WM_CLASS Electron sets), and the VCP 0x04 note in README.Debian, the man page and the description.
@@ -637,6 +650,8 @@ Screenshots of the installed package on Home: `port/test/install/artifacts/<dist
   - stop during start resolves `false` with no frames and no window;
   - overlapping starts: the later wins, the earlier gets nothing, one stream (19 frames in 2 s);
   - a restart drops the old callback at once;
+  - a running capture retuned in place (`setVideoInterval`: 100 → 40 → 300 ms): one session and one window, more frames at 40 ms than at 100 ms, about 5 in 1.5 s at 300 ms, the host's `videoStats`, and the page's `video-retuned` log line; a retune while the start is still in flight applies when the stream is up; a retune while nothing is captured is a no-op;
+  - frame-driven sampling: the page reports `sampling each new source frame`; at 300 ms the frames come every 300 ms (median gap 280..320 ms); and 12 colour changes of the test window, at random phases, reach the frame callback with a median lag under 300 ms (measured 149 ms, max 266; with the timer fallback forced, 439 ms, max 580). The figures are written to `artifacts/capture/lag.json`;
   - a start past its deadline resolves `false` and cleans up;
   - audio resolves `false` without `parec`.
 - **Walkthrough** (`walkthrough.test.ts`, impl-walkthrough.md): the real vendor UI against the simulated 34M2C8600, every monitor page and tab plus Profile, Settings and Dashboard, with interactions checked on the simulated monitor/ENE, in two runs (ENE present and first run; no ENE with the user's migrated Windows data). After every step: no console error or renderer exception beyond documented vendor ones, no failed or hung backend request, no loading overlay left, nothing leaving the machine, no main-process error.
@@ -698,6 +713,8 @@ Screenshots of the installed package on Home: `port/test/install/artifacts/<dist
 33. **Packaged executable:** the `RunAsNode`, `NODE_OPTIONS` and `--inspect` fuses are off. Main refuses outbound sockets and DNS at the Node level (`egress-guard.ts`), and Chromium uses no proxy (`--no-proxy-server`).
 34. **Foreground tracking** runs only while an app-bound theme exists or a theme other than "User" is current. The vendor followed every focus change for the whole session.
 35. **udev:** the i2c rule excludes the GPU adapters the backend never probes (AMDGPU SMU, SMBus, …). The Windows app needed no such rule; ddcutil's `60-ddcutil-i2c.rules`, which the rule otherwise follows, tags every i2c bus of a display adapter.
+36. **Capture retune** (`setVideoInterval`): the capture keeps its session when the Follow video speed changes, and while FollowVideo's uploads are paused. The Wayland portal stream is opened at the 30 fps ceiling and then constrained to the asked rate, and an X11 desktop stream that cannot reach a faster rate is re-opened silently. The vendor captured with GDI on its own fixed 300 ms thread and had nothing to retune.
+37. **Frame-driven sampling** (2026-09-27): the page samples each frame of the screen source as it arrives (`MediaStreamTrackProcessor`), at the asked rate, instead of a timer sampling a `<video>` element out of phase with the source. The vendor grabbed a GDI screenshot at the moment it sampled, so its frames had no age; frame-driven sampling brings the port's lag to the same level. The timer remains as the fallback.
 
 ## Known limitations
 
@@ -740,7 +757,7 @@ The integration items the other modules' notes addressed to Electron main:
 | impl-theme §3.4, 20-theme §10.2 items 1, 2, 7 | `.desktop` chooser instead of `["exe"]`; `processPath` = the port's `.desktop`; save extension | `dialog-options.ts`, `ipc.ts`, `paths.ts selfDesktopFile` |
 | impl-monitor §4 and §5 item 6, 20-monitor-io §3.5 | `getDisplayMode` for the display's connector, `floor(rate + 0.005)` | `display-mode.ts`, `display-sources.ts`, `drm-modes.ts` (see "Display mode") |
 | impl-ambiglow §2.4 and §6 ("Idle time on GNOME Wayland … unverified", 09 plan D) | Input idle time on every target session | `idle-time.ts`: Electron plus Mutter's idle monitor on GNOME Wayland |
-| impl-ambiglow §2.4 (host table) | FollowVideo asks for frames every 300 ms and keeps the session across idle and a short ENE absence; `false` means "not capturing"; FollowAudio forwards the 40 ms level; `stopVideo()` is synchronous and idempotent | Already met by `CaptureHost` (frames at `max(interval, 100)` ms, 50×40 RGBA, latest call wins, never throws, idempotent stops after `dispose()`). The audio source is the default sink's monitor (`parec --device=@DEFAULT_MONITOR@`), which follows default-sink changes and mute. |
+| impl-ambiglow §2.4 (host table) | FollowVideo asks for frames every 300 ms and keeps the session across idle and a short ENE absence; `false` means "not capturing"; FollowAudio forwards the 40 ms level; `stopVideo()` is synchronous and idempotent | Already met by `CaptureHost` (frames at the asked interval, clamped to 33..10000 ms; since the speed tiers FollowVideo asks 300, 100 or 40 ms and retunes a running session with `setVideoInterval`; 50×40 RGBA, latest call wins, never throws, idempotent stops after `dispose()`). The audio source is the default sink's monitor (`parec --device=@DEFAULT_MONITOR@`), which follows default-sink changes and mute. |
 | impl-ambiglow §2.4 "Capture-host request" | No portal dialog on every FollowVideo start (`restore_token`, `persist_mode: 2`) | Within one run: the granted source is reused (see "Capture host"). Across runs: **open**, since Electron exposes neither `persist_mode` nor the token. |
 | impl-ambiglow §6 | A session the user ends from GNOME's sharing indicator is not reported to the backend | **Open**: `CaptureHost` (types.ts) has no callback for it. The host releases the window and the grant and logs a warning. |
 | impl-integration §4.1 and §8 (vendor-ui / e2e) | The e2e console check failed on the vendor's `34M2C8600_overview.png` miss | Allowed in `test/e2e/app.test.ts` only with the loaded fallback (see "E2E tests"). The import script is unchanged. |

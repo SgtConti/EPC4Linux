@@ -1,12 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GRID_HEIGHT, GRID_WIDTH, planFrame, renderFrame, roundHalfEven } from '../../../src/backend/ambiglow/ene-frame.ts';
+import { GRID_HEIGHT, GRID_WIDTH, burstFrameWrite, planFrame, renderFrame, roundHalfEven } from '../../../src/backend/ambiglow/ene-frame.ts';
 import { findModelLayout } from '../../../src/backend/ambiglow/ene-layout.ts';
 import { EneMode, EneRegion, EneSpeed, EneBrightness } from '../../../src/backend/ambiglow/ene-registers.ts';
 import type { EneParameterSet } from '../../../src/backend/ambiglow/ene-params.ts';
 import { FakeUsbBackend } from '../../../src/backend/usb/fake-backend.ts';
-import { EneDevice } from '../../../src/backend/ambiglow/ene.ts';
+import { ENE_FRAME_BURST_ENV, ENE_FRAME_BURST_MAX_FAILURES, EneDevice, eneFrameBurstFromEnv } from '../../../src/backend/ambiglow/ene.ts';
 import { MockEneDevice } from '../../../src/backend/ambiglow/mock-ene.ts';
+import { UsbError } from '../../../src/backend/usb/errors.ts';
 import { LAYOUTS, fmt, hex, openRig, recordingLog, w } from './helpers.ts';
 
 const followVideo: EneParameterSet = { region: EneRegion.AllZone, mode: EneMode.UserDefine, rainbow: true, rgb: [0, 0, 0], speed: EneSpeed.Normal, brightness: EneBrightness.Brightest };
@@ -141,4 +142,118 @@ test('a JSON border larger than the device\'s whole frame buffer is cut at the b
   ]);
   assert.deepEqual(mock.violations, []);
   assert.equal(device.ledColors().length, 30);
+});
+
+// ── experimental frame burst (EneDeviceOptions.frameBurst, EVNIA_ENE_FRAME_BURST=1; 09 plan A.7) ──
+
+test('burstFrameWrite: contiguous segments become one write; a gap or an overlap keeps the segments', () => {
+  const layout = findModelLayout(LAYOUTS, '34M2C8600');
+  assert.ok(layout);
+  const writes = renderFrame(planFrame(layout, { border: 14, central: 18, bottom: 14 }), coordinateGrid(3));
+  const burst = burstFrameWrite(writes);
+  assert.ok(burst);
+  assert.equal(burst.reg, 0xe300);
+  assert.equal(burst.data.length, 138, '9+12+12+9+54+42 bytes, E300..E389');
+  assert.equal(hex(burst.data), SPEC_TABLE.map((line) => line.split(' | ')[1]).join(' '), 'the six segments back to back');
+  // A JSON border larger than the device's border group overlaps the central write: not merged.
+  assert.equal(burstFrameWrite(renderFrame(planFrame(layout, { border: 12, central: 18, bottom: 0 }), coordinateGrid(3))), null);
+  assert.equal(burstFrameWrite([{ reg: 0xe300, data: new Uint8Array(3) }, { reg: 0xe309, data: new Uint8Array(3) }]), null, 'a gap');
+  assert.equal(burstFrameWrite([]), null);
+});
+
+test('frameBurst: one paced 138-byte transfer at 0xE300 with the same bytes, inside the frame-buffer window; off by default', async () => {
+  const rig = await openRig({}, { frameBurst: true });
+  await rig.device.setEffect(followVideo);
+  const m = rig.mark();
+  rig.sleeps.length = 0;
+  assert.equal(await rig.device.writeVideoFrame(coordinateGrid(4)), true);
+  const expected = SPEC_TABLE.map((line) => line.split(' | ')[1]).join(' ');
+  assert.deepEqual(rig.since(m), [`40 80 0000 E300 008A | ${expected}`], 'one control transfer, wLength 138');
+  assert.deepEqual(rig.sleeps, [10], 'paced once');
+  assert.equal(hex(rig.mock.state().frame), expected, 'the MCU holds the same frame as after six writes');
+  assert.equal(hex(rig.device.ledColors()), expected);
+  assert.deepEqual(rig.mock.violations, [], 'every byte on an allowed register of the mock');
+  // Default: the vendor's six writes.
+  const plain = await openRig();
+  await plain.device.setEffect(followVideo);
+  const p = plain.mark();
+  await plain.device.writeVideoFrame(coordinateGrid(3));
+  assert.equal(plain.since(p).length, 6);
+});
+
+test('frameBurst with non-contiguous segments falls back to the segment writes (logged once)', async () => {
+  const usb = new FakeUsbBackend({ journalLimit: Infinity });
+  // Border group of 12 while the JSON border is 14: the central write overlaps the spilled border LEDs.
+  const mock = new MockEneDevice({ counts: { border: 12, central: 18, bottom: 14 } });
+  const info = usb.attach(mock.spec());
+  const { log, lines } = recordingLog();
+  const device = await EneDevice.open(usb, info, { log, layouts: LAYOUTS, writeDelayMs: 0, frameBurst: true });
+  await device.setEffect(followVideo);
+  const m = usb.transfers.length;
+  await device.writeVideoFrame(coordinateGrid(3));
+  await device.writeVideoFrame(coordinateGrid(3));
+  assert.equal(usb.transfers.slice(m).length, 12, 'six writes per frame');
+  assert.equal(lines.filter((l) => l.includes('frame burst off')).length, 1, lines.join('\n'));
+});
+
+test('frameBurst refused by the controller (a firmware that stalls data stages over one 64-byte packet): warned once naming the switch, the six paced writes again after ENE_FRAME_BURST_MAX_FAILURES in a row', async () => {
+  const usb = new FakeUsbBackend({ journalLimit: Infinity });
+  const mock = new MockEneDevice();
+  let refuseLong = true;
+  const info = usb.attach({
+    ...mock.spec({ busNumber: 3, portNumbers: [2, 1] }),
+    handler: {
+      controlIn: (setup, length) => mock.controlIn(setup, length),
+      controlOut: (setup, data) => {
+        if (refuseLong && data.length > 64) throw new Error('EP0 data stage stalled');
+        mock.controlOut(setup, data);
+      },
+    },
+  });
+  const { log, lines } = recordingLog();
+  const device = await EneDevice.open(usb, info, { log, layouts: LAYOUTS, writeDelayMs: 0, frameBurst: true });
+  await device.setEffect(followVideo);
+  const burstWarnings = () => lines.filter((l) => l.startsWith('warn') && l.includes('EVNIA_ENE_FRAME_BURST=1') && l.includes('failed:'));
+  const stall = (e: unknown) => e instanceof UsbError && e.code === 'stall';
+  assert.equal(ENE_FRAME_BURST_MAX_FAILURES, 3);
+
+  // Two failures, then a success: the count starts again.
+  await assert.rejects(device.writeVideoFrame(coordinateGrid(3)), stall);
+  assert.equal(burstWarnings().length, 1, lines.join('\n'));
+  assert.match(burstWarnings()[0], /EP0 data stage stalled/);
+  await assert.rejects(device.writeVideoFrame(coordinateGrid(3)), stall);
+  refuseLong = false;
+  let m = usb.transfers.length;
+  assert.equal(await device.writeVideoFrame(coordinateGrid(3)), true);
+  assert.equal(usb.transfers.slice(m).length, 1, 'still the burst');
+  refuseLong = true;
+
+  // Three in a row: switched off (logged), the device is not lost, and the next frame is the vendor's six writes.
+  for (let i = 0; i < ENE_FRAME_BURST_MAX_FAILURES; i++) await assert.rejects(device.writeVideoFrame(coordinateGrid(3)), stall);
+  assert.equal(burstWarnings().length, 1, 'the failure warning is logged once');
+  assert.equal(lines.filter((l) => l.startsWith('warn') && l.includes('switched off')).length, 1, lines.join('\n'));
+  assert.equal(device.lost, false);
+  m = usb.transfers.length;
+  assert.equal(await device.writeVideoFrame(coordinateGrid(4)), true);
+  assert.deepEqual(usb.transfers.slice(m).map(fmt), SPEC_TABLE, 'six paced writes from now on');
+  assert.equal(hex(mock.state().frame), SPEC_TABLE.map((line) => line.split(' | ')[1]).join(' '));
+  assert.deepEqual(mock.violations, []);
+});
+
+test('frameBurst: a device that went away is not the burst\'s failure (no burst warning; the device is lost)', async () => {
+  const { log, lines } = recordingLog();
+  const rig = await openRig({}, { frameBurst: true, log });
+  await rig.device.setEffect(followVideo);
+  rig.usb.detach(rig.device.info);
+  await assert.rejects(rig.device.writeVideoFrame(coordinateGrid(3)), (e: unknown) => e instanceof UsbError && e.code === 'no-device');
+  assert.equal(rig.device.lost, true);
+  assert.deepEqual(lines.filter((l) => l.includes('frame burst')), [], lines.join('\n'));
+});
+
+test('eneFrameBurstFromEnv: EVNIA_ENE_FRAME_BURST=1 only', () => {
+  assert.equal(ENE_FRAME_BURST_ENV, 'EVNIA_ENE_FRAME_BURST');
+  assert.equal(eneFrameBurstFromEnv({ EVNIA_ENE_FRAME_BURST: '1' }), true);
+  assert.equal(eneFrameBurstFromEnv({ EVNIA_ENE_FRAME_BURST: ' 1 ' }), true);
+  for (const v of [undefined, '', '0', 'true', 'yes', '2']) assert.equal(eneFrameBurstFromEnv({ EVNIA_ENE_FRAME_BURST: v }), false, String(v));
+  assert.equal(eneFrameBurstFromEnv({}), false);
 });

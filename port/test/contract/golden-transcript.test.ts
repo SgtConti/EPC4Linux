@@ -33,6 +33,7 @@ import { captureLogger } from '../unit/rpc/helpers.ts';
 import { testHost } from '../unit/api/helpers.ts';
 import { ENVIRONMENT_DEPENDENT, at, compareJson, formatDiffs, jsonKeyOrders, prefixedOrders, stringifyOrdered, subtreeOrders } from './compare.ts';
 import { USER_DISPLAY_KEY, mockEnes, rawTag, storedDisplayContent, vcpWritesSince, writeEditedProfile } from './compose.ts';
+import { vendorMenuText } from '../fixtures/effect-menu.ts';
 import {
   PROFILE_TAG_SHA256,
   SPEC_STATIC_TAGS,
@@ -557,10 +558,10 @@ test('ENE present: ENE mode from the first read, Effect_* round trips on the MCU
       assert.deepEqual([...data.during, ...replay.drain()].filter((n) => n.FunctionName === EFFECT_NOTIFICATION), [], 'no plug notification at load (vendor: only on a USB change)');
     });
 
-    await t.test('Effect_GetMenu with the ENE: DisplayEffectMenu.Default("34M2C8600") byte for byte (20-enum §6.1)', async () => {
+    await t.test('Effect_GetMenu with the ENE: DisplayEffectMenu.Default("34M2C8600") byte for byte (20-enum §6.1) except the FollowVideo Speed slider (impl-ambiglow deviation 17)', async () => {
       const r = await replay.rpc('ene-menu', 'Effect_GetMenu', [100000]);
       assert.equal(r.reply.err_code, 0, String(r.reply.err_msg));
-      const tag = rawTag(r.text);
+      const tag = vendorMenuText(rawTag(r.text));
       assert.equal(Buffer.byteLength(tag), SPEC_STATIC_TAGS.effectMenuEne.bytes);
       assert.equal(sha256(tag), SPEC_STATIC_TAGS.effectMenuEne.sha256);
     });

@@ -16,8 +16,12 @@ import { serialize } from '../../../src/backend/core/json.ts';
 import { MONITOR_MODULES, VirtualClock, defaultProfileContent, tempHost } from '../monitor/helpers.ts';
 import { FIXTURES } from '../ambiglow-ene/helpers.ts';
 import { FakeCaptureHost, ManualTimers, SyncThemeStore, flush } from './helpers.ts';
+import { FOLLOW_VIDEO_CADENCES } from '../../../src/backend/ambiglow/follow-video.ts';
+import { vendorMenuText } from '../../fixtures/effect-menu.ts';
 
 const sha256 = (s: string) => createHash('sha256').update(Buffer.from(s, 'utf8')).digest('hex');
+/** The capture interval of the user's profile: FollowVideo Speed 2 = Normal (follow-video.ts). */
+const NORMAL_MS = FOLLOW_VIDEO_CADENCES[2].captureMs;
 
 async function compose(mockMonitor: string) {
   const temp = await tempHost();
@@ -76,9 +80,10 @@ test('mock mode with the ENE: the first DeviceData is in ENE mode, the menu is t
     const hw = c.manager.mockHardware!;
     assert.equal(hw.ene.state().hostControl, 4);
     assert.equal(hw.ene.state().groups[1]?.mode, 14, 'stored FollowVideo pushed after the load');
-    assert.deepEqual(c.capture.videoStarts, [300]);
+    assert.deepEqual(c.capture.videoStarts, [NORMAL_MS]);
     const menu = await c.call('Effect_GetMenu', [100000]);
-    assert.equal(sha256(serialize(menu.Tag, 'ui')), '516cd5fad0f6938f314663ae956a79b845a816d272b7446b6bf605f77b290af2');
+    // 20-enum §6.1 except the FollowVideo Speed slider (impl-ambiglow deviation 17)
+    assert.equal(sha256(vendorMenuText(serialize(menu.Tag, 'ui'))), '516cd5fad0f6938f314663ae956a79b845a816d272b7446b6bf605f77b290af2');
     const change = await c.call('Effect_Change', [100000, 6]);
     assert.equal(change.Tag.CurrEffect.Name, 'StarryNight');
     assert.equal(hw.ene.state().groups[2]?.mode, 13, 'StarryNightRainbow');

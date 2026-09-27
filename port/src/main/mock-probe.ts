@@ -13,7 +13,8 @@
 // It can also change the simulated environment the way the outside world would: a setting changed on the
 // monitor itself (osdSet), the user's input idle time, and the monitor switched off and on (its USB devices
 // and DRM connector, with the host events raised through main's real DeviceChangeGate). It never reaches
-// into the backend's model.
+// into the backend's model. Besides the simulated hardware it shows what the backend asked of main's own
+// screen-capture host (sessions started, interval changes: the Follow video speed tiers).
 
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -55,6 +56,19 @@ export interface MockProbeSnapshot {
     /** Refused register accesses (must stay empty). */
     violations: string[];
   } | null;
+  /**
+   * What the backend asked of main's screen-capture host (ElectronCaptureHost.videoStats): capture sessions started
+   * (each a portal dialog on Wayland), in-place interval changes, and the current session's frame interval (null while
+   * nothing is captured). null when main gave the probe no capture hook.
+   */
+  capture: MockProbeCapture | null;
+}
+
+/** MockProbeSnapshot.capture (the capture host is part of the environment the backend drives, like the ENE). */
+export interface MockProbeCapture {
+  starts: number;
+  retunes: number;
+  intervalMs: number | null;
 }
 
 export interface MockProbe {
@@ -86,6 +100,8 @@ export interface MockProbe {
 export interface MockProbeHooks {
   /** A raw host device event, through main's DeviceChangeGate (vendor debounce and shields, 01 §9). */
   deviceEvent?: (name: DeviceEventName) => void;
+  /** The screen-capture host's video state (ElectronCaptureHost.videoStats). */
+  capture?: () => MockProbeCapture;
 }
 
 /** Set VCP frames as received on 0x37 (`51 84 03 cc hi lo chk`, `51 86 03 E2 A0 xx hi lo chk`). */
@@ -95,7 +111,7 @@ export function decodeSetVcp(frame: Uint8Array): [number, number] | null {
   return null;
 }
 
-export function snapshotOf(hw: MockHardware): MockProbeSnapshot {
+export function snapshotOf(hw: MockHardware, capture: MockProbeCapture | null = null): MockProbeSnapshot {
   const monitor = hw.monitor;
   const vcp: Record<number, number> = {};
   for (const [code] of monitor.spec.vcp) {
@@ -110,7 +126,7 @@ export function snapshotOf(hw: MockHardware): MockProbeSnapshot {
     for (const [g, s] of Object.entries(state.groups)) groups[g] = s ? { ...s, color: [...s.color] } : null;
     ene = { hostControl: state.hostControl, groups, frame: Array.from(state.frame), violations: [...hw.ene.violations] };
   }
-  return { model: monitor.spec.name, vcp, writes, ene };
+  return { model: monitor.spec.name, vcp, writes, ene, capture: capture ? { ...capture } : null };
 }
 
 export function createMockProbe(backend: () => DefaultBackend | null, hooks: MockProbeHooks = {}): MockProbe {
@@ -127,7 +143,7 @@ export function createMockProbe(backend: () => DefaultBackend | null, hooks: Moc
   return {
     snapshot: () => {
       const hw = hardware();
-      return hw ? snapshotOf(hw) : null;
+      return hw ? snapshotOf(hw, hooks.capture?.() ?? null) : null;
     },
     osdSet: (code, value) => hardware()?.monitor.osdSet(code, value) ?? false,
     setIdleSeconds: (seconds) => {

@@ -3,6 +3,10 @@
 // (PHL/CDevice_PHLDisplay.cs:866-879). Fixtures: 20-enum-valuelist-catalog §6.1 (ENE model "34M2C8600",
 // 3962 bytes) and §6.2 (no ENE, string_0 = "", 3277 bytes); 09 §10.1.
 //
+// Deliberate deviation (impl-ambiglow §5 item 17): with an ENE the served menu's FollowVideo item offers the
+// Speed slider (SupSpeed true, 1..3 step 1) for the host's follow-video speed tiers. vendorEffectMenu() is
+// the byte-exact vendor menu; displayEffectMenu() is what Effect_GetMenu answers. §6.2 (no ENE) is unchanged.
+//
 // Member order is BaseEffectMenuItem's declaration order (ENT/BaseEffectMenuItem.cs): Effect, SupSync,
 // SupSpeed, MinSpeed, MaxSpeed, SpeedStep, SupBrightness, MinBrightness, MaxBrightness, BrightnessStep,
 // SupRandomColor, SupRainbowColor, SupColor, SupBgColor, SupDir, DirList, SupRegion, RegionList,
@@ -94,8 +98,11 @@ function baseItem(effect: EnumItem): DisplayEffectMenuItem {
   };
 }
 
-/** DisplayEffectMenu.Default(modelName): the seven effects of DisplayEffectInfo.GetEffects with their capabilities. */
-export function displayEffectMenu(layouts: readonly EneModelLayout[], modelName: string): DisplayEffectMenu {
+/**
+ * DisplayEffectMenu.Default(modelName) exactly as the vendor builds it: the seven effects of
+ * DisplayEffectInfo.GetEffects with their capabilities (fixtures 20-enum §6.1 / §6.2, byte for byte).
+ */
+export function vendorEffectMenu(layouts: readonly EneModelLayout[], modelName: string): DisplayEffectMenu {
   const EffectList: DisplayEffectMenuItem[] = [];
   for (const name of DISPLAY_EFFECTS) {
     const item = baseItem(getItem('EffectType', name));
@@ -132,6 +139,35 @@ export function displayEffectMenu(layouts: readonly EneModelLayout[], modelName:
     EffectList.push(item);
   }
   return { EffectList };
+}
+
+/**
+ * What the port changes in the ENE menu's FollowVideo item (impl-ambiglow §5 deviation 17): the Speed slider, whose
+ * EffectDetail.Speed 1..3 selects the host's follow-video cadence (follow-video.ts: Low = the vendor's 300 + 100 ms,
+ * Normal, High). The vendor item has SupSpeed false with the BaseEffectMenuItem range 1..3 step 1.
+ *
+ * The renderer builds the slider (Ambiglow-Dvqon39u.js:1059-1072) from the item merged over EffectDetail
+ * (styles-DAnQi2A8.js:9516 updateMonitorEffectInfo, :9431 saveMonitorData) with a vendor bug: the range starts at
+ * `MinBrightness`, not `MinSpeed` (`let a = e.MinBrightness; … for (; a <= e.MaxSpeed;) … a += e.SpeedStep`), and
+ * mark i is labelled ua[i] = ["Low", "Normal", "High"][i]. The FollowVideo item keeps the base MinBrightness 1, so
+ * the range is exactly [1, 2, 3] with the marks Low, Normal, High (menu.test.ts replays that code); MinBrightness
+ * needs no change.
+ */
+export const FOLLOW_VIDEO_SPEED_MENU = Object.freeze({ SupSpeed: true, MinSpeed: 1, MaxSpeed: 3, SpeedStep: 1 } as const);
+
+/**
+ * Effect_GetMenu as the port serves it: the vendor's DisplayEffectMenu.Default(modelName), except that with an ENE
+ * (modelName non-empty) the FollowVideo item offers the Speed slider (FOLLOW_VIDEO_SPEED_MENU). Without an ENE the
+ * monitor firmware renders FollowVideo (E2A019 = 1); the host cannot change its rate, so the vendor item stays and
+ * the §6.2 menu is byte-exact.
+ */
+export function displayEffectMenu(layouts: readonly EneModelLayout[], modelName: string): DisplayEffectMenu {
+  const menu = vendorEffectMenu(layouts, modelName);
+  if (modelName === '') return menu;
+  for (const item of menu.EffectList) {
+    if (item.Effect.Name === 'FollowVideo') Object.assign(item, FOLLOW_VIDEO_SPEED_MENU);
+  }
+  return menu;
 }
 
 /** CDeviceEffectBase._effectMenu: one menu per ENE model string, built on first use. */

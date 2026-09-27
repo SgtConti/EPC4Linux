@@ -94,9 +94,16 @@ export class ManualTimers implements EffectTimers {
   }
 }
 
-/** A CaptureHost the test drives: records starts/stops and pushes frames and levels on demand. */
+/**
+ * A CaptureHost the test drives: records starts/stops/retunes and pushes frames and levels on demand. Like the real
+ * host, setVideoInterval acts only on a session that is running or starting (a no-op otherwise).
+ */
 export class FakeCaptureHost implements CaptureHost {
   readonly videoStarts: number[] = [];
+  /** setVideoInterval calls that reached a session (running or starting). */
+  readonly videoIntervals: number[] = [];
+  /** The interval of the current session (start, then retunes); null while none. */
+  videoIntervalMs: number | null = null;
   videoStops = 0;
   audioStarts = 0;
   audioStops = 0;
@@ -109,17 +116,26 @@ export class FakeCaptureHost implements CaptureHost {
 
   async startVideo(intervalMs: number, onFrame: (f: CaptureFrame) => void): Promise<boolean> {
     this.videoStarts.push(intervalMs);
+    this.videoIntervalMs = intervalMs;
     const stopsBefore = this.videoStops;
     if (this.videoGate) await this.videoGate;
     // Like the real host: a stop issued while the start was pending makes it resolve false, without frames.
     if (this.videoStops !== stopsBefore) return false;
     this.#onFrame = this.videoResult ? onFrame : null;
+    if (!this.videoResult) this.videoIntervalMs = null;
     return this.videoResult;
   }
 
   stopVideo(): void {
     this.videoStops++;
+    this.videoIntervalMs = null;
     this.#onFrame = null;
+  }
+
+  setVideoInterval(intervalMs: number): void {
+    if (this.videoIntervalMs === null) return;
+    this.videoIntervals.push(intervalMs);
+    this.videoIntervalMs = intervalMs;
   }
 
   async startAudio(onLevel: (level: number) => void): Promise<boolean> {

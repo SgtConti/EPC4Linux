@@ -15,7 +15,7 @@ Contents:
 9. [Reverse-engineering toolchain (`tools/`)](#reverse-engineering-toolchain-tools)
 10. [Invariants to keep](#invariants-to-keep)
 11. [Release checklist](#release-checklist)
-12. [Known limitations and open questions](#known-limitations-and-open-questions)
+12. [Known limitations and open questions](#known-limitations-and-open-questions) (including [Known deviations](#known-deviations))
 
 ---
 
@@ -97,6 +97,10 @@ Each area has one implementation note. Read it before you change the area. Its "
 
 - **Renderer ↔ backend wire.** Every reply is a `JsonResult` with the C# key order, `Tag` shapes and enum integers of the Windows backend. There are three serialization modes (`ui`, `uiProfileGet`, `profile`; `core/json.ts`, `[toCSharpJson]`). Overloads are resolved by argument type exactly as `Bridge.cs` declares them. The golden transcript (`test/contract/fixtures/golden-2026-09-26.json`, 20-backend-host-tail §5) pins 20 steps byte for byte.
 - **Adding or changing an API function.** Register it in the owning `api/<family>.ts` with the exact `Bridge.cs` signature (impl-hub-rpc §7). Keep `api/catalog.ts` in step. `coverage.test.ts` names anything missing, extra, duplicated or registered by the wrong family. A new `api/` file also goes into `API_MODULE_FILES` in `test/unit/api/helpers.ts` and into `compose.ts API_MODULES`.
+- **Deliberate wire deviations** are few, documented, and tested as "the fixture except exactly this":
+  - `Effect_GetMenu` with an ENE serves the FollowVideo item with `SupSpeed: true`, the Follow video Speed slider (impl-ambiglow deviation 17).
+  - The tests compare against 20-enum §6.1 after putting back the vendor's `"SupSpeed":false` (`test/fixtures/effect-menu.ts vendorMenuText`), so any other change to the menu still fails.
+  - A new deviation of this kind needs the same treatment, an entry in [Known deviations](#known-deviations) and one in the module's impl note.
 - **Notifications** (`notifier.notify(name, tag)`): names and payloads from 02 §6. `NotifyUIDisplayEffectChange` carries the named keys followed by `Item1..3` (impl-monitor deviation 12).
 - **Files under `~/.config/EvniaServe`** stay byte-compatible with `%APPDATA%\EvniaServe` (UTF-8 BOM, one-line JSON in C# member order; impl-theme §3.7). The round-trip tests use the user's real files.
 - **`~/.config/evnia/config.json`** stays electron-store compatible (impl-electron-shell "Persisted settings").
@@ -110,10 +114,10 @@ Each area has one implementation note. Read it before you change the area. Its "
 | Typecheck | whole project | `npx tsc -p tsconfig.json` | every `src/` and `test/` file | Nothing |
 | Unit | `test/unit/<module>/` (85 files) | `node --test "test/unit/**/*.test.ts"`, or one module: `node --test "test/unit/ddc/*.test.ts"` | each module against fakes: virtual clocks, `FakeUsbBackend`, fake i2c syscalls, the simulated monitor and ENE, fake `parec`/`xprop`/`gdbus` on `PATH` | Nothing. A few suites need `build/vendor-data` or the installer's `app.asar` and skip without them. |
 | Contract (golden transcript) | `test/contract/` | `node --test "test/contract/**/*.test.ts"` | The **production** composition (`createDefaultBackend` with the simulated 34M2C8600 and the user's fixtures) through the real dispatcher: the 20 golden steps byte-exact, the 03 §5 page flows, persistence, theme-switch writes, ENE present/absent, hotplug, the VCP 0x04 resets, restart, the `serve.ts` smoke test | `build/vendor-data` (`npm run import-ui`); skipped without it. About 30 s, because the driver's real sleeps run (1 s per SmartImage change, 5 s per reset). |
-| E2E | `test/e2e/` | `npm run import-ui && npm run build && xvfb-run -a -s "-screen 0 1920x1080x24" npm run test:e2e` | `app.test.ts`: shell contract, kill-switch probe, zero non-local requests, Home card (placeholder UI and real vendor UI). `capture.test.ts`: X11 capture and its sequencing. `walkthrough.test.ts`: the real vendor UI page by page, in two runs (ENE and first run; no ENE with the migrated Windows data), 17 tests and about 84 steps each, checking the simulated hardware through `mock-probe.ts` | An X display (Xvfb). 51 tests in about 4.6 minutes. Artifacts (screenshots, `rpc.log`, `main.log`, `network.json`) go to `test/e2e/artifacts/` (git-ignored). |
+| E2E | `test/e2e/` | `npm run import-ui && npm run build && xvfb-run -a -s "-screen 0 1920x1080x24" npm run test:e2e` | `app.test.ts`: shell contract, kill-switch probe, zero non-local requests, Home card (placeholder UI and real vendor UI). `capture.test.ts`: X11 capture, its sequencing, the in-place retune (`setVideoInterval`) and frame-driven sampling (a frame every 300 ms at Low, the lag of a screen change). `walkthrough.test.ts`: the real vendor UI page by page, in two runs (ENE and first run; no ENE with the migrated Windows data), 17 tests and 85 steps each, checking the simulated hardware through `mock-probe.ts` | An X display (Xvfb). 51 tests in about 4.6 minutes. Artifacts (screenshots, `rpc.log`, `main.log`, `network.json`) go to `test/e2e/artifacts/` (git-ignored). |
 | Install | `test/install/` | On the Docker **host**: `port/test/install/run.sh` | `.deb` build; lintian; `apt install` in **clean** `debian:trixie` and `ubuntu:24.04`; the shared-library closure; file modes; fuses; `udevadm verify`; `.desktop`; launches as a non-root user (namespace and setuid sandbox) to Home; exit leaves no helper; purge leaves only user data | Network for apt only. 10 to 15 minutes. Results in `test/install/artifacts/`. |
 
-`npm test` runs unit and contract tests together. At the end of the docs wave (2026-09-27) there were **848 tests: 847 pass, none fail**. The remaining hub test, the LAN-interface refusal, skips under `--network none`.
+`npm test` runs unit and contract tests together. After the Follow video speed change (2026-09-27) there were **870 tests: 868 pass, none fail**, with `EVNIA_VENDOR_ASAR` pointing at the installer's `app.asar`. Two tests skip: the hub's LAN-interface refusal under `--network none`, and the layout-table check of `ene-layout.test.ts`, which needs the installation at `../Evnia Precision Center`. Without the vendor archive, the vendor-UI suites skip too (850 tests). The review fixes of the same day added 6 tests: **856 without the archive (855 pass, 1 skip, none fail)**, so 876 with it.
 
 **What to run before calling a change done:**
 
@@ -284,6 +288,16 @@ Collected from every `impl-*.md` and the results of the packaging, security-fix 
 | The ENE "hub enumerated only at SuperSpeed" diagnostic is missing | 20-monitor-io §6 asks for one log line when `2109:0211` is present without `2109:2211`/`0cf2:a201`. It is not implemented. The user guide covers the case manually. | Add it to the ambiglow service's reconcile. |
 | Cosmetic | `core/envelope.ts exception()` prints the message twice (impl-hub-rpc §6). `src/backend/api/setting.ts` lines 8-9 still mention the removed `api/system-minimal.ts`. | Small clean-ups by the owners. |
 
+### Known deviations
+
+Deliberate differences from the Windows app that a user can see or that change what goes over the wire. Every module's numbered deviations are in its impl note. The ones below changed behaviour the Windows app has, on request or as an opt-in experiment:
+
+| Deviation | What differs | Where | Tests |
+|---|---|---|---|
+| **Follow video speed tiers** (user request, 2026-09-27) | With the ENE, the Ambiglow page shows the vendor's own Speed slider for Follow video (`Effect_GetMenu` FollowVideo `SupSpeed: true`, no renderer patch). The value selects a tier: **Low** = the vendor cadence (capture 300 ms, the newest frame on a fixed 100 ms tick) and, with frame-driven sampling, also the vendor's lag (~265 ms average, ~465 ms worst). **Normal** (default, also for missing or unknown values): capture 100 ms, each new frame uploaded at once (~115 / ~165 ms). **High**: capture 40 ms, uploads whenever the ENE is free (~15/s, ~115 / ~170 ms). The lag figures count the wait for the next source frame, Low's tick, an upload in flight and the ~65 ms upload. A speed change retunes the running capture (`CaptureHost.setVideoInterval`), with no new session and so no portal dialog. While the uploads are paused (idle, the ENE away) the kept session is slowed to 1 fps the same way. The capture host's floor is 33 ms (was 100 ms). Without the ENE nothing changes | impl-ambiglow §4.2 and deviation 17; impl-electron-shell "Capture host" (`setVideoInterval`), deviation 36 | `menu.test.ts`, `follow-video.test.ts`, `service-ene.test.ts`, `idle.test.ts`, `capture-protocol.test.ts`, `capture-slot.test.ts`, `mock-probe.test.ts`, the contract test's §6.1 step, e2e `capture.test.ts` (retune) and the walkthrough steps "ambiglow-follow-video-speed" (ENE) and "ambiglow-ddc-follow-video" (no ENE) |
+| **Frame-driven screen sampling** (2026-09-27) | The capture page samples each frame of the screen source as it arrives (`MediaStreamTrackProcessor`), and asks the source for exactly 1000 / interval fps (300 ms is 3.33 fps). Before, a timer sampled a `<video>` element out of phase with the source, which added up to one capture interval of lag (Low up to ~0.8 s instead of the Windows app's ~0.47 s). The timer remains as the fallback when the interface is missing; the start status names the sampling in use | impl-electron-shell "Capture host" and deviation 37; impl-ambiglow §4.2 | `capture-protocol.test.ts` (rate, spacing), e2e `capture.test.ts` (the 300 ms spacing, the lag of a screen change: median 149 ms, 439 ms with the fallback forced) |
+| **ENE frame burst** (experimental, off by default) | `EVNIA_ENE_FRAME_BURST=1` sends a follow-video frame as one 138-byte control transfer at `0xE300` instead of six paced writes, inside the same register-window guard. It is logged once at start-up. A refused burst logs one warning, and after three failures in a row the device uses the six writes again. Not verified on hardware | impl-usb-ene §2.2 and deviation 20; USER-GUIDE "Follow video lags behind the picture" | `ene-frame.test.ts` (burst, fallback, refused burst, env switch), `service-ene.test.ts` |
+
 ### Not yet verified on the physical monitor
 
 The port has run only against the simulated 34M2C8600 and in containers. On the user's machine, these need confirming (checklist: 20-monitor-io §7; impl-electron-shell "Test coverage gaps"):
@@ -297,7 +311,7 @@ The port has run only against the simulated 34M2C8600 and in containers. On the 
 - **ENE Ambiglow controller**:
   - everything beyond the logged identity: the `0x0023` host-control semantics, the 14/18/14 LED groups, auto-increment across segments, no commit after frames;
   - whether 10 ms pacing is needed (09 open question 4);
-  - the achievable frame rate (about 14-15 fps with 6 paced writes; the single 138-byte frame write is unused);
+  - the achievable frame rate (about 14-15 fps with 6 paced writes, which Follow video High reaches; the single 138-byte frame write is an opt-in experiment, `EVNIA_ENE_FRAME_BURST=1`);
   - its HID interface (09 Q1).
   - (impl-usb-ene §4)
 - **Monitor firmware behaviour:**
@@ -390,7 +404,7 @@ The port has run only against the simulated 34M2C8600 and in containers. On the 
 | Panel name and boot-flag address of the monitor (the simulator answers with a null message) | impl-ddc | Capture over USB with the CLI (`identity`) |
 | Exact 175 Hz timing | 20-monitor-io C10 | `edid-decode` of the sysfs EDID |
 | Whether DP HDR metadata/colorspace properties allow an HDR cross-check (P2) | 20-monitor-io C13 | `modetest -c` |
-| ENE pacing and single-write frames | 09 open question 4, plan A.7 | Hardware test with the ENE |
+| ENE pacing and single-write frames | 09 open question 4, plan A.7 | Hardware test with the ENE: Follow video at High with and without `EVNIA_ENE_FRAME_BURST=1` (impl-usb-ene §2.2) |
 
 ### Stale statements in the impl notes
 

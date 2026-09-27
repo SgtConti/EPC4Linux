@@ -20,12 +20,26 @@
 // succeeded within VIDEO_START_TIMEOUT_MS (a portal dialog left open) resolves false and releases the
 // window, which withdraws the dialog.
 //
+// Retune (setVideoInterval, the Follow video speed tiers and their pause): the current session, running or still
+// starting, changes its frame interval in place (page command setVideoInterval: the sampling interval,
+// applyConstraints on the track), so a speed change never opens a new session, i.e. never a new portal dialog on
+// Wayland. Intervals are clamped to 33..10000 ms (protocol.ts clampFrameInterval; High asks for 40 ms). The page
+// samples each source frame as it arrives (src/capture/page.ts).
+//
 // Audio is recorded outside Chromium, which cannot open a sink monitor (audio-monitor.ts).
 
 import { pathToFileURL } from 'node:url';
 import { BrowserWindow, desktopCapturer, ipcMain, screen, session, type IpcMainEvent, type Session } from 'electron';
 import type { CaptureFrame, CaptureHost, Logger } from '../backend/types.ts';
-import { FRAME_HEIGHT, FRAME_WIDTH, type FramePayload, type StartVideoCommand } from '../capture/protocol.ts';
+import {
+  clampFrameInterval,
+  FRAME_HEIGHT,
+  FRAME_WIDTH,
+  MIN_FRAME_INTERVAL_MS,
+  type FramePayload,
+  type SetVideoIntervalCommand,
+  type StartVideoCommand,
+} from '../capture/protocol.ts';
 import { type AudioMonitorOptions, type LevelCallback, PulseMonitorCapture } from './audio-monitor.ts';
 import { CaptureSlot, withTimeout } from './capture-slot.ts';
 import { pickScreenSource, ScreenGrant } from './capture-sources.ts';
@@ -34,8 +48,8 @@ import type { AppPaths } from './paths.ts';
 import { INTERNAL_CHANNELS } from './shared/channels.ts';
 
 export const CAPTURE_PARTITION = 'evnia-capture';
-/** Fastest frame interval accepted (ARCHITECTURE: up to 10 fps). */
-export const MIN_FRAME_INTERVAL_MS = 100;
+/** Fastest frame interval accepted (33 ms, about 30 fps; src/capture/protocol.ts clampFrameInterval). */
+export { MIN_FRAME_INTERVAL_MS };
 /** A video start still pending after this long (portal dialog left open) resolves false. */
 export const VIDEO_START_TIMEOUT_MS = 60_000;
 
@@ -51,6 +65,16 @@ export interface CaptureHostOptions {
 
 type FrameCallback = (f: CaptureFrame) => void;
 
+/** What the backend asked of the video half (mock-probe.ts shows it to the e2e walkthrough). */
+export interface CaptureVideoStats {
+  /** startVideo calls since construction (each one a new session: a portal dialog on Wayland). */
+  starts: number;
+  /** setVideoInterval calls that retuned a session. */
+  retunes: number;
+  /** The frame interval of the current session (clamped), or null while nothing is captured. */
+  intervalMs: number | null;
+}
+
 export class ElectronCaptureHost implements CaptureHost {
   readonly #o: CaptureHostOptions;
   readonly #video = new CaptureSlot<FrameCallback>();
@@ -60,6 +84,10 @@ export class ElectronCaptureHost implements CaptureHost {
   #session: Session | null = null;
   #win: BrowserWindow | null = null;
   #opening: Promise<BrowserWindow | null> | null = null;
+  /** The interval the current video session wants (its start may still be in flight). */
+  #interval: { session: number; ms: number } | null = null;
+  #starts = 0;
+  #retunes = 0;
 
   constructor(o: CaptureHostOptions) {
     this.#o = o;
@@ -70,6 +98,8 @@ export class ElectronCaptureHost implements CaptureHost {
 
   startVideo(intervalMs: number, onFrame: FrameCallback): Promise<boolean> {
     const session = this.#video.begin(onFrame);
+    this.#starts++;
+    this.#interval = { session, ms: clampFrameInterval(intervalMs) };
     const timeoutMs = this.#o.videoStartTimeoutMs ?? VIDEO_START_TIMEOUT_MS;
     return withTimeout(this.#startVideo(session, intervalMs), timeoutMs, () => {
       if (this.#video.isCurrent(session)) {
@@ -83,7 +113,35 @@ export class ElectronCaptureHost implements CaptureHost {
 
   stopVideo(): void {
     this.#video.stop();
+    this.#interval = null;
     this.#destroyWindow();
+  }
+
+  /**
+   * CaptureHost.setVideoInterval (the Follow video speed tiers): the current session, running or still starting,
+   * samples every `intervalMs` from now on, in the same stream (no new session, no portal dialog). A start still in
+   * flight sends the new interval with its page command, or the page applies it when its stream is up.
+   */
+  setVideoInterval(intervalMs: number): void {
+    const session = this.#video.current;
+    const wanted = this.#interval;
+    if (session === null || wanted === null || wanted.session !== session) return;
+    const ms = clampFrameInterval(intervalMs);
+    if (ms === wanted.ms) return;
+    wanted.ms = ms;
+    this.#retunes++;
+    this.#o.log.info(`Screen capture interval ${ms} ms (same session)`);
+    const win = this.#win;
+    if (!win || win.isDestroyed() || this.#opening) return; // the start sends the latest interval
+    const cmd: SetVideoIntervalCommand = { session, intervalMs: ms };
+    void this.#run(win, `window.evniaCapture.setVideoInterval(${JSON.stringify(cmd)})`, false);
+  }
+
+  /** What the backend asked of the video half so far (mock mode: the e2e walkthrough's probe). */
+  get videoStats(): CaptureVideoStats {
+    const session = this.#video.current;
+    const wanted = this.#interval;
+    return { starts: this.#starts, retunes: this.#retunes, intervalMs: session !== null && wanted?.session === session ? wanted.ms : null };
   }
 
   startAudio(onLevel: LevelCallback): Promise<boolean> {
@@ -113,7 +171,8 @@ export class ElectronCaptureHost implements CaptureHost {
     }
     const cmd: StartVideoCommand = {
       session,
-      intervalMs: Math.max(MIN_FRAME_INTERVAL_MS, Math.round(intervalMs) || MIN_FRAME_INTERVAL_MS),
+      // the latest interval of this session: a setVideoInterval during the window/source awaits wins
+      intervalMs: this.#interval?.session === session ? this.#interval.ms : clampFrameInterval(intervalMs),
       sourceId,
       width: FRAME_WIDTH,
       height: FRAME_HEIGHT,
@@ -152,7 +211,8 @@ export class ElectronCaptureHost implements CaptureHost {
     if (k === 'video-started') {
       this.#o.log.info(msg);
       this.#grant.started();
-    } else this.#o.log.warn(msg);
+    } else if (k === 'video-retuned') this.#o.log.info(msg);
+    else this.#o.log.warn(msg);
     if (k === 'video-ended') {
       this.#grant.ended();
       this.#video.release(sessionId);

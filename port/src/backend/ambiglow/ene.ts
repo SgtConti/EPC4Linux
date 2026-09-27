@@ -19,7 +19,7 @@ import { Mutex } from '../core/events.ts';
 import { UsbError } from '../usb/errors.ts';
 import { isSameEnumeration } from '../usb/ids.ts';
 import { findModelLayout, type EneModelLayout } from './ene-layout.ts';
-import { planFrame, renderFrame, type EneLedCounts, type FramePlan, type VideoGrid } from './ene-frame.ts';
+import { burstFrameWrite, planFrame, renderFrame, type EneLedCounts, type FramePlan, type FrameWrite, type VideoGrid } from './ene-frame.ts';
 import {
   audioLevelByte,
   audioLevelWrites,
@@ -69,6 +69,24 @@ export interface EneDeviceOptions extends EneTransportOptions {
    * re-enumerated). The owner should close() it and re-probe; see EneDevice.lost.
    */
   onLost?: (device: EneDevice) => void;
+  /**
+   * Experimental (09 plan A.7, open question 4; default off): send a follow-video frame as ONE control
+   * transfer at 0xE300 (138 bytes on the 34M2C8600) instead of the vendor's six paced segment writes. Only when
+   * the frame's segments are contiguous; the transport's frame-buffer window still bounds it. The vendor never
+   * sends more than one 64-byte packet per transfer, so a controller may refuse it: the first failure is logged
+   * as a warning, and after ENE_FRAME_BURST_MAX_FAILURES in a row the device goes back to the six paced writes.
+   */
+  frameBurst?: boolean;
+}
+
+/** Environment switch for EneDeviceOptions.frameBurst ("1" = on). */
+export const ENE_FRAME_BURST_ENV = 'EVNIA_ENE_FRAME_BURST';
+
+/** Failed burst writes in a row (other than a vanished device) after which a device uses the six paced writes again. */
+export const ENE_FRAME_BURST_MAX_FAILURES = 3;
+
+export function eneFrameBurstFromEnv(env: Readonly<Record<string, string | undefined>> = process.env): boolean {
+  return env[ENE_FRAME_BURST_ENV]?.trim() === '1';
 }
 
 export function isEneDevice(info: Pick<UsbDeviceInfo, 'vendorId' | 'productId'>): boolean {
@@ -147,6 +165,11 @@ export class EneDevice {
   readonly #log: Logger;
   readonly #onLost: ((device: EneDevice) => void) | undefined;
   readonly #plan: FramePlan;
+  /** EneDeviceOptions.frameBurst; switched off after ENE_FRAME_BURST_MAX_FAILURES failed bursts in a row. */
+  #frameBurst: boolean;
+  #burstFallbackLogged = false;
+  #burstFailures = 0;
+  #burstFailureWarned = false;
   readonly #mutex = new Mutex();
   #pending = 0;
   #closed = false;
@@ -175,14 +198,22 @@ export class EneDevice {
       if (!layout) {
         throw new EneError('unsupported-model', `ENE model "${identity.modelName}" is not in PCenter_AmbiglowInfo.json; the device is not driven (vendor behaviour)`);
       }
-      return new EneDevice(t, identity, layout, log, options.onLost);
+      return new EneDevice(t, identity, layout, log, options.onLost, options.frameBurst === true);
     } catch (e) {
       await t.close().catch(() => undefined);
       throw e;
     }
   }
 
-  private constructor(t: EneTransport, identity: EneIdentity, layout: EneModelLayout, log: Logger, onLost: ((device: EneDevice) => void) | undefined) {
+  private constructor(
+    t: EneTransport,
+    identity: EneIdentity,
+    layout: EneModelLayout,
+    log: Logger,
+    onLost: ((device: EneDevice) => void) | undefined,
+    frameBurst: boolean,
+  ) {
+    this.#frameBurst = frameBurst;
     this.#t = t;
     this.info = t.handle.info;
     this.identity = identity;
@@ -315,13 +346,24 @@ export class EneDevice {
    * the 34M2C8600. Frames only take effect in mode 14 (UserDefine, or 11); in any other mode —
    * including after lightsOff() — the frame is dropped and false is returned, so a late frame
    * cannot write into a buffer the firmware is not showing.
+   *
+   * With `frameBurst` (experimental, EneDeviceOptions) the six segments go out as one paced transfer at
+   * 0xE300 when they are contiguous (burstFrameWrite); otherwise, and by default, as the vendor's six writes.
+   * A failed burst rejects like a failed segment write (the next frame is the retry); see #writeBurst.
    */
   async writeVideoFrame(grid: VideoGrid): Promise<boolean> {
     const writes = renderFrame(this.#plan, grid);
+    const burst = this.#frameBurst ? burstFrameWrite(writes) : null;
+    if (this.#frameBurst && !burst && !this.#burstFallbackLogged) {
+      this.#burstFallbackLogged = true;
+      this.#log.info(`ENE ${this.info.id}: frame segments are not contiguous; frame burst off, six paced writes are used`);
+    }
     return this.#op(async () => {
       const mode = this.#applied?.mode;
       if (mode !== EneMode.UserDefine && mode !== EneMode.FollowVideo) return false;
-      await this.#write(writes.map((w) => ({ ...w, paced: true })));
+      // (a burst switched off while this frame was queued goes out as the six writes)
+      if (burst && this.#frameBurst) await this.#writeBurst(burst);
+      else await this.#write(writes.map((w) => ({ ...w, paced: true })));
       for (const w of writes) {
         const offset = w.reg - EneReg.FRAME_BUFFER;
         const room = this.#mirror.length - offset;
@@ -421,6 +463,39 @@ export class EneDevice {
 
   async #write(writes: readonly EneRegisterWrite[]): Promise<void> {
     for (const w of writes) await this.#t.writeRegs(w.reg, w.data, w.paced);
+  }
+
+  /**
+   * One experimental frame burst. A failure other than a vanished device (UsbError 'no-device', handled by #op) is
+   * the burst's own: a firmware that stalls a multi-packet EP0 data stage fails every frame, which the owner logs at
+   * debug level only. So the first one is a warning naming the switch, and after ENE_FRAME_BURST_MAX_FAILURES in a
+   * row this device goes back to the vendor's six paced writes; a success starts the count again.
+   */
+  async #writeBurst(burst: FrameWrite): Promise<void> {
+    try {
+      await this.#write([{ ...burst, paced: true }]);
+      this.#burstFailures = 0;
+    } catch (e) {
+      if (!(e instanceof UsbError && e.code === 'no-device')) this.#burstFailed(e);
+      throw e;
+    }
+  }
+
+  #burstFailed(e: unknown): void {
+    this.#burstFailures++;
+    if (!this.#burstFailureWarned) {
+      this.#burstFailureWarned = true;
+      this.#log.warn(
+        `ENE ${this.info.id}: the experimental frame burst (${ENE_FRAME_BURST_ENV}=1) failed: ${e instanceof Error ? e.message : String(e)}; ` +
+          `after ${ENE_FRAME_BURST_MAX_FAILURES} failures in a row the six paced writes are used again`,
+      );
+    }
+    if (this.#frameBurst && this.#burstFailures >= ENE_FRAME_BURST_MAX_FAILURES) {
+      this.#frameBurst = false;
+      this.#log.warn(
+        `ENE ${this.info.id}: frame burst failed ${this.#burstFailures} times in a row; switched off, Follow video frames use the six paced writes (unset ${ENE_FRAME_BURST_ENV})`,
+      );
+    }
   }
 
   /** The ParameterSet transfer sequence for `ps`; `applied` is null until all of it went out. */

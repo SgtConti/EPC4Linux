@@ -1,6 +1,6 @@
 # Implementation notes: `usb` layer and ENE Ambiglow driver
 
-Module owner: usb-ene. Sources: `port/src/backend/usb/*`, `port/src/backend/ambiglow/ene*.ts`, `port/src/backend/ambiglow/mock-ene.ts`. Tests: `port/test/unit/usb/`, `port/test/unit/ambiglow-ene/` (96 tests, `node --test "test/unit/usb/**/*.test.ts" "test/unit/ambiglow-ene/**/*.test.ts"`).
+Module owner: usb-ene. Sources: `port/src/backend/usb/*`, `port/src/backend/ambiglow/ene*.ts`, `port/src/backend/ambiglow/mock-ene.ts`. Tests: `port/test/unit/usb/`, `port/test/unit/ambiglow-ene/` (100 tests, `node --test "test/unit/usb/**/*.test.ts" "test/unit/ambiglow-ene/**/*.test.ts"`).
 
 Specs: `docs/re/09-ambiglow-lighting.md` §3–§8, §11, §16.8, plan A/F; `08` §4.1, §8.2, §8.5; `01` §9; `20-monitor-io-linux-consolidation` §2.2 rule 5, §5. Ground truth: `work/dotnet-clean/Zeasn.USB.ENE.Lib` (`Class0.cs`, `CUSBENE6K7732.cs`), `work/dotnet-clean/Zeasn.Equipment.Option.Lib/.../ENEDataConvert.cs`, `CDevice_PHLDisplay.cs`, `work/native/EneEc.dll.c`, and the user's log `logs/EvniaServe-2026-09-25.txt`.
 
@@ -98,6 +98,7 @@ for (const info of await findEneDevices(usb)) {                           // 0cf
 await ene.setEffect(toEneParameterSet(displayEffectInfo));   // ParameterSet (09 §6); the owner's explicit state
 await ene.setEffect(ps, { suspended: true });                // while idle: recorded for lightsOn(), the LEDs stay dark
 await ene.writeVideoFrame(captureFrame);                     // 50×40 RGBA or RGB grid → 0xE300… (09 §7.3); false unless mode 14 applied
+// EneDeviceOptions.frameBurst (experimental, EVNIA_ENE_FRAME_BURST=1): the frame as ONE transfer at 0xE300 (below)
 await ene.writeAudioLevel(level);                            // float 0..255, truncated to a byte → E960..62 or E970..72; false unless mode 9/10
 await ene.lightsOff(); await ene.lightsOn();                 // idle suspend / resume (09 §11); resolve false when they did nothing
 ene.ledColors();                                             // Effect_GetLEDs preview, R,G,B × ledCount in frame-buffer order
@@ -130,6 +131,17 @@ Every sequence is asserted byte for byte in `ene-params.test.ts`, including the 
 **UI mapping.** `toEneParameterSet(info, {breathingSync})` implements `ENEDataConvert.MapTMain_ParameterSet` together with the Breathing override from `CDevice_PHLDisplay.method_17`. It takes the C#-shaped `DisplayEffectInfo` members directly (`EffectEnable`, `CurrEffect.Value`, `EffectDetail.{Effect.Value, Speed, Brightness, IsRainbowColor, CurRGB, CurRegion}`).
 
 **Follow-video frame.** `planFrame()` precomputes one sampled grid cell per LED using the vendor formulas with round-half-even. Border sub-counts come from the JSON; the central and bottom counts and the base addresses come from the device registers. For the 34M2C8600 this gives 6 paced writes: 9 B @E300, 12 B @E309, 12 B @E315, 9 B @E321, 54 B @E32A, 42 B @E360. `ene-frame.test.ts` asserts these against the concrete table in 09 §7.3. No commit write follows. The grid must be exactly 50×40, RGB or RGBA. A `CaptureFrame` can be passed as is.
+
+**Experimental frame burst** (`EneDeviceOptions.frameBurst`, default off; deviation 20). With `EVNIA_ENE_FRAME_BURST=1` in the app's environment (`eneFrameBurstFromEnv`; the ambiglow service reads it once and logs one warning at start-up, `AmbiglowServiceOptions.eneFrameBurst` overrides it), `writeVideoFrame` sends the frame as **one** paced control transfer at `0xE300`: `burstFrameWrite()` concatenates the segments when each starts where the previous one ended. On the 34M2C8600 that is `40 80 0000 E300 008A` with the same 138 bytes, followed by one 10 ms pause instead of six. This is 09 plan A.7 and open question 4: it relies on the device auto-incrementing across the segment boundaries, which is inferred and not verified on hardware.
+- It stays inside every existing guard. The transport's frame-buffer window (`E300 … E300 + 3·ledCount`) still checks the whole transfer, 138 bytes is far below `ENE_MAX_TRANSFER`, and the simulated MCU accepts it only because every byte lands on a frame-buffer register.
+- Segments that are not contiguous fall back to the six writes, logged once. This happens with a gap, or with a JSON border larger than the device's border group, whose spill the central write overwrites.
+- The mirror, the mode-14 check and the serialization are unchanged.
+- It cuts a frame upload from about 65 ms to about 12 ms. FollowVideo High (40 ms capture, impl-ambiglow §4.2) can then reach its 25 fps instead of about 15.
+- **A refused burst is not silent.** The vendor never sends more than one 64-byte packet per transfer, so a firmware may stall or NAK the 138-byte data stage. Every frame would then fail with a `UsbError` other than `no-device`. The engine logs failed uploads at debug level only, so the LEDs would freeze with nothing at the default log level. `EneDevice.#writeBurst` therefore handles any burst failure except a vanished device:
+  - the first failure is a warning naming the switch: `ENE <id>: the experimental frame burst (EVNIA_ENE_FRAME_BURST=1) failed: <error>; after 3 failures in a row the six paced writes are used again`;
+  - after `ENE_FRAME_BURST_MAX_FAILURES` (3) failures in a row, the device goes back to the six paced writes for the rest of its life, with a second warning (`… switched off …`). A success resets the count. A frame that was queued when the burst was switched off goes out as the six writes;
+  - the failed frame itself is not retried: the next frame is the retry, as for a failed segment write. A `no-device` error marks the device lost as before and does not count.
+  - `ene-frame.test.ts` covers this with a handler that stalls every data stage over 64 bytes: two failures and a success (the count starts again), then three failures (one failure warning, one switch-off warning, the device not lost), then the §7.3 six writes with the right frame. A detached device produces no burst warning.
 
 Every frame write stays inside the device's frame buffer (`E300 … E300 + 3·ledCount`). If the JSON border sub-counts add up to more LEDs than the device has in total, the border is cut at the buffer end (deviation 19). A JSON border that is larger than the device's border group but fits in the buffer spills into the central LEDs, as in the vendor, and the central write that follows overwrites them. Any mismatch between the JSON border and the device's `0xE0A3` count is logged once as a warning when the device opens.
 
@@ -201,7 +213,7 @@ A device can also have re-enumerated without any operation failing yet, for exam
 8. **Frames and audio levels are dropped unless the matching mode is applied.** A late frame after idle turn-off cannot reach the device. Audio levels are truncated and clamped to a byte rather than relying on the caller (the vendor's value is a byte by construction).
 9. **`0x0023` is derived from the normalised mode.** This only differs for out-of-range input: the vendor would claim host control with the LEDs off.
 10. **`close()` releases `0x0023`** by default, like `UnPlug`. The vendor never releases it at process exit (09 §16.6).
-11. **Transfers over `0x1000` bytes are refused** rather than chunked with the DLL's repeated-`wIndex` bug. The driver never exceeds 54 bytes.
+11. **Transfers over `0x1000` bytes are refused** rather than chunked with the DLL's repeated-`wIndex` bug. The driver never exceeds 54 bytes (138 with the experimental frame burst, §2.2).
 12. **Empty frame segments are skipped.** The vendor still sleeps 10 ms for a 0-length write.
 13. **The `ledColors()` mirror is correct.** The vendor mirror (`Class1`) uses the RightUp count for the right segment, never fills central/bottom, and fills the wrong ranges per region.
 14. **Operations are serialized per device.** The vendor's capture, audio and UI threads can interleave writes.
@@ -210,13 +222,14 @@ A device can also have re-enumerated without any operation failing yet, for exam
 17. **Idle suspend is state in the driver** (§2.2). The vendor reads `EffectInfo.EffectEnable` from the profile on every `EffectEnableTemp`. Here `lightsOff()`/`lightsOn()` act on the last `setEffect` request. The bytes on the wire are the same, and a disabled Ambiglow is never switched on by a wake.
 18. **Re-enumeration is detected, not re-plugged on every USB change** (§2.4). The vendor re-plugs the ENE on every `USBChange` (09 §16.8): `UnPlug` (`0x0023←0`), then a full probe and effect re-apply, even when the ENE was not involved. The port re-probes only an ENE that is new, lost or re-enumerated.
 19. **Follow-video border cut at the frame-buffer end** (§2.2). The vendor sizes the four border writes by the JSON sub-counts alone (`Class0.method_8`). A table row with more border LEDs than the device reports in total therefore makes it write past the frame buffer into undocumented registers. The port cuts the border at `E300 + 3·ledCount`. No shipped combination is known to trigger this: the 34M2C8600's JSON border (3+4+4+3 = 14) matches its border group.
+20. **Experimental single-transfer frames** (§2.2, off by default). The vendor always sends the six segment writes (`Class0.method_8..10`). `EVNIA_ENE_FRAME_BURST=1` sends one 138-byte transfer at `0xE300` instead (09 plan A.7), and only for contiguous segments. A controller that refuses it gets a warning and, after three failures in a row, the six writes again.
 
 ---
 
 ## 4. Known limitations / unverified on hardware
 
 - **Inferred firmware behaviour.** All device behaviour beyond the logged identity values is inferred: `0x0023` semantics, the 14/18/14 counts, auto-increment across segments, and "no commit after frames". The byte sequences are vendor-exact, so the driver does what Windows did.
-- **Frame rate.** A frame is 6 paced writes, about 65 ms including transfers, so the rate tops out around 14–15 fps. A single 138-byte write at `0xE300` is possible (09 plan A.7) but not used until tested.
+- **Frame rate.** A frame is 6 paced writes, about 65 ms including transfers, so the rate tops out around 14–15 fps (FollowVideo High, impl-ambiglow §4.2). The single 138-byte write at `0xE300` (09 plan A.7) is available as an experiment (`EVNIA_ENE_FRAME_BURST=1`, §2.2) and is off by default until it has been tested on the monitor.
 - **Strings on non-Linux systems.** String descriptors come from sysfs only. Where sysfs is absent, `serialNumber`/`product` stay undefined. Nothing in the port depends on them.
 - **Handles shared with code outside this backend.** The per-device record covers every handle opened through `LibusbBackend` (module-wide). Code that uses the `usb` package directly on the same device would bypass it. Nothing in the port does.
 
@@ -239,7 +252,7 @@ A device can also have re-enumerated without any operation failing yet, for exam
 - On plug, the vendor applies the stored effect (`method_14`, then `method_17`) and sets `ENEEffectEnable = true`. Do the same with `setEffect(toEneParameterSet(profile.EffectInfo, { breathingSync: false }))`.
 
 **Effect engine (follow-video / audio / idle)**
-- **Follow-video:** pass the capture host's 50×40 RGBA `CaptureFrame` directly to `writeVideoFrame`. Skip frames while `ene.busy`. The vendor sends every 100 ms with fresh content every 300 ms; up to about 10 fps is safe.
+- **Follow-video:** pass the capture host's 50×40 RGBA `CaptureFrame` directly to `writeVideoFrame`. Skip frames while `ene.busy`. The vendor sends every 100 ms with fresh content every 300 ms. The port's speed tiers (impl-ambiglow §4.2) send each new frame once the device is free: up to about 15 fps with the paced writes.
 - **Follow-audio:** forward the `CaptureHost` level (a float) to `writeAudioLevel(level)` every 40 ms; the driver truncates it to a byte. This is 3 paced writes (about 30 ms), so do not queue more than one.
 - **Idle:** call `lightsOff()` when idle starts and `lightsOn()` when it ends (§2.2). Both are safe to call unconditionally: they do nothing when the Ambiglow is disabled, not yet applied, already suspended or not suspended. Every plain `setEffect` (a UI change, a profile switch) is the new requested state and ends a suspension; while idle, the engine passes `{ suspended: true }` instead (§2.2), which records the state without lighting the LEDs (following a plain `setEffect` with `lightsOff()` would flash them on for the ~0.3 s of the sequence).
 - **Speed/brightness changes:** do not re-send ParameterSet for FollowVideo, FollowAudio or Breathing (vendor `:1088-1121`); the other `Effect_*` calls do re-send it (09 §6.4).

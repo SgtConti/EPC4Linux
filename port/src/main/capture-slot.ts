@@ -40,6 +40,11 @@ export class CaptureSlot<T> {
   get busy(): boolean {
     return this.#current !== null;
   }
+
+  /** The session of the start in flight or the running capture, else null. */
+  get current(): number | null {
+    return this.#current?.session ?? null;
+  }
 }
 
 /** `promise`, or the value of `onTimeout()` when `promise` has not settled after `ms`. */

@@ -26,6 +26,15 @@ Without a tray host (for example GNOME without the AppIndicator
 extension) the window is shown anyway.
 .SH ENVIRONMENT
 .TP
+.B EVNIA_ENE_FRAME_BURST
+Experimental: when set to
+.BR 1 ,
+Ambiglow "Follow video" sends each LED update to the Ambiglow controller
+as one USB transfer instead of six. Untested on real monitors; unset it
+if the LEDs misbehave. A controller that refuses the single transfer is
+logged, and after three failures in a row the six transfers are used
+again.
+.TP
 .B EVNIA_MOCK_MONITOR
 For testing: when set to a model name such as
 .BR 34M2C8600 ,

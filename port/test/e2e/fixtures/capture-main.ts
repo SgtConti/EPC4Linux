@@ -3,7 +3,8 @@
 // is printed as one `RESULT <json>` line.
 //
 // Scenarios: a normal start/stop; stop issued while the start is still pending; two overlapping starts;
-// a restart while running; a start that times out; follow-audio without a sound server.
+// a restart while running; retuning a running (and a starting) capture; the frame spacing at 300 ms and the lag of
+// a screen change (frame-driven sampling); a start that times out; follow-audio without a sound server.
 
 import { app, BrowserWindow } from 'electron';
 import { createLogger, consoleSink } from '../../../src/backend/core/log.ts';
@@ -64,6 +65,97 @@ app.whenReady().then(async () => {
   await sleep(300);
   const windowsAtEnd = captureWindows(red);
 
+  // 4b. retune a running capture in place (Follow video speed tiers): same session and window, other frame rate
+  const startsBefore = host.videoStats.starts;
+  const tuned: CaptureFrame[] = [];
+  const okG = await host.startVideo(100, (f) => tuned.push(f));
+  await sleep(300);
+  const g0 = tuned.length;
+  await sleep(1000);
+  const frames100 = tuned.length - g0;
+  host.setVideoInterval(40); // High
+  await sleep(500); // applyConstraints, and on X11 possibly the silent re-open of the desktop source
+  const windowsDuringRetune = captureWindows(red);
+  const g1 = tuned.length;
+  await sleep(1000);
+  const frames40 = tuned.length - g1;
+  host.setVideoInterval(300); // Low
+  await sleep(500);
+  const g2 = tuned.length;
+  await sleep(1500);
+  const frames300 = tuned.length - g2;
+  const running = host.videoStats;
+  // a retune while the start is still in flight: the new interval wins
+  const quick: CaptureFrame[] = [];
+  const pendingH = host.startVideo(300, (f) => quick.push(f));
+  host.setVideoInterval(40);
+  const okH = await pendingH;
+  await sleep(300);
+  const h0 = quick.length;
+  await sleep(1000);
+  const pendingFrames40 = quick.length - h0;
+  host.stopVideo();
+  host.setVideoInterval(100); // nothing captured: a no-op
+  await sleep(300);
+  const retune = {
+    okG,
+    frames100,
+    frames40,
+    frames300,
+    windowsDuringRetune,
+    lastFrameWidth: tuned.at(-1)?.width,
+    starts: running.starts - startsBefore,
+    retunes: running.retunes,
+    intervalMs: running.intervalMs,
+    okH,
+    pendingFrames40,
+    idle: host.videoStats,
+    windowsAfter: captureWindows(red),
+  };
+
+  // 4c. frame-driven sampling (src/capture/page.ts): at Low (300 ms) the source delivers a frame every 300 ms
+  //     (3.33 fps, not 3), and a screen change reaches the frame callback within about one source interval. A
+  //     timer sampling the page out of phase with the source would add up to another interval (median ~2x).
+  const setColour = (css: string) => red.webContents.executeJavaScript(`document.body.style.background = '${css}'`);
+  const colourOf = (f: CaptureFrame): 'red' | 'green' | 'other' => {
+    const i = (20 * f.width + 25) * 4; // the centre of the 50×40 grid
+    const [r, g] = [f.data[i], f.data[i + 1]];
+    return r > 200 && g < 60 ? 'red' : g > 200 && r < 60 ? 'green' : 'other';
+  };
+  const low: CaptureFrame[] = [];
+  let waiter: ((f: CaptureFrame) => void) | null = null;
+  await host.startVideo(300, (f) => {
+    low.push(f);
+    waiter?.(f);
+  });
+  await sleep(2000);
+  const steady = low.slice(1).map((f) => f.timestamp);
+  const gaps300 = steady.slice(1).map((t, i) => t - steady[i]);
+  const latencies: number[] = [];
+  for (let i = 0; i < 12; i++) {
+    await sleep(350 + Math.random() * 300); // a random phase against the source; the previous colour is settled
+    const target = i % 2 === 0 ? 'green' : 'red';
+    const t0 = Date.now();
+    const seen = new Promise<number>((resolve) => {
+      const timeout = setTimeout(() => {
+        waiter = null;
+        resolve(-1);
+      }, 3000);
+      waiter = (f) => {
+        if (colourOf(f) !== target) return;
+        clearTimeout(timeout);
+        waiter = null;
+        resolve(Date.now() - t0);
+      };
+    });
+    await setColour(target === 'green' ? '#00ff00' : '#ff0000');
+    latencies.push(await seen);
+  }
+  host.stopVideo();
+  await setColour('#ff0000');
+  await sleep(300);
+  const lag = { gaps300, latencies };
+
   // 5. a start that cannot finish in time resolves false and cleans up (portal dialog left open)
   const impatient = new ElectronCaptureHost({ paths, log, wayland: false, videoStartTimeoutMs: 1 });
   const late: CaptureFrame[] = [];
@@ -98,6 +190,8 @@ app.whenReady().then(async () => {
     doubleStart,
     restart,
     windowsAtEnd,
+    retune,
+    lag,
     timeout,
     audioOk,
   };
