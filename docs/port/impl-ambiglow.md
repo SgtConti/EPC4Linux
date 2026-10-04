@@ -324,3 +324,49 @@ The user asked for the experimental frame burst as a checkbox, and for a brightn
 | ENE driver (impl-usb-ene §2.2) | `writeVideoFrame(grid, { gain })` with `ene-frame.ts dimFrameWrites`; `EneDevice.setFrameBurst`, `frameBurst`; the burst decided when the frame's turn comes; `MockEneDevice.recentFrameWrites()`/`frameWriteCount` |
 | Electron main, preload, renderer | `config.json linuxExperimental.eneFrameBurst` (`src/main/experimental.ts`), the internal invoke channel `evnia:experimental-set`, `window.__EVNIA__.experimental` (impl-electron-shell "IPC", "Persisted settings"); the FAST-LED-UPLOAD patch (impl-vendor-ui §3); the mock probe's `ene.frameWrites` |
 | Tests | §7; `ene-frame.test.ts` (gain, `setFrameBurst`, re-arm, the mock's frame-write record), `test/fixtures/effect-menu.ts` (both deviations), main's `experimental.test.ts`, `ipc.test.ts`, `store.test.ts`, `backend-host.test.ts`, `mock-probe.test.ts`, the vendor-UI `fast-led-upload.test.ts` and the real-archive check; e2e `app.test.ts` (the API across the contextBridge) and the walkthrough steps "ambiglow-follow-video-brightness-burst" (ENE) and "ambiglow-ddc-no-fast-upload" (no ENE) (impl-walkthrough §4) |
+
+---
+
+## 11. LAN colour sync to Hubitat (2026-10-04, user request)
+
+The user asked for Follow video to also drive smart lights through a Hubitat hub. This is a port feature with no vendor counterpart. The hub side is in [`hubitat/`](../../hubitat/README.md): the "Ambient Color Sync" app and the "Ambient Color Receiver" driver, which also accept Hyperion.
+
+**Data path.**
+- `FollowVideoEngine` gets a `frameSink` option.
+  - It receives every captured frame while the uploads run (not paused), as captured, before the brightness gain.
+  - It receives `null` once when the uploads pause or the capture stops or fails. This covers idle lights-off, another effect, the ENE away, a detach, and the service stopping.
+  - The sink does not depend on the ENE being free. A throwing sink is logged and never stops the LEDs.
+- `LanColorSender` (`lan-sync.ts`) reduces a 50×40 frame to five averages: the whole screen, and bands of 20 % of the width or height on the left, right, top and bottom. It POSTs them as JSON to `http://<hub>:<port>/` (Hubitat's LAN port 39501). The format is in `hubitat/README.md`; `{"active": false}` ends a stream.
+
+**Pacing.**
+- A document goes out when any channel of any zone has moved by at least 4. The first one after a start always goes out.
+- There is at most one document per 200 ms, and a heartbeat every 5 s on a static screen. The hub app's inactivity timeout is 15 s.
+- One request is in flight at a time, the newest colours win, and nothing is queued.
+- An unreachable hub is retried every 2 s, logged once, and its recovery is logged once.
+- `close()` (from the service's `stop()`) sends the end of the stream and waits for it for at most 1 s.
+- Turning the sync off, or moving it to another address, first tells the old hub that the stream ended.
+
+**Setting.**
+- The setting is `config.json linuxLanSync = {enabled, host, port}`. `src/main/lan-sync.ts LanSyncController` owns it, like `experimental.ts`: `config.json` is the one source of truth.
+- The Ambiglow page writes it with the LAN-COLOR-SYNC renderer patch (impl-vendor-ui §3) through `window.__EVNIA__.lanSync` (impl-electron-shell "IPC"). Every other writer is followed too.
+- On a change, the controller opens the egress exception first and then calls `BackendHost.setLanSync` → `AmbiglowService.setLanSync`. The backend is created with the stored value (`AmbiglowServiceOptions.lanSync`).
+- The rules for the setting are in `lan-address.ts`, a pure module shared by the preload, main and the backend.
+  - The host must be a private IPv4 literal (RFC 1918 or 169.254/16). Host names are refused, so no DNS lookup ever happens.
+  - The port must be 1–65535.
+  - Anything else counts as off.
+
+**Nothing online (ARCHITECTURE rule 4).**
+- `egress-guard.ts setAllowedLanPeers` lets TCP `connect()` reach exactly the configured address while the setting is on. It does not apply to UDP or DNS, and it accepts private IPv4 literals only.
+- The renderer is not involved: the request is made by the backend in main. The Chromium kill-switch is unchanged.
+
+| Area | Change |
+|---|---|
+| `follow-video.ts` | `FollowVideoOptions.frameSink` |
+| `lan-address.ts`, `lan-sync.ts` | the setting and address rules; `frameZones`, `lanSyncDocument`, `httpPost`, `LanColorSender` |
+| `service.ts` | the options `lanSync` and `lanPost` (tests), `setLanSync`, `lanSync`; `stop()` awaits `LanColorSender.close()` |
+| `services.ts` | `AmbiglowService.setLanSync?` (appended, optional) |
+| Electron main, preload, renderer | `src/main/lan-sync.ts`; `egress-guard.ts setAllowedLanPeers`/`isAllowedTcpPeer`; the store key `linuxLanSync`; the internal invoke channel `evnia:lan-sync-set`; `window.__EVNIA__.lanSync`; `BackendHost.setLanSync` and its `lanSync` option; the LAN-COLOR-SYNC patch |
+| Tests | `lan-sync.test.ts` (address rules, zones, document, pacing, end of stream, failure back-off, the frame sink, a real loopback POST), `ipc.test.ts`, `egress-guard.test.ts`, `store.test.ts`, the vendor-UI `lan-color-sync.test.ts` and the real-archive check |
+
+**Not verified:** a real Hubitat hub. `hubitat/test/run.sh` runs the Groovy app and driver under Groovy 2.4 against stand-ins of the hub's API (37 scenario checks), but they were not run on a hub. The e2e walkthrough has no step for the row yet.
+

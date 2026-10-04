@@ -21,6 +21,7 @@
 
 import { createDefaultBackend, startHubServer, type DefaultBackend, type HubHandle } from '../backend/index.ts';
 import type { DefaultCompositionOptions } from '../backend/compose.ts';
+import type { LanSyncSettings } from '../backend/ambiglow/lan-address.ts';
 import type { BackendOptions, HostServices, Logger, UsbBackend } from '../backend/types.ts';
 
 /** EVNIA_MOCK_MONITOR (ARCHITECTURE rule 7): the simulated model, e.g. "34M2C8600" or "34M2C8600/no-ene". */
@@ -44,23 +45,35 @@ export interface BackendHostOptions {
    * created (AmbiglowServiceOptions.eneFrameBurst); later changes go through setEneFrameBurst().
    */
   eneFrameBurst?: () => boolean;
+  /**
+   * The LAN colour sync setting (config.json linuxLanSync), read when the backend is created
+   * (AmbiglowServiceOptions.lanSync); later changes go through setLanSync().
+   */
+  lanSync?: () => LanSyncSettings;
   /** Backend factory (tests); default createDefaultBackend. */
   createBackend?: (options: BackendOptions, overrides: DefaultCompositionOptions) => DefaultBackend;
 }
 
 /**
  * The BackendOptions and composition overrides main uses. `eneFrameBurst` is the "Fast LED upload (experimental)"
- * setting at backend creation; only a setting that is on is passed (off is the service's default).
+ * setting and `lanSync` the LAN colour sync setting at backend creation; only settings that are on are passed (off is
+ * the service's default).
  */
-export function backendConfiguration(o: Pick<BackendHostOptions, 'host' | 'usb' | 'mockMonitor' | 'appTempDir'> & { eneFrameBurst?: boolean }): {
+export function backendConfiguration(
+  o: Pick<BackendHostOptions, 'host' | 'usb' | 'mockMonitor' | 'appTempDir'> & { eneFrameBurst?: boolean; lanSync?: LanSyncSettings },
+): {
   options: BackendOptions;
   overrides: DefaultCompositionOptions;
 } {
   const options: BackendOptions = o.mockMonitor ? { host: o.host, mockMonitor: o.mockMonitor, noHardware: true } : { host: o.host, usb: o.usb };
   const overrides: DefaultCompositionOptions = {
     ...(o.appTempDir ? { themes: { appTempDir: o.appTempDir } } : {}),
-    ...(o.eneFrameBurst === true ? { ambiglow: { eneFrameBurst: true } } : {}),
   };
+  const ambiglow = {
+    ...(o.eneFrameBurst === true ? { eneFrameBurst: true } : {}),
+    ...(o.lanSync?.enabled === true ? { lanSync: { ...o.lanSync } } : {}),
+  };
+  if (Object.keys(ambiglow).length > 0) overrides.ambiglow = ambiglow;
   return { options, overrides };
 }
 
@@ -110,6 +123,18 @@ export class BackendHost {
     }
   }
 
+  /**
+   * The LAN colour sync setting changed (AmbiglowService.setLanSync, from the next frame). Before the backend exists
+   * nothing is to do: it is created with the current setting (BackendHostOptions.lanSync).
+   */
+  setLanSync(settings: LanSyncSettings): void {
+    try {
+      this.#backend?.services.ambiglow.setLanSync?.(settings);
+    } catch (e) {
+      this.#o.log.error('setLanSync failed', e);
+    }
+  }
+
   async stop(): Promise<void> {
     this.#stopped = true;
     // A start still in flight finishes first, so its hub and services are stopped too.
@@ -134,7 +159,11 @@ export class BackendHost {
     log.info('Backend service run');
     try {
       if (!this.#backend) {
-        const { options, overrides } = backendConfiguration({ ...this.#o, eneFrameBurst: this.#o.eneFrameBurst?.() === true });
+        const { options, overrides } = backendConfiguration({
+          ...this.#o,
+          eneFrameBurst: this.#o.eneFrameBurst?.() === true,
+          lanSync: this.#o.lanSync?.(),
+        });
         this.#backend = (this.#o.createBackend ?? createDefaultBackend)(options, overrides);
       }
       await this.#backend.start();

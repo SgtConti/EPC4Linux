@@ -11,12 +11,16 @@
 //   - dgram send()/connect() to a non-loopback address;
 //   - dns.lookup of any name but "localhost" (getaddrinfo), and every dns.resolve*/reverse query (c-ares
 //     sends those to the network itself), for the callback and promise APIs and dns.Resolver instances.
+// One opt-in exception: the LAN colour sync (backend/ambiglow/lan-sync.ts, main/lan-sync.ts) may open TCP connections to
+// the one private IPv4 address the user entered for their Hubitat hub (setAllowedLanPeers; RFC 1918 or link-local
+// literals only, never a name, so still no DNS). Nothing else gets through, and the list is empty unless that setting is on.
 // Servers are not affected (the hub listens on 127.0.0.1; accepted sockets are not connect() calls), nor
 // are child processes (gdbus, xprop, parec) and Chromium's own networking.
 
 import dgram from 'node:dgram';
 import dns from 'node:dns';
 import net from 'node:net';
+import { isPrivateIpv4 } from '../backend/ambiglow/lan-address.ts';
 import type { Logger } from '../backend/types.ts';
 
 /** The error a refused connection or lookup gets (code EACCES, like a firewall's refusal). */
@@ -69,6 +73,33 @@ function isLocalhostName(host: string): boolean {
 /** May a TCP/UDP peer `host` be contacted? Loopback IP literals and "localhost" only. */
 export function isAllowedPeer(host: string): boolean {
   return isLoopbackIp(host) || isLocalhostName(host);
+}
+
+/** The private addresses TCP connections may go to besides loopback (the LAN colour sync's hub); empty by default. */
+let lanPeers: ReadonlySet<string> = new Set();
+
+/**
+ * Let TCP connections reach exactly these private IPv4 literals (the LAN colour sync's Hubitat hub), replacing the
+ * previous list; [] closes it again. Anything that is not a private IPv4 literal is dropped (and logged). Returns the
+ * list in effect. Applies whether or not the guard is installed yet.
+ */
+export function setAllowedLanPeers(hosts: readonly string[], log?: Logger): readonly string[] {
+  const next = new Set<string>();
+  for (const h of hosts) {
+    if (isPrivateIpv4(h)) next.add(h);
+    else log?.warn(`Refused to allow outbound connections to ${String(h)} (private IPv4 addresses only)`);
+  }
+  const same = next.size === lanPeers.size && [...next].every((h) => lanPeers.has(h));
+  if (!same) {
+    lanPeers = next;
+    log?.info(next.size === 0 ? 'Outbound LAN exception closed (loopback and Unix sockets only)' : `Outbound TCP allowed to ${[...next].join(', ')} (LAN colour sync)`);
+  }
+  return [...lanPeers];
+}
+
+/** May a TCP connection go to `host`: an allowed peer or one of the LAN colour sync's addresses. */
+export function isAllowedTcpPeer(host: string): boolean {
+  return isAllowedPeer(host) || lanPeers.has(host);
 }
 
 interface ConnectTarget {
@@ -138,7 +169,7 @@ export function installEgressGuard(log: Logger): Restore {
   patch(net.Socket.prototype, 'connect', (original) =>
     function (this: net.Socket, ...args: unknown[]) {
       const t = connectTarget(args);
-      if (t.path === undefined && !isAllowedPeer(t.host ?? '')) throw refuse(`connection to ${t.host}:${String(t.port)}`);
+      if (t.path === undefined && !isAllowedTcpPeer(t.host ?? '')) throw refuse(`connection to ${t.host}:${String(t.port)}`);
       return original.apply(this, args);
     },
   restores);

@@ -27,7 +27,9 @@ import {
   type ExperimentalState,
   type FsSyncResult,
   INTERNAL_CHANNELS,
+  type LanSyncChange,
 } from './shared/channels.ts';
+import type { LanSyncSettings } from '../backend/ambiglow/lan-address.ts';
 import { VENDOR_APP_VERSION } from './shared/store-schema.ts';
 import type { ConfigStore } from './store.ts';
 import type { MainWindowController, NoticeWindowController } from './windows.ts';
@@ -69,6 +71,11 @@ export interface IpcHost {
    * switch the backend's ENE frame burst (AmbiglowService.setEneFrameBurst); the new state.
    */
   setEneFrameBurst(enabled: boolean): ExperimentalState;
+  /**
+   * The Ambiglow page's "Send colours to Hubitat" row: validate and store config.json linuxLanSync, open the egress
+   * guard for that address and switch the backend's LAN colour sync (main/lan-sync.ts); the new setting.
+   */
+  setLanSync(change: LanSyncChange): LanSyncSettings;
 }
 
 /** The Electron APIs the handlers use (the real modules in index.ts, fakes in tests). */
@@ -276,6 +283,32 @@ export function registerIpcHandlers(h: IpcHost, electron: IpcElectron): void {
       throw new TypeError(`${INTERNAL_CHANNELS.experimentalSet}: expected a boolean`);
     }
     return h.setEneFrameBurst(enabled);
+  });
+  // The Ambiglow page's "Send colours to Hubitat" row (window.__EVNIA__.lanSync.set, the LAN-COLOR-SYNC patch): the main
+  // window only, a plain {enabled?: boolean, address?: string} only; main/lan-sync.ts validates the address.
+  handle(INTERNAL_CHANNELS.lanSyncSet, (e, change) => {
+    if (!isMainWindow(e)) {
+      log.warn(`IPC ${INTERNAL_CHANNELS.lanSyncSet} refused for this sender (main window only)`);
+      throw new Error(`IPC ${INTERNAL_CHANNELS.lanSyncSet} refused for this sender`);
+    }
+    const c = change as { enabled?: unknown; address?: unknown } | null;
+    if (
+      c === null ||
+      typeof c !== 'object' ||
+      Array.isArray(c) ||
+      Object.keys(c).some((k) => k !== 'enabled' && k !== 'address') ||
+      (c.enabled !== undefined && typeof c.enabled !== 'boolean') ||
+      (c.address !== undefined && (typeof c.address !== 'string' || c.address.length > 64))
+    ) {
+      log.warn(`IPC ${INTERNAL_CHANNELS.lanSyncSet} refused: expected {enabled?: boolean, address?: string}`);
+      throw new TypeError(`${INTERNAL_CHANNELS.lanSyncSet}: expected {enabled?: boolean, address?: string}`);
+    }
+    try {
+      return h.setLanSync({ enabled: c.enabled as boolean | undefined, address: c.address as string | undefined });
+    } catch (err) {
+      log.warn(`IPC ${INTERNAL_CHANNELS.lanSyncSet}: ${err instanceof Error ? err.message : String(err)}`);
+      throw err;
+    }
   });
   on(INTERNAL_CHANNELS.storeSet, (e, key, value) => {
     withStoreOrigin(e.sender, () => {

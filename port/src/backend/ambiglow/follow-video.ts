@@ -206,6 +206,12 @@ export interface FollowVideoOptions {
   speed?: number;
   /** Initial EffectDetail.Brightness (default 3, full); the owner follows the profile with setBrightness(). */
   brightness?: number;
+  /**
+   * Port feature (LAN colour sync, lan-sync.ts): every captured frame while the uploads run (not paused), as captured
+   * (before the brightness gain), and null once when they stop or pause (capture stopped or failed, idle, ENE away).
+   * Independent of the ENE being busy: the LEDs and the sink each take the newest frame.
+   */
+  frameSink?: (frame: CaptureFrame | null) => void;
 }
 
 type State = 'stopped' | 'starting' | 'running' | 'failed';
@@ -215,6 +221,9 @@ export class FollowVideoEngine {
   readonly #capture: CaptureHost | undefined;
   readonly #target: () => EneDevice | null;
   readonly #timers: EffectTimers;
+  readonly #sink: ((frame: CaptureFrame | null) => void) | undefined;
+  /** The sink got a frame since its last null. */
+  #sinkActive = false;
   #cadence: FollowVideoCadence;
   #brightness: FollowVideoBrightness;
   #state: State = 'stopped';
@@ -241,6 +250,7 @@ export class FollowVideoEngine {
     this.#capture = options.capture;
     this.#target = options.target;
     this.#timers = options.timers ?? realTimers;
+    this.#sink = options.frameSink;
     this.#cadence = followVideoCadence(options.speed);
     this.#brightness = followVideoBrightness(options.brightness);
   }
@@ -344,9 +354,21 @@ export class FollowVideoEngine {
   setPaused(paused: boolean): void {
     if (paused === this.#paused) return;
     this.#paused = paused;
+    if (paused) this.#toSink(null);
     if (!paused) this.#sent = null;
     this.#retuneCapture();
     if (!paused) this.#pump();
+  }
+
+  /** FollowVideoOptions.frameSink: frames as they come, null once per stop. A throwing sink never stops the LEDs. */
+  #toSink(frame: CaptureFrame | null): void {
+    if (!this.#sink || (frame === null && !this.#sinkActive)) return;
+    this.#sinkActive = frame !== null;
+    try {
+      this.#sink(frame);
+    } catch (e) {
+      this.#log.warn('FollowVideo: frame sink failed', e);
+    }
   }
 
   #live(): boolean {
@@ -380,6 +402,7 @@ export class FollowVideoEngine {
       .startVideo(captureMs, (frame) => {
         if (session !== this.#session) return;
         this.#latest = frame;
+        if (!this.#paused) this.#toSink(frame);
         this.#pump();
       })
       .then(
@@ -398,6 +421,7 @@ export class FollowVideoEngine {
     this.#clearTimers();
     this.#state = 'failed';
     this.#askedMs = null;
+    this.#toSink(null);
   }
 
   #stop(): void {
@@ -408,6 +432,7 @@ export class FollowVideoEngine {
     this.#clearTimers();
     this.#latest = null;
     this.#sent = null;
+    this.#toSink(null);
     if (wasCapturing) {
       try {
         this.#capture?.stopVideo();

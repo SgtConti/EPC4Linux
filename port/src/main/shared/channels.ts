@@ -148,6 +148,12 @@ export const INTERNAL_CHANNELS = {
    * type, stores config.json linuxExperimental.eneFrameBurst and switches the backend (ENE frame burst). Main window only.
    */
   experimentalSet: 'evnia:experimental-set',
+  /**
+   * invoke: (change: LanSyncChange) → LanSyncSettings. window.__EVNIA__.lanSync.set, the Ambiglow page's "Send colours
+   * to Hubitat" row (scripts/ui-patches.mjs LAN-COLOR-SYNC): main validates the address (a private IPv4 literal), stores
+   * config.json linuxLanSync, opens the egress guard for that address only and switches the backend. Main window only.
+   */
+  lanSyncSet: 'evnia:lan-sync-set',
   /** capture window → main (src/capture/protocol.ts). */
   captureFrame: 'evnia:capture-frame',
   captureStatus: 'evnia:capture-status',
@@ -163,6 +169,13 @@ export interface ExperimentalState {
 
 /** What windows other than the main window (and refused senders) see. */
 export const EXPERIMENTAL_NONE: Readonly<ExperimentalState> = Object.freeze({ eneFrameBurst: false, forcedByEnv: false });
+
+/** window.__EVNIA__.lanSync.set(): what the Ambiglow page's row changes (either or both). */
+export interface LanSyncChange {
+  enabled?: boolean;
+  /** "192.168.1.20" or "192.168.1.20:39501"; '' clears the address (and turns the sync off). */
+  address?: string;
+}
 
 /** The vendor electron-store sync channel (01 §10.1 #50), kept for compatibility. */
 export const ELECTRON_STORE_SYNC_CHANNEL = 'electron-store-get-data';

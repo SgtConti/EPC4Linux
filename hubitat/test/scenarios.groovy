@@ -1,0 +1,112 @@
+// Scenarios for the Ambient Color Sync app and the Ambient Color Receiver driver, run against HubStubs.groovy (run.sh).
+// args[0]: the repository root.
+
+import org.codehaus.groovy.control.CompilerConfiguration
+
+def repo = new File(args[0])
+GroovyClassLoader loader = new GroovyClassLoader(this.class.classLoader)
+def load = { String file, String base ->
+    def cc = new CompilerConfiguration(); cc.scriptBaseClass = base
+    def shell = new GroovyShell(loader, new Binding(), cc)
+    def s = shell.parse(new File(repo, file)); s.run(); s
+}
+int failures = 0
+def check = { boolean ok, String what -> if (ok) println "ok   $what" else { failures++; println "FAIL $what" } }
+def lan = { Map doc -> "index:00, mac:AABBCCDDEEFF, ip:c0a8012a, port:9c40, headers:UE9TVA==, body:" + groovy.json.JsonOutput.toJson(doc).bytes.encodeBase64().toString() }
+
+// ───── driver ─────
+def drv = load("hubitat/drivers/ambient-color-receiver.groovy", "DriverBase")
+def parentCalls = []
+drv.parent = new Expando(receiveColors: { z -> parentCalls << ["colors", z] }, sourceEnded: { s -> parentCalls << ["ended", s] }, receiverPaused: { -> parentCalls << ["paused"] })
+drv.installed()
+check(drv.device.current.switch == "on" && drv.device.current.streaming == "inactive", "driver installed: switch on, inactive")
+drv.parse(lan([source: "EPC4Linux", version: 1, seq: 1, active: true, color: [96, 72, 40], zones: [left: [180, 40, 20], right: [20, 40, 200], top: [90, 90, 90], bottom: [30, 30, 30]]]))
+check(parentCalls[-1] == ["colors", [all: [96, 72, 40], left: [180, 40, 20], right: [20, 40, 200], top: [90, 90, 90], bottom: [30, 30, 30]]], "EPC4Linux document → parent.receiveColors with zones")
+check(drv.device.current.streaming == "active" && drv.device.current.source == "EPC4Linux" && drv.device.current.color == "#604828", "attributes: streaming, source, color")
+drv.parse(lan([source: "EPC4Linux", version: 1, seq: 2, active: false]))
+check(parentCalls[-1] == ["ended", "EPC4Linux"] && drv.device.current.streaming == "inactive", "active:false → sourceEnded")
+drv.parse(lan([command: "color", color: [255, 80, 0], priority: 50, origin: "script"]))
+check(parentCalls[-1] == ["colors", [all: [255, 80, 0]]], "Hyperion JSON color command")
+drv.parse(lan([command: "color", color: [255, 0, 0, 0, 0, 255], priority: 50]))
+check(parentCalls[-1] == ["colors", [all: [128, 0, 128]]], "a multi-LED Hyperion color is averaged")
+drv.parse(lan([command: "clear", priority: 50]))
+check(parentCalls[-1][0] == "ended", "Hyperion clear → ended")
+int n = parentCalls.size()
+drv.parse(lan([command: "serverinfo"]))
+drv.parse("index:00, mac:AA, ip:c0a8012a, port:1, body:" + "not json".bytes.encodeBase64().toString())
+check(parentCalls.size() == n, "other commands and non-JSON bodies are ignored")
+drv.off()
+check(parentCalls[-1] == ["paused"], "switch off → parent.receiverPaused")
+drv.parse(lan([source: "EPC4Linux", active: true, color: [1, 2, 3]]))
+check(parentCalls.size() == n + 1, "paused: colours not passed on")
+drv.on()
+
+// Hyperion pull
+drv.settings.putAll([hyperionEnabled: true, hyperionHost: "192.168.1.50", hyperionPort: 19444, hyperionPollMs: 1000])
+drv.connectHyperion()
+check(drv.raw.connects[-1] == [[eol: "\n", byteInterface: false], "192.168.1.50", 19444], "rawSocket.connect")
+check(drv.raw.sent.any { it.contains('"serverinfo"') }, "serverinfo asked")
+drv.parse(groovy.json.JsonOutput.toJson([command: "serverinfo", success: true, tan: 2, info: [leds: [[hmin: 0, hmax: 0.1, vmin: 0.4, vmax: 0.5], [hmin: 0.9, hmax: 1, vmin: 0.4, vmax: 0.5], [hmin: 0.45, hmax: 0.55, vmin: 0, vmax: 0.1]]]]))
+drv.hyperionPoll()
+check(drv.raw.sent[-1].contains("ledstream-start"), "poll → ledstream-start")
+String update = groovy.json.JsonOutput.toJson([command: "ledcolors-ledstream-update", data: [leds: [255, 0, 0, 0, 0, 255, 0, 255, 0]]])
+drv.parse(update.substring(0, 30)); drv.parse(update.substring(30))
+check(drv.raw.sent[-1].contains("ledstream-stop"), "first update → ledstream-stop (split line joined)")
+check(parentCalls[-1] == ["colors", [all: [85, 85, 85], left: [255, 0, 0], right: [0, 0, 255], top: [0, 255, 0]]], "Hyperion zones from the layout")
+int before = parentCalls.size()
+drv.parse(update)
+check(parentCalls.size() == before, "further stream updates before the next poll are ignored")
+drv.parse(groovy.json.JsonOutput.toJson([command: "ledcolors-ledstream-update", result: [leds: [[1, 2, 3]]]]))
+drv.hyperionPoll(); drv.parse(groovy.json.JsonOutput.toJson([command: "ledcolors-ledstream-update", result: [leds: [[10, 20, 30]]]]))
+check(parentCalls[-1][1].all == [10, 20, 30], "older servers: result.leds as [r,g,b] lists")
+drv.socketStatus("receive error: Connection reset")
+check(drv.device.current.hyperion.startsWith("error") && drv.schedules.any { it[0] == "runIn" && it[2] == "connectHyperion" }, "socket error → reconnect scheduled")
+drv.disconnectHyperion()
+check(drv.device.current.hyperion == "off", "disconnect")
+
+// ───── app ─────
+def app = load("hubitat/apps/ambient-color-sync.groovy", "AppBase")
+def l1 = new FakeLight(id: 11, displayName: "Left lamp", current: [switch: "off", colorMode: "CT", colorTemperature: 2700, level: 40])
+def l2 = new FakeLight(id: 12, displayName: "Strip", current: [switch: "on", colorMode: "RGB", hue: 10, saturation: 90, level: 70])
+app.settings.putAll([senderAddress: "192.168.1.42", lights: [l1, l2], zone_11: "left", zone_12: "all", brightnessMode: "follow", minLevel: 10, maxLevel: 100,
+                     saturationBoost: 0, darkThreshold: 4, darkAction: "dim", minIntervalMs: 1000, changeThreshold: 3, endAction: "restore", inactiveTimeout: 15])
+app.mainPage()
+check(app.paragraphs[-1].contains("192.168.1.20") && app.paragraphs[-1].contains("C0A8012A"), "settings page renders, shows hub IP and network id")
+app.installed()
+check(app.children.size() == 1 && app.children[0].deviceNetworkId == "C0A8012A", "receiver created with the IP-hex network id")
+app.settings.senderAddress = "00:00:00:00:00:00"; app.updated()
+check(app.children.size() == 1 && app.children[0].deviceNetworkId == "000000000000", "MAC address → network id, same receiver")
+app.receiveColors([all: [0, 0, 255], left: [255, 0, 0]])
+check(app.state.active == true && app.state.snapshot["11"].switch == "off", "session starts with a snapshot")
+check(l1.calls[-1] == ["setColor", [hue: 0, saturation: 100, level: 100]], "left lamp follows the left edge (red)")
+check(l2.calls[-1] == ["setColor", [hue: 67, saturation: 100, level: 100]], "strip follows the whole screen (blue = hue 67)")
+app.advance(200)
+app.receiveColors([all: [0, 255, 0], left: [255, 0, 0]])
+check(l2.calls.size() == 1 && app.schedules.any { it[0] == "runInMillis" && it[2] == "flush" && it[1] == 800 }, "within the interval: one flush scheduled for the rest")
+app.advance(800); app.flush()
+check(l2.calls[-1][1].hue == 33 && l1.calls.size() == 1, "flush: changed light updated, unchanged one not")
+app.advance(1000)
+app.receiveColors([all: [0, 0, 0], left: [128, 0, 0]])
+check(l2.calls[-1] == ["setColor", [hue: 0, saturation: 0, level: 10]], "black screen → dim to the dark level, white")
+check(l1.calls[-1][1].level == 55, "level follows the screen brightness (50 % → 55)")
+app.advance(20_000); app.watchdog()
+check(app.state.active == false && app.children[0].calls.contains("markInactive"), "watchdog ends a silent stream")
+check(l1.calls[-1] == ["off"] && l2.calls[-1] == ["setColor", [hue: 10, saturation: 90, level: 70]], "restore: off light off again, colour light back to its colour")
+app.settings.endAction = "off"; app.advance(1000)
+app.receiveColors([all: [10, 200, 10]]); app.sourceEnded("EPC4Linux")
+check(l2.calls[-1] == ["off"], "end action off")
+app.settings.putAll([darkAction: "off", endAction: "leave"]); app.advance(1000)
+app.receiveColors([all: [0, 0, 0], left: [0, 0, 0]])
+check(l1.calls[-1] == ["off"] && l2.calls[-1] == ["off"], "black → off")
+int c2 = l2.calls.size(); app.advance(1000); app.receiveColors([all: [1, 1, 1], left: [0, 0, 0]])
+check(l2.calls.size() == c2, "already off: not sent again")
+app.receiverPaused()
+check(app.state.active == false && l2.calls.size() == c2, "paused with end action leave: lights untouched")
+l1.current.colorMode = "CT"; l1.current.switch = "on"; l1.current.level = 40
+app.settings.endAction = "restore"; app.advance(1000)
+app.receiveColors([all: [255, 255, 255], left: [255, 255, 255]]); app.sourceEnded("x")
+check(l1.calls[-1] == ["setColorTemperature", 2700, 40], "restore a CT light with its level")
+app.uninstalled()
+check(app.children.isEmpty(), "uninstall removes the receiver")
+println(failures == 0 ? "ALL PASSED" : "$failures FAILED")
+System.exit(failures == 0 ? 0 : 1)

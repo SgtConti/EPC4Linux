@@ -14,7 +14,8 @@
 //   evnia    window.__EVNIA__ {hubToken, platform} for the patched SignalR URL (ARCHITECTURE "Big picture"), and
 //            {experimental: {get, setEneFrameBurst}} for the port's opt-in experiments: the Ambiglow page's
 //            "Fast LED upload (experimental)" checkbox (scripts/ui-patches.mjs FAST-LED-UPLOAD). get() is synchronous
-//            (the store snapshot of the bootstrap, so the first render is right) and follows config.json.
+//            (the store snapshot of the bootstrap, so the first render is right) and follows config.json. Likewise
+//            {lanSync: {get, set}} for the Ambiglow page's "Send colours to Hubitat" row (LAN-COLOR-SYNC patch).
 //   noop     the vendor defined it only in the isolated world, so the page's `.catch(window.noop)`
 //            swallowed nothing; exposing it makes those catches work as intended.
 //   electronLog  window.__electronLog {sendToMain, log, error, …}: the renderer's electron-log lines into
@@ -30,18 +31,21 @@ import {
   type FsSyncResult,
   INTERNAL_CHANNELS,
   INVOKE_CHANNELS,
+  type LanSyncChange,
   LOCAL_EVENT_CHANNELS,
   OFFLINE_INVOKE_DEFAULTS,
   SEND_CHANNELS,
   syntheticReply,
 } from '../main/shared/channels.ts';
 import { basename, join } from '../main/shared/posix-path.ts';
+import { LAN_SYNC_OFF, normalizeLanSyncSettings, type LanSyncSettings } from '../backend/ambiglow/lan-address.ts';
 import {
   cloneJson,
   coerceForced,
   deletePath,
   ENE_FRAME_BURST_KEY,
   getPath,
+  LAN_SYNC_KEY,
   setPath,
   splitKeyPath,
   writeError,
@@ -103,6 +107,16 @@ export interface PreloadApi {
       get(): ExperimentalState;
       /** Save the setting (config.json linuxExperimental.eneFrameBurst) and switch the ENE frame burst; rejects for a non-boolean or a refused sender. */
       setEneFrameBurst(enabled: boolean): Promise<void>;
+    };
+    /**
+     * The LAN colour sync (Follow Video colours to a Hubitat hub; config.json linuxLanSync). Main window only, like
+     * experimental; only the LAN-COLOR-SYNC patch of the Ambiglow page uses it.
+     */
+    lanSync: {
+      /** Synchronous: the saved setting {enabled, host, port} (off with host '' in other windows). */
+      get(): LanSyncSettings;
+      /** Change `enabled` and/or `address` ("192.168.1.20[:port]"); rejects with a text for the user for a bad address. */
+      set(change: LanSyncChange): Promise<LanSyncSettings>;
     };
   };
   noop: () => void;
@@ -328,11 +342,28 @@ export function createPreloadApi(ipcRenderer: IpcRendererLike, out: PreloadConso
     },
   };
 
+  // ───────────── LAN colour sync (window.__EVNIA__.lanSync) ─────────────
+
+  // The setting is config.json linuxLanSync; the main window reads it from its store snapshot like the experiments.
+  const lanSync: PreloadApi['evnia']['lanSync'] = {
+    get: (): LanSyncSettings => (isMainWindow ? normalizeLanSyncSettings(getPath(snapshot, LAN_SYNC_KEY)) : { ...LAN_SYNC_OFF }),
+    async set(change) {
+      if (change === null || typeof change !== 'object') throw new TypeError('lanSync.set expects {enabled?, address?}');
+      const plain: LanSyncChange = {};
+      if (change.enabled !== undefined) plain.enabled = change.enabled;
+      if (change.address !== undefined) plain.address = change.address;
+      const next = normalizeLanSyncSettings(await ipcRenderer.invoke(INTERNAL_CHANNELS.lanSyncSet, plain));
+      // The snapshot now (main's broadcast of the same write may arrive after this reply).
+      setPath(snapshot, LAN_SYNC_KEY, { ...next });
+      return next;
+    },
+  };
+
   return {
     ipc,
     store,
     nodeApi,
-    evnia: { hubToken: boot.hubToken, platform: 'linux', experimental },
+    evnia: { hubToken: boot.hubToken, platform: 'linux', experimental, lanSync },
     noop: () => {},
     electronLog,
   };

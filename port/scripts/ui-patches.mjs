@@ -23,6 +23,17 @@ const FAST_LED_UPLOAD_HINT = 'Sends each frame in one USB transfer. Turn off if 
  * The FAST-LED-UPLOAD checkbox's log line when the preload refuses a change (followed by the reason). The vendor
  * Checkbox has already toggled its local value and cannot be reset from the page, so the line says so.
  */
+/** The LAN-COLOR-SYNC row's description (a visible last line and the row's tooltip). */
+const LAN_SYNC_HINT =
+  'Also sends the Follow Video colours to a Hubitat hub on your network (the Ambient Color Sync app). Enter the hub\'s IP address; port 39501 unless you add :port.';
+
+/** The LAN-COLOR-SYNC checkbox's log line when the preload refuses a change (followed by the reason), like FAST_LED_UPLOAD_REFUSED. */
+const LAN_SYNC_REFUSED =
+  'Hubitat colour sync not changed; the checkbox shows the wrong state until the row is shown again (another effect and back, or the page reopened): ';
+
+/** Electron prefixes errors of ipcRenderer.invoke with this; the address field shows the reason without it. */
+const INVOKE_ERROR_PREFIX = String.raw`/^Error invoking remote method '[^']*': (?:\w*Error: )?/`;
+
 const FAST_LED_UPLOAD_REFUSED =
   'Fast LED upload not changed; the checkbox shows the wrong state until the row is shown again (another effect and back, or the page reopened): ';
 
@@ -404,6 +415,47 @@ export default {
         'main log); the box keeps showing the refused value until the row is created again (the Checkbox\'s local model ' +
         'cannot be reset from the page, and get() is not reactive). No window.ipc channel, no URL, nothing online.',
       spec: 'impl-vendor-ui §3 FAST-LED-UPLOAD; impl-usb-ene §2.2 deviation 20; impl-electron-shell "IPC" (experimentalSet); 03 §4.5',
+    },
+    {
+      id: 'LAN-COLOR-SYNC',
+      file: AMBIGLOW,
+      // Directly after the FAST-LED-UPLOAD row, whose own replacement is the anchor (the patches run in table order,
+      // so this text exists exactly once, and only once FAST-LED-UPLOAD was applied).
+      find: 'experimental.get()):m("",!0),Ye.startCount.support?',
+      replace:
+        'experimental.get()):m("",!0),' +
+        'c(Z)&&1===Ae.value&&window.__EVNIA__?.lanSync?(t=>(n(),u("div",{key:"evnia-lan-sync",class:"slider-item evnia-lan-sync",' +
+        `title:${JSON.stringify(LAN_SYNC_HINT)}},[` +
+        'r(s("Checkbox"),{modelValue:t.enabled,label:"Send colours to Hubitat (LAN)",i18n:!1,' +
+        'onChange:e=>{window.__EVNIA__.lanSync.set({enabled:e}).catch(x=>{' +
+        `const msg=${JSON.stringify(LAN_SYNC_REFUSED)}+(x&&x.message||x);console.warn(msg);window.__electronLog?.warn(msg)})}},` +
+        'null,8,["modelValue"]),' +
+        'S("input",{class:"evnia-lan-sync-address",type:"text",inputmode:"decimal",spellcheck:"false",autocomplete:"off",maxlength:64,' +
+        'placeholder:"Hub IP address, e.g. 192.168.1.20",' +
+        'value:t.host===""?"":39501===t.port?t.host:t.host+":"+t.port,' +
+        'style:{display:"block",width:"100%",boxSizing:"border-box",marginTop:".06rem",padding:".04rem .08rem",fontSize:".12rem",' +
+        'color:"inherit",background:"transparent",border:"1px solid rgba(128,128,128,.5)",borderRadius:".04rem",outline:"none"},' +
+        'onChange:e=>{const el=e.target;window.__EVNIA__.lanSync.set({address:el.value}).then(v=>{' +
+        'el.value=v.host===""?"":39501===v.port?v.host:v.host+":"+v.port;el.style.borderColor="";el.title=""},x=>{' +
+        `const msg=String(x&&x.message||x).replace(${INVOKE_ERROR_PREFIX},"");el.style.borderColor="#e5484d";el.title=msg;` +
+        'console.warn(msg);window.__electronLog?.warn(msg)})}},null,8,["value"]),' +
+        'S("div",{class:"evnia-lan-sync-hint",style:{fontSize:".11rem",lineHeight:".16rem",marginTop:".04rem",opacity:.6}},' +
+        `${JSON.stringify(LAN_SYNC_HINT)},1)` +
+        '])))(window.__EVNIA__.lanSync.get()):m("",!0),' +
+        'Ye.startCount.support?',
+      rationale:
+        'Port feature (user request 2026-10-04): the "Send colours to Hubitat (LAN)" row for the LAN colour sync (Follow Video ' +
+        'colours also POSTed to a Hubitat hub on the local network, backend/ambiglow/lan-sync.ts; hub side in hubitat/), ' +
+        'directly after the FAST-LED-UPLOAD row. Shown under the same condition (the ENE, Z, and the Follow Video effect, ' +
+        'Ae = EffectType 1) and only when the preload offers window.__EVNIA__.lanSync; not disabled while the effect is off, ' +
+        'since it is a setting. The vendor\'s global Checkbox (as FAST-LED-UPLOAD) turns it on or off; a plain text <input> ' +
+        'takes the hub\'s address ("192.168.1.20[:port]") and saves it on change (blur or Enter). Both call the narrow preload ' +
+        'API, which has main validate the address (a private IPv4 literal only, no host names, so no DNS), store config.json ' +
+        'linuxLanSync, open the Node egress guard for that one address and switch the backend. A refused address turns the ' +
+        'field\'s border red with the reason as its tooltip and in the logs; an accepted one is shown normalized. The key is a ' +
+        'string, so it cannot collide with the column\'s numeric v-if keys. No window.ipc channel, no URL in the renderer; the ' +
+        'renderer itself never opens a connection (the backend does, in main).',
+      spec: 'impl-vendor-ui §3 LAN-COLOR-SYNC; impl-ambiglow §11; impl-electron-shell "IPC" (lanSyncSet); hubitat/README.md',
     },
   ],
 

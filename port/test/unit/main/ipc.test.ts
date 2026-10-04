@@ -12,6 +12,8 @@ import { afterEach, beforeEach, test } from 'node:test';
 import { createLogger } from '../../../src/backend/core/log.ts';
 import { DeviceChangeGate } from '../../../src/main/device-events.ts';
 import { ExperimentalSettings } from '../../../src/main/experimental.ts';
+import { LanSyncController } from '../../../src/main/lan-sync.ts';
+import type { LanSyncSettings } from '../../../src/backend/ambiglow/lan-address.ts';
 import { PathGuard } from '../../../src/main/fs-guard.ts';
 import { FILE_SELECT_MAX_BUFFER, type IpcElectron, type IpcHost, isTrustedSender, registerIpcHandlers } from '../../../src/main/ipc.ts';
 import { resolveAppPaths } from '../../../src/main/paths.ts';
@@ -107,6 +109,9 @@ let saveAnswer: { canceled: boolean; filePath: string };
 let applied: boolean[];
 /** EVNIA_ENE_FRAME_BURST=1 as main would report it. */
 let forcedByEnv: boolean;
+/** What the fake backend was told (BackendHost.setLanSync) and the egress guard was opened for, in order. */
+let lanApplied: LanSyncSettings[];
+let lanPeers: string[][];
 
 beforeEach(() => {
   logged.length = 0;
@@ -132,6 +137,9 @@ beforeEach(() => {
   // The real settings object main uses (src/main/experimental.ts) over the real store, with a fake backend.
   const experimental = new ExperimentalSettings({ store, backend: { setEneFrameBurst: (on) => void applied.push(on) }, forcedByEnv: false, log });
   const state = () => ({ ...experimental.state(), forcedByEnv });
+  lanApplied = [];
+  lanPeers = [];
+  const lanSync = new LanSyncController({ store, backend: { setLanSync: (s) => void lanApplied.push(s) }, allowPeers: (h) => void lanPeers.push([...h]), log });
   host = {
     log,
     paths,
@@ -154,6 +162,7 @@ beforeEach(() => {
       experimental.setEneFrameBurst(on);
       return state();
     },
+    setLanSync: (change) => lanSync.set(change),
   };
   const electron: IpcElectron = {
     ipcMain: bus as unknown as IpcElectron['ipcMain'],
@@ -290,6 +299,40 @@ test('window.__EVNIA__.experimental: main window only, booleans only; anything e
   // The page can reach it only through the preload's narrow API: window.ipc does not forward the internal channel.
   assert.equal(await main.ipc.invoke(INTERNAL_CHANNELS.experimentalSet, true), undefined);
   assert.deepEqual(applied, []);
+});
+
+test('window.__EVNIA__.lanSync: stored in config.json, egress opened for that address before the backend switches, bad input refused', async () => {
+  const main = preload(mainWc);
+  assert.deepEqual(main.evnia.lanSync.get(), { enabled: false, host: '', port: 39501 });
+  assert.deepEqual(lanPeers, [[]], 'closed at start');
+  await assert.rejects(main.evnia.lanSync.set({ enabled: true }), /IP address first/);
+  await assert.rejects(main.evnia.lanSync.set({ address: '8.8.8.8' }), /not a private network address/);
+  await assert.rejects(main.evnia.lanSync.set({ address: 'hubitat.local' }), /host names are not looked up/);
+  assert.equal('linuxLanSync' in onDisk(), false);
+  assert.deepEqual(await main.evnia.lanSync.set({ address: ' 192.168.1.20 ' }), { enabled: false, host: '192.168.1.20', port: 39501 });
+  assert.deepEqual(lanApplied, [], 'an address alone does not turn it on');
+  assert.deepEqual(await main.evnia.lanSync.set({ enabled: true }), { enabled: true, host: '192.168.1.20', port: 39501 });
+  assert.deepEqual(onDisk().linuxLanSync, { enabled: true, host: '192.168.1.20', port: 39501 });
+  assert.deepEqual(lanPeers.at(-1), ['192.168.1.20']);
+  assert.deepEqual(lanApplied, [{ enabled: true, host: '192.168.1.20', port: 39501 }]);
+  assert.deepEqual(main.evnia.lanSync.get(), { enabled: true, host: '192.168.1.20', port: 39501 });
+  await main.evnia.lanSync.set({ enabled: true });
+  assert.equal(lanApplied.length, 1, 'the same value again: nothing switched');
+  await main.evnia.lanSync.set({ address: '10.0.0.5:8080' });
+  assert.deepEqual(lanApplied.at(-1), { enabled: true, host: '10.0.0.5', port: 8080 });
+  assert.deepEqual(lanPeers.at(-1), ['10.0.0.5']);
+  // A hand-written public address in config.json counts as off and closes the exception.
+  main.store.set('linuxLanSync', { enabled: true, host: '1.1.1.1', port: 39501 });
+  assert.deepEqual(lanApplied.at(-1), { enabled: false, host: '', port: 39501 });
+  assert.deepEqual(lanPeers.at(-1), []);
+
+  const notice = preload(noticeWc);
+  assert.deepEqual(notice.evnia.lanSync.get(), { enabled: false, host: '', port: 39501 }, 'other windows see nothing');
+  await assert.rejects(notice.evnia.lanSync.set({ enabled: false }), /refused/);
+  for (const bad of [true, 'x', null, [], { enabled: 'yes' }, { address: 5 }, { address: 'x'.repeat(65) }, { host: '192.168.1.2' }]) {
+    await assert.rejects(bus.invoke(mainWc, mainWc.mainFrame, INTERNAL_CHANNELS.lanSyncSet, bad), TypeError, `main checks it: ${JSON.stringify(bad)}`);
+  }
+  assert.equal(await main.ipc.invoke(INTERNAL_CHANNELS.lanSyncSet, { enabled: false }), undefined, 'not through window.ipc');
 });
 
 test('nodeApi: profile import temp copy and cleanup work; app state is never overwritten or deleted', async () => {

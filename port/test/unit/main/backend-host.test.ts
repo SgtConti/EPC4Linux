@@ -218,3 +218,35 @@ test('the "Fast LED upload" setting: the backend is created with the stored valu
   bh.setEneFrameBurst(true);
   await bh.stop();
 });
+
+test('the LAN colour sync setting: the backend is created with it when on, and later changes reach its ambiglow service', async () => {
+  const host = mainHost(dir);
+  const on = { enabled: true, host: '192.168.1.20', port: 39501 };
+  assert.deepEqual(backendConfiguration({ host, mockMonitor: '34M2C8600', lanSync: on }).overrides, { ambiglow: { lanSync: on } });
+  assert.deepEqual(backendConfiguration({ host, mockMonitor: '34M2C8600', eneFrameBurst: true, lanSync: on }).overrides, { ambiglow: { eneFrameBurst: true, lanSync: on } });
+  assert.deepEqual(backendConfiguration({ host, mockMonitor: '34M2C8600', lanSync: { ...on, enabled: false } }).overrides, {}, 'off is the default');
+
+  const seen: unknown[] = [];
+  const switched: unknown[] = [];
+  const backend = fakeBackend();
+  (backend as { services: unknown }).services = { ambiglow: { setLanSync: (s: unknown) => void switched.push(s) } };
+  const bh = new BackendHost({
+    host,
+    log,
+    token: generateHubToken(),
+    mockMonitor: '34M2C8600',
+    lanSync: () => on,
+    createBackend: (_options, overrides) => {
+      seen.push(overrides.ambiglow?.lanSync);
+      return backend;
+    },
+  });
+  bh.setLanSync({ ...on, enabled: false }); // before the backend exists: nothing to switch
+  assert.ok((await bh.ensureStarted()) > 0);
+  assert.deepEqual(seen, [on]);
+  bh.setLanSync({ ...on, host: '10.0.0.2' });
+  assert.deepEqual(switched, [{ ...on, host: '10.0.0.2' }]);
+  (backend as { services: unknown }).services = { ambiglow: {} };
+  bh.setLanSync(on);
+  await bh.stop();
+});

@@ -51,6 +51,7 @@ See "Integration status" at the end.
 | `port/src/main/renderer-log.ts` | The renderer's electron-log lines (`window.__electronLog`) into the main log: message sanitizing (see "IPC") |
 | `port/src/main/mock-probe.ts` | Test probe of the simulated hardware, installed on main's `globalThis` only with `EVNIA_MOCK_MONITOR` (impl-walkthrough §3) |
 | `port/src/main/experimental.ts` | `ExperimentalSettings`: the port's opt-in experiments in `config.json` (`linuxExperimental`), today the Ambiglow page's "Fast LED upload (experimental)" checkbox; follows the store and forwards every change to the backend (see "IPC", "Persisted settings") |
+| `port/src/main/lan-sync.ts` | `LanSyncController`: the LAN colour sync setting in `config.json` (`linuxLanSync`). It validates the address, follows the store, opens the egress guard's one LAN exception and forwards every change to the backend (see "IPC", "Persisted settings") |
 | `port/src/preload/api.ts`, `index.ts` | `window.ipc`, `window.store`, `window.nodeApi`, `window.__EVNIA__` (`hubToken`, `platform`, `experimental`), `window.noop`, `window.__electronLog`. `api.ts` builds them over an injected `ipcRenderer`; `index.ts` exposes them |
 | `port/src/capture/{capture.html,page.ts,preload.ts,protocol.ts}` | Hidden follow-video capture page and its bridge |
 | `port/scripts/build.mjs` | esbuild → `build/app` |
@@ -259,6 +260,14 @@ Listeners receive an empty event object instead of `IpcRendererEvent`. The vendo
 - `ExperimentalSettings` follows the store: any change of `linuxExperimental` or `linuxExperimental.eneFrameBurst`, whoever writes it (also `window.store`), reaches the backend (`BackendHost.setEneFrameBurst` → `AmbiglowService.setEneFrameBurst`, from the next frame, impl-usb-ene §2.2). `config.json` is the one source of truth.
 - The page cannot reach the channel through `window.ipc` (not in the allowlist) and the vendor bundle references no new channel.
 
+**`window.__EVNIA__.lanSync`** (user request 2026-10-04) is the narrow API of the LAN colour sync, used only by the LAN-COLOR-SYNC renderer patch (impl-vendor-ui §3, impl-ambiglow §11):
+- `get()` is synchronous: `{enabled, host, port}` from the store snapshot (`config.json linuxLanSync`), normalized by `lan-address.ts`. Other windows see it off.
+- `set({enabled?, address?})` invokes the internal channel `evnia:lan-sync-set`.
+  - Main (`ipc.ts`) accepts only calls from the main window's top frame with a plain object of exactly those keys: a boolean, and a string of at most 64 characters. Anything else is refused with a `TypeError` and logged.
+  - `LanSyncController.set` (`src/main/lan-sync.ts`) parses the address: a private IPv4 literal, with an optional port. A bad address, or `enabled: true` without an address, throws with a text for the user, and nothing is written.
+  - Otherwise it stores a real change and returns the setting. The preload puts the setting into its snapshot at once.
+- `LanSyncController` follows every writer of `linuxLanSync`. On an effective change it opens or closes the egress guard's LAN exception (`setAllowedLanPeers`) and then calls `BackendHost.setLanSync`. An address saved while the sync is off changes neither.
+
 **`window.store`** is a synchronous snapshot taken at load through `evnia:bootstrap` (sendSync):
 - `get`/`set`/`delete`, with dot paths and electron-store validation errors.
 - Writes go through to main, which is the only writer of `config.json`.
@@ -304,6 +313,7 @@ The file uses the electron-store format: one tab-indented JSON object, schema de
 | `userInfo`, `email`, `password`, `latestSoftwareInfo` | Removed on load; writes are refused |
 | Invalid JSON | Moved to `config.json.invalid-<ts>`, then the app starts from defaults |
 | `linuxExperimental` (port-only) | The port's opt-in experiments: `{"eneFrameBurst": boolean}`, the Ambiglow page's "Fast LED upload (experimental)" checkbox (see "IPC"). Global, not per profile, and not in the backend's `Config/SoftConfig.data`. In the schema as an `object` **without a default**: a fresh file gets it only when the user ticks the checkbox, a missing key means off, and the user's Windows `config.json` loads unchanged. A non-object value is dropped on load. The Windows app ignores the key (electron-store keeps unknown keys, like the installer's `languageTemp`) |
+| `linuxLanSync` (port-only) | The LAN colour sync: `{"enabled": boolean, "host": "192.168.1.20", "port": 39501}`, the Ambiglow page's "Send colours to Hubitat (LAN)" row (see "IPC", impl-ambiglow §11). An `object` without a default, like `linuxExperimental`. A host that is not a private IPv4 literal makes it count as off. The Windows app ignores it |
 
 ## Network kill-switch (defence in depth)
 

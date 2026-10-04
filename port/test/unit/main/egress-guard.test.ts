@@ -11,7 +11,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import tls from 'node:tls';
 import { after, before, test } from 'node:test';
-import { connectTarget, EgressBlockedError, installEgressGuard, isAllowedPeer, isLoopbackIp } from '../../../src/main/egress-guard.ts';
+import { connectTarget, EgressBlockedError, installEgressGuard, isAllowedPeer, isAllowedTcpPeer, isLoopbackIp, setAllowedLanPeers } from '../../../src/main/egress-guard.ts';
 import { captureLogger, type LogLine } from '../rpc/helpers.ts';
 
 let lines: LogLine[];
@@ -63,6 +63,19 @@ test('outbound TCP/TLS/HTTP/fetch to a non-loopback peer is refused before any p
   });
   await assert.rejects(fetch('http://192.0.2.1/', { signal: AbortSignal.timeout(5000) }), (e: unknown) => blocked((e as Error).cause ?? e));
   assert.ok(lines.some((l) => l.level === 'warn' && l.text.includes('Blocked outbound connection to 192.0.2.1:9')), JSON.stringify(lines));
+});
+
+test('the LAN colour sync exception: TCP to exactly the configured private IPv4 address, nothing else, closed again with []', () => {
+  lines.length = 0;
+  assert.deepEqual(setAllowedLanPeers(['192.168.1.20', '8.8.8.8', 'hubitat.local', '127.0.0.1'], captureLogger('lan').log), ['192.168.1.20']);
+  assert.equal(isAllowedTcpPeer('192.168.1.20'), true);
+  for (const no of ['192.168.1.21', '8.8.8.8', 'hubitat.local']) assert.equal(isAllowedTcpPeer(no), false, no);
+  assert.equal(isAllowedPeer('192.168.1.20'), false, 'UDP stays loopback-only');
+  // (No real connect() to the allowed address: a test must not send packets onto whatever network it runs on.)
+  assert.throws(() => net.connect({ host: '192.168.1.21', port: 9 }), blocked);
+  assert.throws(() => dgram.createSocket('udp4').send('x', 9, '192.168.1.20'), blocked, 'no UDP to it');
+  assert.deepEqual(setAllowedLanPeers([]), []);
+  assert.throws(() => net.connect({ host: '192.168.1.20', port: 9 }), blocked, 'closed again');
 });
 
 test('DNS: no lookups but localhost, no c-ares queries at all', async () => {

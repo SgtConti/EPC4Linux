@@ -31,8 +31,10 @@ test('schema reproduces the vendor keys and defaults (01 §6) with update/login 
     'noticeSwitch', 'noticeSound', 'noticeStyle', 'autoUpdate', 'latestSoftwareInfo', 'ignoreVersion', 'automaticUpdate',
     'tutorials', 'userInfo', 'email', 'password', 'skipLoginState', 'mainWindowBounds', 'overviewType', 'ambiScapeEnable',
     'linuxExperimental', // port-only: the opt-in experiments ("Fast LED upload")
+    'linuxLanSync', // port-only: the LAN colour sync (Follow Video colours to a Hubitat hub)
   ]);
   assert.equal(STORE_SCHEMA.linuxExperimental.default, undefined, 'no default: a config.json without it is not rewritten');
+  assert.equal(STORE_SCHEMA.linuxLanSync.default, undefined, 'no default: a config.json without it is not rewritten');
   assert.equal(STORE_SCHEMA.autoStartup.default, false, 'Linux default (01 port plan 6): no login autostart until enabled');
   assert.equal(STORE_SCHEMA.autoStartupMinimize.default, true);
   assert.equal(STORE_SCHEMA.overviewType.default, 'category');

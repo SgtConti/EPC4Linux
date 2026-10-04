@@ -62,6 +62,7 @@ import {
   writeVerified,
 } from './ddc-fallback.ts';
 import { FollowVideoEngine } from './follow-video.ts';
+import { describeLanTarget, LanColorSender, type LanPost, type LanSyncSettings } from './lan-sync.ts';
 import { FollowAudioEngine } from './follow-audio.ts';
 import { BreathingEngine, type BreathingDetail } from './breathing.ts';
 import { IdleMonitor } from './idle.ts';
@@ -132,6 +133,13 @@ export interface AmbiglowServiceOptions {
    * read from the environment once (eneFrameBurstFromEnv).
    */
   eneFrameBurstForced?: boolean;
+  /**
+   * Port feature: the LAN colour sync setting at start (config.json linuxLanSync, lan-sync.ts): Follow Video colours to a
+   * Hubitat hub on the local network. Main passes the stored setting and changes it with setLanSync(). Default off.
+   */
+  lanSync?: LanSyncSettings;
+  /** The LAN colour sync transport (tests); default an HTTP POST (lan-sync.ts httpPost). */
+  lanPost?: LanPost;
   idleIntervalMs?: number;
   lostGraceMs?: number;
   /** ENE_AWAY_CAPTURE_MS. */
@@ -205,6 +213,7 @@ export class AmbiglowServiceImpl implements AmbiglowService {
   readonly #colors: ColorDataStore;
   readonly #idle: IdleMonitor;
   readonly #video: FollowVideoEngine;
+  readonly #lan: LanColorSender;
   readonly #audio: FollowAudioEngine;
   readonly #breathing: BreathingEngine;
   /** ENE model last reported to a display through setEneModel (for displays that do not expose eneModel). */
@@ -245,11 +254,14 @@ export class AmbiglowServiceImpl implements AmbiglowService {
     this.#clock = options.clock ?? realClock;
     this.#colors = new ColorDataStore(colorDataPath(core.host.serveDataDir), this.#log);
     const target = () => (this.#display ? this.#eneFor(this.#display) : null);
+    this.#lan = new LanColorSender({ log: this.#log.child('lan'), settings: options.lanSync, timers: this.#timers, post: options.lanPost });
+    if (this.#lan.settings.enabled) this.#log.info(`LAN colour sync on: Follow Video colours to ${describeLanTarget(this.#lan.settings)}`);
     this.#video = new FollowVideoEngine({
       log: this.#log.child('video'),
       capture: core.host.capture,
       target,
       timers: this.#timers,
+      frameSink: (frame) => this.#lan.push(frame),
     });
     this.#frameBurstSetting = options.eneFrameBurst === true;
     this.#frameBurstForced = options.eneFrameBurstForced ?? eneFrameBurstFromEnv();
@@ -298,6 +310,8 @@ export class AmbiglowServiceImpl implements AmbiglowService {
     this.#unsubscribe?.();
     this.#unsubscribe = null;
     this.#stopEngines();
+    // The hub is told the stream ended (it may restore its lights); at most a second's wait.
+    await this.#lan.close();
     this.#cancelLostTimer();
     this.#clearAway();
     this.#cancelDdcRetry();
@@ -362,6 +376,21 @@ export class AmbiglowServiceImpl implements AmbiglowService {
           : `"${ENE_FRAME_BURST_SETTING}" off: Follow video frames use the six paced writes from the next frame`,
     );
     this.#ene?.setFrameBurst(on);
+  }
+
+  /**
+   * The LAN colour sync setting (services.ts AmbiglowService.setLanSync; main passes config.json linuxLanSync): Follow
+   * Video colours to a Hubitat hub (lan-sync.ts). Applies to the next frame, without touching the capture or the LEDs;
+   * turning it off or changing the address first tells the old hub that the stream ended. The same setting again is a
+   * no-op. An invalid one (not a private IPv4 address) counts as off.
+   */
+  setLanSync(settings: LanSyncSettings): void {
+    this.#lan.configure(settings);
+  }
+
+  /** The LAN colour sync sender (diagnostics, tests). */
+  get lanSync(): LanColorSender {
+    return this.#lan;
   }
 
   /** The frame burst state: the setting, the environment override, and whether ENEs are opened (and driven) with it. */

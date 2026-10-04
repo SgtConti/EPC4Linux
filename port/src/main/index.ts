@@ -22,7 +22,7 @@ import { ElectronCaptureHost } from './capture-host.ts';
 import { createCommandRunner } from './child-process.ts';
 import { DeviceChangeGate, type DeviceEventName } from './device-events.ts';
 import { DisplayModeProvider } from './display-sources.ts';
-import { installEgressGuard } from './egress-guard.ts';
+import { installEgressGuard, setAllowedLanPeers } from './egress-guard.ts';
 import { type LineWatcher, startDisplayWatchers } from './display-watch.ts';
 import { createDrmSource } from './drm-modes.ts';
 import { appExitSteps, runExitSteps } from './exit.ts';
@@ -38,7 +38,9 @@ import { buildMonitorJsonConfig, loadMonitorInfo, type MonitorJsonConfig } from 
 import { installNetworkGuard, redactUrl } from './network-guard.ts';
 import { type AppPaths, clearDebugFlag, debugFlagSet, resolveAppPaths, selfDesktopFile, USER_DATA_NAME, userRuntimeDir } from './paths.ts';
 import { ExperimentalSettings } from './experimental.ts';
-import type { ExperimentalState } from './shared/channels.ts';
+import { LanSyncController } from './lan-sync.ts';
+import type { ExperimentalState, LanSyncChange } from './shared/channels.ts';
+import type { LanSyncSettings } from '../backend/ambiglow/lan-address.ts';
 import { VENDOR_APP_VERSION } from './shared/store-schema.ts';
 import { ConfigStore } from './store.ts';
 import { TrayController } from './tray.ts';
@@ -71,6 +73,8 @@ class EvniaApp implements IpcHost {
   readonly #appTempDir = defaultAppTempDir(process.env);
   /** The port's experiments (config.json linuxExperimental): the "Fast LED upload (experimental)" checkbox. */
   readonly #experimental: ExperimentalSettings;
+  /** The LAN colour sync (config.json linuxLanSync): Follow Video colours to a Hubitat hub, the egress exception for it. */
+  readonly #lanSync: LanSyncController;
   #language: string;
   #monitorConfig: MonitorJsonConfig | null = null;
   #appReady = false;
@@ -158,6 +162,8 @@ class EvniaApp implements IpcHost {
       appTempDir: this.#appTempDir,
       // The Ambiglow page's "Fast LED upload (experimental)" checkbox, as stored: the backend starts with it.
       eneFrameBurst: () => this.#experimental.eneFrameBurst,
+      // The Ambiglow page's "Send colours to Hubitat" row, as stored (lan-sync.ts opened the egress exception already).
+      lanSync: () => this.#lanSync.settings,
     });
     // ...and follows every change of the stored setting (experimental.ts): config.json is the one source of truth.
     this.#experimental = new ExperimentalSettings({
@@ -165,6 +171,13 @@ class EvniaApp implements IpcHost {
       backend: this.#backend,
       forcedByEnv: eneFrameBurstFromEnv(process.env),
       log: log.child('experimental'),
+    });
+    const lanLog = log.child('lanSync');
+    this.#lanSync = new LanSyncController({
+      store: this.store,
+      backend: this.#backend,
+      allowPeers: (hosts) => void setAllowedLanPeers(hosts, lanLog),
+      log: lanLog,
     });
     if (mockMonitor) log.info(`EVNIA_MOCK_MONITOR=${mockMonitor}: simulated monitor, no hardware access`);
   }
@@ -336,6 +349,10 @@ class EvniaApp implements IpcHost {
 
   setEneFrameBurst(enabled: boolean): ExperimentalState {
     return this.#experimental.setEneFrameBurst(enabled);
+  }
+
+  setLanSync(change: LanSyncChange): LanSyncSettings {
+    return this.#lanSync.set(change);
   }
 
   // ───────────── exit ─────────────

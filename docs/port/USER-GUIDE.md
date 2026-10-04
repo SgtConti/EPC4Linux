@@ -215,6 +215,24 @@ Below the Speed slider, Follow video has a checkbox **Fast LED upload (experimen
 - The checkbox appears only with the USB Ambiglow controller and with Follow video selected, and it is greyed out while the effect is switched off.
 - If the app was started with `EVNIA_ENE_FRAME_BURST=1` in its environment (the older way to switch it on), the checkbox shows ticked and greyed out, with a note: the environment variable wins for that run. Start the app without it to decide with the checkbox again.
 
+#### Send colours to Hubitat (LAN)
+
+Below *Fast LED upload*, Follow video has a row **Send colours to Hubitat (LAN)**. It is off by default; the Windows app has none. With it on, the screen colours also go to a [Hubitat](https://hubitat.com/) hub on your network, so smart lights in the room can follow the screen. On the hub, install the *Ambient Color Sync* app and its receiver driver from [`hubitat/`](../../hubitat/README.md).
+
+1. Enter the hub's IP address in the field, for example `192.168.1.20`. Add `:port` only if it is not 39501. The address is saved when you leave the field or press Enter. A red border means it was refused; the tooltip says why.
+2. Tick **Send colours to Hubitat (LAN)**.
+
+- Only **private IPv4 addresses** are accepted (`10.x`, `172.16–31.x`, `192.168.x`, `169.254.x`), and no host names.
+  - This is the app's only network connection, and only while the box is ticked.
+  - The app makes it to exactly that address.
+- **What is sent.** The PC sends the average colour of the whole screen and of its four edges.
+  - It sends at most 5 times per second, and only when the colours change noticeably.
+  - On a static screen it sends a heartbeat every 5 seconds.
+  - When Follow video stops (another effect, Ambiglow off, idle lights-off, the app quitting), the hub is told, so it can restore its lights.
+- The choice is kept in `~/.config/evnia/config.json` as `"linuxLanSync": {"enabled": true, "host": "192.168.1.20", "port": 39501}`. The Windows app ignores that entry.
+- The row appears only with the USB Ambiglow controller and with Follow video selected.
+- If the hub does not answer, the backend log says `LAN colour sync: … not reachable` once, and the app retries every 2 seconds.
+
 ### Ambiglow "Follow audio"
 
 Follow audio makes the LEDs react to what your computer plays. It records the **monitor of the default output device** (the playback signal), never a microphone.

@@ -9,6 +9,7 @@
 
 import type { BackendService } from './index.ts';
 import type { DdcChannel, DiscoveredMonitor, UsbDeviceInfo } from './types.ts';
+import type { LanSyncSettings } from './ambiglow/lan-address.ts';
 
 // ───────────────────────────── Theme / profile store (theme/) ─────────────────────────────
 
@@ -172,4 +173,11 @@ export interface AmbiglowService extends BackendService {
    * once the backend exists and on every change; the value at start is AmbiglowServiceOptions.eneFrameBurst.
    */
   setEneFrameBurst?(enabled: boolean): void;
+  /**
+   * (Appended by ambiglow/, optional.) The port's LAN colour sync setting, which main keeps in config.json
+   * (linuxLanSync, {enabled, host, port}): while Follow Video runs, its colours also go to a Hubitat hub on the local
+   * network (ambiglow/lan-sync.ts, hubitat/). Takes effect with the next frame; the same value again is a no-op. Main
+   * calls it once the backend exists and on every change; the value at start is AmbiglowServiceOptions.lanSync.
+   */
+  setLanSync?(settings: LanSyncSettings): void;
 }
