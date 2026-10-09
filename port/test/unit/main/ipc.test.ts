@@ -303,34 +303,45 @@ test('window.__EVNIA__.experimental: main window only, booleans only; anything e
 
 test('window.__EVNIA__.lanSync: stored in config.json, egress opened for that address before the backend switches, bad input refused', async () => {
   const main = preload(mainWc);
-  assert.deepEqual(main.evnia.lanSync.get(), { enabled: false, host: '', port: 39501 });
+  const off = { enabled: false, host: '', port: 39501, path: '/' };
+  assert.deepEqual(main.evnia.lanSync.get(), { ...off, address: '' });
   assert.deepEqual(lanPeers, [[]], 'closed at start');
-  await assert.rejects(main.evnia.lanSync.set({ enabled: true }), /IP address first/);
+  await assert.rejects(main.evnia.lanSync.set({ enabled: true }), /webhook URL first/);
   await assert.rejects(main.evnia.lanSync.set({ address: '8.8.8.8' }), /not a private network address/);
   await assert.rejects(main.evnia.lanSync.set({ address: 'hubitat.local' }), /host names are not looked up/);
+  await assert.rejects(main.evnia.lanSync.set({ address: 'https://192.168.1.5:8123/api/webhook/x' }), /https is not supported/);
   assert.equal('linuxLanSync' in onDisk(), false);
-  assert.deepEqual(await main.evnia.lanSync.set({ address: ' 192.168.1.20 ' }), { enabled: false, host: '192.168.1.20', port: 39501 });
+
+  // Hubitat: an IP address.
+  const hubitat = { enabled: false, host: '192.168.1.20', port: 39501, path: '/' };
+  assert.deepEqual(await main.evnia.lanSync.set({ address: ' 192.168.1.20 ' }), { ...hubitat, address: '192.168.1.20' });
   assert.deepEqual(lanApplied, [], 'an address alone does not turn it on');
-  assert.deepEqual(await main.evnia.lanSync.set({ enabled: true }), { enabled: true, host: '192.168.1.20', port: 39501 });
-  assert.deepEqual(onDisk().linuxLanSync, { enabled: true, host: '192.168.1.20', port: 39501 });
+  assert.deepEqual(await main.evnia.lanSync.set({ enabled: true }), { ...hubitat, enabled: true, address: '192.168.1.20' });
+  assert.deepEqual(onDisk().linuxLanSync, { ...hubitat, enabled: true });
   assert.deepEqual(lanPeers.at(-1), ['192.168.1.20']);
-  assert.deepEqual(lanApplied, [{ enabled: true, host: '192.168.1.20', port: 39501 }]);
-  assert.deepEqual(main.evnia.lanSync.get(), { enabled: true, host: '192.168.1.20', port: 39501 });
+  assert.deepEqual(lanApplied, [{ ...hubitat, enabled: true }]);
   await main.evnia.lanSync.set({ enabled: true });
   assert.equal(lanApplied.length, 1, 'the same value again: nothing switched');
-  await main.evnia.lanSync.set({ address: '10.0.0.5:8080' });
-  assert.deepEqual(lanApplied.at(-1), { enabled: true, host: '10.0.0.5', port: 8080 });
+
+  // Home Assistant: a webhook URL (port 8123 when none is given).
+  const url = 'http://10.0.0.5/api/webhook/3f9a6c0d2b1e47aa';
+  const ha = { enabled: true, host: '10.0.0.5', port: 8123, path: '/api/webhook/3f9a6c0d2b1e47aa' };
+  assert.deepEqual(await main.evnia.lanSync.set({ address: url }), { ...ha, address: 'http://10.0.0.5:8123/api/webhook/3f9a6c0d2b1e47aa' });
+  assert.deepEqual(lanApplied.at(-1), ha);
   assert.deepEqual(lanPeers.at(-1), ['10.0.0.5']);
+  assert.ok(!logged.some((l) => l.text.includes('3f9a6c0d2b1e47aa')), 'the webhook id stays out of the log');
+  assert.ok(logged.some((l) => l.text.includes('10.0.0.5:8123/api/webhook/3f9a…')));
+
   // A hand-written public address in config.json counts as off and closes the exception.
   main.store.set('linuxLanSync', { enabled: true, host: '1.1.1.1', port: 39501 });
-  assert.deepEqual(lanApplied.at(-1), { enabled: false, host: '', port: 39501 });
+  assert.deepEqual(lanApplied.at(-1), off);
   assert.deepEqual(lanPeers.at(-1), []);
 
   const notice = preload(noticeWc);
-  assert.deepEqual(notice.evnia.lanSync.get(), { enabled: false, host: '', port: 39501 }, 'other windows see nothing');
+  assert.deepEqual(notice.evnia.lanSync.get(), { ...off, address: '' }, 'other windows see nothing');
   await assert.rejects(notice.evnia.lanSync.set({ enabled: false }), /refused/);
-  for (const bad of [true, 'x', null, [], { enabled: 'yes' }, { address: 5 }, { address: 'x'.repeat(65) }, { host: '192.168.1.2' }]) {
-    await assert.rejects(bus.invoke(mainWc, mainWc.mainFrame, INTERNAL_CHANNELS.lanSyncSet, bad), TypeError, `main checks it: ${JSON.stringify(bad)}`);
+  for (const bad of [true, 'x', null, [], { enabled: 'yes' }, { address: 5 }, { address: 'x'.repeat(301) }, { host: '192.168.1.2' }]) {
+    await assert.rejects(bus.invoke(mainWc, mainWc.mainFrame, INTERNAL_CHANNELS.lanSyncSet, bad), TypeError, `main checks it: ${JSON.stringify(bad).slice(0, 40)}`);
   }
   assert.equal(await main.ipc.invoke(INTERNAL_CHANNELS.lanSyncSet, { enabled: false }), undefined, 'not through window.ipc');
 });

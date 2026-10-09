@@ -98,7 +98,7 @@ Reference hardware: Philips Evnia 34M2C8600 (EDID `PHL`/`0xC29F`, scaler RTD2738
    - The main process installs `webRequest.onBeforeRequest`. It cancels anything that is not `data:`, `blob:`, `devtools:`, `chrome:`, `local:` (images below allowlisted directories only), `file:` below the app's own tree (`vendor-ui/`, `capture/`), or the loopback hub URL, and logs every cancellation.
    - Chromium resolves no host name (`host-resolver-rules`) and uses no proxy (`--no-proxy-server`).
    - A Node-side egress guard in main (`src/main/egress-guard.ts`) is installed before the backend is created. It refuses every outbound socket other than a Unix socket or a loopback address, and every DNS query.
-   - One opt-in exception: with the LAN colour sync on (`config.json linuxLanSync`, impl-ambiglow §11), the backend's HTTP POST may reach the one private IPv4 address the user entered for their Hubitat hub (`setAllowedLanPeers`). It never reaches a host name, a public address, UDP or DNS. It is off by default.
+   - One opt-in exception: with the LAN colour sync on (`config.json linuxLanSync`, impl-ambiglow §11), the backend's HTTP POST may reach the one private IPv4 address the user entered for their Hubitat hub or Home Assistant (`setAllowedLanPeers`). It never reaches a host name, a public address, UDP or DNS. It is off by default.
    - The vendor CSP is replaced with a local-only one: `connect-src` names only `ws://127.0.0.1:*`, and there are no frames, workers or media.
 5. **Least privilege.**
    - The preload uses `contextIsolation:true` and `sandbox:true`.

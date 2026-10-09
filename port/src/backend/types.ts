@@ -216,6 +216,11 @@ export interface HostServices {
   capture?: CaptureHost;
   /** Seconds since last user input (powerMonitor.getSystemIdleTime). */
   getIdleSeconds?(): number;
+  /**
+   * Port addition: true while an open screen capture should be closed so that the desktop can blank, lock and
+   * sleep (Chromium inhibits idle while a desktop capture runs; src/main/desktop-idle.ts). Polled every second.
+   */
+  shouldReleaseScreenCapture?(): boolean;
   /** Current mode of the OS display that shows `monitor` (best effort). */
   getDisplayMode?(monitor: DiscoveredMonitor): DisplayModeInfo | null;
   /** Executable path of the foreground app, or null if unknown (Wayland). */

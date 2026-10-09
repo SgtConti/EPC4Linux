@@ -9,13 +9,16 @@ import type { AddressInfo } from 'node:net';
 import { test } from 'node:test';
 import { FollowVideoEngine } from '../../../src/backend/ambiglow/follow-video.ts';
 import {
+  describeLanTarget,
   frameZones,
   httpPost,
   isPrivateIpv4,
   LAN_SYNC_CHANGE_DELTA,
   LAN_SYNC_FAILING_INTERVAL_MS,
   LAN_SYNC_HEARTBEAT_MS,
+  LAN_SYNC_HUBITAT_INTERVAL_MS,
   LAN_SYNC_MIN_INTERVAL_MS,
+  lanSyncMinInterval,
   LanColorSender,
   lanSyncAddressText,
   lanSyncDocument,
@@ -26,7 +29,7 @@ import {
 import type { CaptureFrame } from '../../../src/backend/types.ts';
 import { FakeCaptureHost, ManualTimers, flush, rgbaFrame, rig, silentLog } from './helpers.ts';
 
-const ON: LanSyncSettings = { enabled: true, host: '192.168.1.20', port: 39501 };
+const ON: LanSyncSettings = { enabled: true, host: '192.168.1.20', port: 39501, path: '/' };
 const solid = (r: number, g: number, b: number): CaptureFrame => rgbaFrame(() => [r, g, b]);
 
 test('addresses: private IPv4 literals only, with an optional port', () => {
@@ -34,22 +37,38 @@ test('addresses: private IPv4 literals only, with an optional port', () => {
   for (const no of ['8.8.8.8', '172.15.0.1', '172.32.0.1', '127.0.0.1', '0.0.0.0', '192.169.0.1', '192.168.001.20', '192.168.1', 'hubitat.local', '::1', 'fd00::1', '']) {
     assert.equal(isPrivateIpv4(no), false, no);
   }
-  assert.deepEqual(parseLanSyncAddress(' 192.168.1.20 '), { host: '192.168.1.20', port: 39501 });
-  assert.deepEqual(parseLanSyncAddress('http://10.1.2.3:8080/'), { host: '10.1.2.3', port: 8080 });
+  assert.deepEqual(parseLanSyncAddress(' 192.168.1.20 '), { host: '192.168.1.20', port: 39501, path: '/' });
+  assert.deepEqual(parseLanSyncAddress('http://10.1.2.3:8080/'), { host: '10.1.2.3', port: 8080, path: '/' });
   assert.match((parseLanSyncAddress('hubitat.local') as { error: string }).error, /host names are not looked up/);
   assert.match((parseLanSyncAddress('1.1.1.1') as { error: string }).error, /not a private network address/);
   assert.match((parseLanSyncAddress('192.168.1.20:70000') as { error: string }).error, /out of range/);
   assert.match((parseLanSyncAddress('192.168.1.20:0') as { error: string }).error, /out of range/);
   assert.match((parseLanSyncAddress('') as { error: string }).error, /no address/);
-  assert.equal(lanSyncAddressText({ host: '192.168.1.20', port: 39501 }), '192.168.1.20');
-  assert.equal(lanSyncAddressText({ host: '192.168.1.20', port: 8080 }), '192.168.1.20:8080');
+  assert.equal(lanSyncAddressText({ host: '192.168.1.20', port: 39501, path: '/' }), '192.168.1.20');
+  assert.equal(lanSyncAddressText({ host: '192.168.1.20', port: 8080, path: '/' }), '192.168.1.20:8080');
+});
+
+test('addresses: a Home Assistant webhook URL (port 8123 unless given), its id kept out of descriptions', () => {
+  assert.deepEqual(parseLanSyncAddress('http://192.168.1.5/api/webhook/abcDEF-123_x'), { host: '192.168.1.5', port: 8123, path: '/api/webhook/abcDEF-123_x' });
+  assert.deepEqual(parseLanSyncAddress('192.168.1.5:9000/api/webhook/x/'), { host: '192.168.1.5', port: 9000, path: '/api/webhook/x' });
+  assert.deepEqual(parseLanSyncAddress('192.168.1.5/custom'), { host: '192.168.1.5', port: 39501, path: '/custom' }, 'other paths keep the Hubitat port');
+  assert.match((parseLanSyncAddress('https://192.168.1.5:8123/api/webhook/x') as { error: string }).error, /https is not supported/);
+  assert.match((parseLanSyncAddress('http://homeassistant.local:8123/api/webhook/x') as { error: string }).error, /host names/);
+  assert.match((parseLanSyncAddress('192.168.1.5/api/webhook/a b') as { error: string }).error, /not a usable path/);
+  assert.match((parseLanSyncAddress('192.168.1.5/api/../x') as { error: string }).error, /not a usable path/);
+  assert.match((parseLanSyncAddress('192.168.1.5/api/webhook/x?y=1') as { error: string }).error, /not an IPv4 address/);
+  const ha = { host: '192.168.1.5', port: 8123, path: '/api/webhook/3f9a6c0d2b1e' };
+  assert.equal(lanSyncAddressText(ha), 'http://192.168.1.5:8123/api/webhook/3f9a6c0d2b1e');
+  assert.equal(describeLanTarget(ha), '192.168.1.5:8123/api/webhook/3f9a…');
+  assert.deepEqual(normalizeLanSyncSettings({ enabled: true, host: '192.168.1.5', port: 8123, path: '/api/webhook/x' }).path, '/api/webhook/x');
+  assert.equal(normalizeLanSyncSettings({ enabled: true, host: '192.168.1.5', path: 'no-slash' }).path, '/');
 });
 
 test('the stored setting is normalized: on only with a private host', () => {
-  assert.deepEqual(normalizeLanSyncSettings(undefined), { enabled: false, host: '', port: 39501 });
-  assert.deepEqual(normalizeLanSyncSettings({ enabled: true, host: '192.168.1.20', port: 8080 }), { enabled: true, host: '192.168.1.20', port: 8080 });
-  assert.deepEqual(normalizeLanSyncSettings({ enabled: true, host: '1.1.1.1' }), { enabled: false, host: '', port: 39501 });
-  assert.deepEqual(normalizeLanSyncSettings({ enabled: 'yes', host: '10.0.0.2', port: 'x' }), { enabled: false, host: '10.0.0.2', port: 39501 });
+  assert.deepEqual(normalizeLanSyncSettings(undefined), { enabled: false, host: '', port: 39501, path: '/' });
+  assert.deepEqual(normalizeLanSyncSettings({ enabled: true, host: '192.168.1.20', port: 8080, path: '/' }), { enabled: true, host: '192.168.1.20', port: 8080, path: '/' });
+  assert.deepEqual(normalizeLanSyncSettings({ enabled: true, host: '1.1.1.1' }), { enabled: false, host: '', port: 39501, path: '/' });
+  assert.deepEqual(normalizeLanSyncSettings({ enabled: 'yes', host: '10.0.0.2', port: 'x' }), { enabled: false, host: '10.0.0.2', port: 39501, path: '/' });
 });
 
 test('frameZones: the whole screen and 20 % border bands; the document', () => {
@@ -75,15 +94,15 @@ test('frameZones: the whole screen and 20 % border bands; the document', () => {
 /** A sender over manual timers whose requests finish when the test says so. */
 function senderRig(settings: LanSyncSettings = ON) {
   const timers = new ManualTimers();
-  const posts: Array<{ host: string; port: number; doc: Record<string, unknown>; done: (ok: boolean) => void }> = [];
+  const posts: Array<{ host: string; port: number; path: string; doc: Record<string, unknown>; done: (ok: boolean) => void }> = [];
   const sender = new LanColorSender({
     log: silentLog,
     settings,
     timers,
     now: () => timers.now,
-    post: (host, port, body) =>
+    post: (host, port, path, body) =>
       new Promise((resolve, reject) => {
-        posts.push({ host, port, doc: JSON.parse(body), done: (ok) => (ok ? resolve(200) : reject(new Error('ECONNREFUSED'))) });
+        posts.push({ host, port, path, doc: JSON.parse(body), done: (ok) => (ok ? resolve(200) : reject(new Error('ECONNREFUSED'))) });
       }),
   });
   /** Finish the open request (and let the sender react). */
@@ -95,7 +114,7 @@ function senderRig(settings: LanSyncSettings = ON) {
 }
 
 test('sender: off by default; on, the first frame goes out at once; one request at a time, newest wins', async () => {
-  const off = senderRig({ enabled: false, host: '', port: 39501 });
+  const off = senderRig({ enabled: false, host: '', port: 39501, path: '/' });
   off.sender.push(solid(10, 20, 30));
   assert.equal(off.posts.length, 0);
 
@@ -103,7 +122,7 @@ test('sender: off by default; on, the first frame goes out at once; one request 
   sender.push(solid(10, 20, 30));
   assert.equal(posts.length, 1);
   assert.deepEqual([posts[0].host, posts[0].port, posts[0].doc.active, posts[0].doc.color], ['192.168.1.20', 39501, true, [10, 20, 30]]);
-  timers.advance(LAN_SYNC_MIN_INTERVAL_MS * 2);
+  timers.advance(LAN_SYNC_HUBITAT_INTERVAL_MS * 2);
   sender.push(solid(100, 0, 0));
   sender.push(solid(0, 100, 0));
   assert.equal(posts.length, 1, 'the request is still open: nothing else is sent');
@@ -125,7 +144,7 @@ test('sender: small changes wait for the heartbeat, big ones for the minimum int
   await answer();
   sender.push(solid(200, 20, 30));
   assert.equal(posts.length, 2, 'a big change right after a send waits for the minimum interval');
-  timers.advance(LAN_SYNC_MIN_INTERVAL_MS);
+  timers.advance(LAN_SYNC_HUBITAT_INTERVAL_MS);
   assert.equal(posts.length, 3);
   assert.deepEqual(posts[2].doc.color, [200, 20, 30]);
 });
@@ -153,17 +172,32 @@ test('sender: the end of the stream is sent once; close() waits for it; turning 
 
   sender.push(solid(5, 5, 5));
   await answer();
-  sender.configure({ enabled: true, host: '10.0.0.7', port: 8080 });
+  sender.configure({ enabled: true, host: '10.0.0.7', port: 8080, path: '/' });
   assert.deepEqual([posts.at(-2)!.host, posts.at(-2)!.doc.active], ['192.168.1.20', false], 'the old hub hears the end');
   posts.at(-2)!.done(true);
   assert.deepEqual([posts.at(-1)!.host, posts.at(-1)!.port, posts.at(-1)!.doc.active, posts.at(-1)!.doc.color], ['10.0.0.7', 8080, true, [5, 5, 5]], 'the new one gets the newest colours at once');
   await answer();
   const before = posts.length;
-  sender.configure({ enabled: false, host: '10.0.0.7', port: 8080 });
+  sender.configure({ enabled: false, host: '10.0.0.7', port: 8080, path: '/' });
   assert.equal(posts.length, before + 1);
   assert.deepEqual([posts.at(-1)!.host, posts.at(-1)!.doc.active], ['10.0.0.7', false]);
   sender.push(solid(7, 7, 7));
   assert.equal(posts.length, before + 1, 'off: nothing more');
+});
+
+test('sender: Home Assistant gets up to 20 documents per second, Hubitat 5', async () => {
+  assert.equal(lanSyncMinInterval({ path: '/' }), LAN_SYNC_HUBITAT_INTERVAL_MS);
+  assert.equal(lanSyncMinInterval({ path: '/api/webhook/x' }), LAN_SYNC_MIN_INTERVAL_MS);
+  assert.deepEqual([LAN_SYNC_MIN_INTERVAL_MS, LAN_SYNC_HUBITAT_INTERVAL_MS], [50, 200]);
+  const { timers, posts, sender, answer } = senderRig({ enabled: true, host: '192.168.1.5', port: 8123, path: '/api/webhook/x' });
+  sender.push(solid(10, 20, 30));
+  await answer();
+  sender.push(solid(200, 20, 30));
+  timers.advance(LAN_SYNC_MIN_INTERVAL_MS - 1);
+  assert.equal(posts.length, 1);
+  timers.advance(1);
+  assert.equal(posts.length, 2, 'after 50 ms');
+  assert.equal(posts[1].path, '/api/webhook/x');
 });
 
 test('sender: an unreachable hub slows the attempts down, logged once', async () => {
@@ -172,9 +206,9 @@ test('sender: an unreachable hub slows the attempts down, logged once', async ()
   await answer(false);
   assert.equal(sender.failing, true);
   sender.push(solid(200, 2, 3));
-  timers.advance(LAN_SYNC_MIN_INTERVAL_MS);
+  timers.advance(LAN_SYNC_HUBITAT_INTERVAL_MS);
   assert.equal(posts.length, 1, 'not at the normal rate');
-  timers.advance(LAN_SYNC_FAILING_INTERVAL_MS - LAN_SYNC_MIN_INTERVAL_MS);
+  timers.advance(LAN_SYNC_FAILING_INTERVAL_MS - LAN_SYNC_HUBITAT_INTERVAL_MS);
   assert.equal(posts.length, 2);
   await answer(true);
   assert.equal(sender.failing, false);
@@ -222,12 +256,20 @@ test('httpPost: a real POST to a loopback server', async () => {
   await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
   try {
     const { port } = server.address() as AddressInfo;
-    assert.equal(await httpPost('127.0.0.1', port, '{"a":1}', 2000), 200);
+    assert.equal(await httpPost('127.0.0.1', port, '/', '{"a":1}', 2000), 200);
     assert.deepEqual(bodies, ['POST / application/json {"a":1}']);
+    // A webhook path: one kept-open connection for consecutive requests.
+    const sockets = new Set<unknown>();
+    server.on('connection', (sock) => sockets.add(sock));
+    assert.equal(await httpPost('127.0.0.1', port, '/api/webhook/t', '{"b":1}', 2000), 200);
+    assert.equal(await httpPost('127.0.0.1', port, '/api/webhook/t', '{"b":2}', 2000), 200);
+    assert.deepEqual(bodies.slice(1), ['POST /api/webhook/t application/json {"b":1}', 'POST /api/webhook/t application/json {"b":2}']);
+    assert.equal(sockets.size, 1, 'the connection was reused');
   } finally {
+    server.closeAllConnections();
     server.close();
   }
-  await assert.rejects(httpPost('127.0.0.1', 1, '{}', 2000), /ECONNREFUSED/);
+  await assert.rejects(httpPost('127.0.0.1', 1, '/', '{}', 2000), /ECONNREFUSED/);
 });
 
 test('AmbiglowService: Follow Video frames reach the hub while the effect runs; another effect and stop() end the stream; setLanSync switches live', async () => {
@@ -235,7 +277,7 @@ test('AmbiglowService: Follow Video frames reach the hub while the effect runs; 
   const r = await rig({
     service: {
       lanSync: ON,
-      lanPost: async (host, _port, body) => {
+      lanPost: async (host, _port, _path, body) => {
         docs.push({ host, doc: JSON.parse(body) });
         return 200;
       },
@@ -256,7 +298,7 @@ test('AmbiglowService: Follow Video frames reach the hub while the effect runs; 
 
     assert.equal((await r.call('Effect_Change', [100000, 1])).err_code, 0);
     await flush();
-    r.service.setLanSync({ enabled: true, host: '10.0.0.9', port: 39501 });
+    r.service.setLanSync({ enabled: true, host: '10.0.0.9', port: 39501, path: '/' });
     r.timers.advance(1000);
     r.capture.frame(rgbaFrame(() => [200, 0, 0]));
     await flush();

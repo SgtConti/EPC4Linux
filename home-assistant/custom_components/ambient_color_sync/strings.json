@@ -1,0 +1,145 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ambient Color Sync",
+        "description": "Lights follow the screen colours sent by EPC4Linux (Ambiglow Follow Video) or Hyperion.",
+        "data": {
+          "name": "Name",
+          "lights": "Lights"
+        },
+        "data_description": {
+          "lights": "Colour lights that follow the screen. You can change them later in the options."
+        }
+      },
+      "zones": {
+        "title": "Screen areas",
+        "description": "Choose the part of the screen each light follows."
+      }
+    },
+    "create_entry": {
+      "default": "In EPC4Linux (Ambiglow → Follow video), paste this webhook URL into the address field and tick **Send colours to Hubitat / Home Assistant (LAN)**:\n\n`{url}`\n\nKeep it private: whoever knows it can set your lights. The URL is also shown in this integration's options."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Ambient Color Sync",
+        "description": "Webhook URL for EPC4Linux:\n\n`{url}`",
+        "menu_options": {
+          "lights": "Lights and screen areas",
+          "behaviour": "Brightness, pacing and end of stream",
+          "hyperion": "Hyperion server"
+        }
+      },
+      "lights": {
+        "title": "Lights",
+        "data": {
+          "lights": "Lights"
+        }
+      },
+      "zones": {
+        "title": "Screen areas",
+        "description": "Choose the part of the screen each light follows."
+      },
+      "behaviour": {
+        "title": "Brightness, pacing and end of stream",
+        "data": {
+          "on_off": "Switching lights on and off",
+          "brightness_mode": "Brightness",
+          "min_brightness": "Brightness for a dark screen",
+          "max_brightness": "Brightness for a bright screen",
+          "fixed_brightness": "Fixed brightness",
+          "saturation_boost": "Saturation boost",
+          "dark_threshold": "Black screen below",
+          "dark_action": "On a black screen",
+          "min_interval": "Minimum time between updates",
+          "change_threshold": "Minimum change",
+          "transition": "Transition",
+          "end_action": "When the colours stop",
+          "inactive_timeout": "Source counts as gone after",
+          "sensor_interval": "Screen colour sensor update interval"
+        },
+        "data_description": {
+          "saturation_boost": "Screen averages tend to grey; this makes the lights more colourful. 0 = the colours as on screen.",
+          "min_interval": "Zigbee and Z-Wave bulbs: 1000 ms or more; Wi-Fi and LAN bulbs: 100-500 ms; WLED and other fast lights: 50 ms. A light that is still busy skips to the newest colour when it is ready.",
+          "change_threshold": "A light is only updated when hue, saturation or brightness moved by this many points (0-100 scales).",
+          "transition": "Fade time sent with each update (lights that do not support transitions ignore it).",
+          "on_off": "\"Respect\": only lights that are on follow the screen; a light switched off by an automation, a rule or by hand stays off and follows again once it is switched on. The sync then never switches a light on or off itself (a black screen dims instead), except the \"Turn the lights off\" end action.",
+          "sensor_interval": "Only the screen colour sensor, not the lights. Every change is stored by the recorder, so short intervals grow the database."
+        }
+      },
+      "hyperion": {
+        "title": "Hyperion server",
+        "description": "Poll the LED colours of a Hyperion.ng server (JSON API, default port 19444). Not needed for EPC4Linux.",
+        "data": {
+          "hyperion_enabled": "Pull colours from Hyperion",
+          "hyperion_host": "Host",
+          "hyperion_port": "JSON port",
+          "hyperion_token": "API token (only if the server requires authorization)",
+          "hyperion_poll": "Poll interval"
+        }
+      }
+    },
+    "error": {
+      "host_required": "Enter the Hyperion server's address."
+    }
+  },
+  "selector": {
+    "zone": {
+      "options": {
+        "all": "Whole screen",
+        "left": "Left edge",
+        "right": "Right edge",
+        "top": "Top edge",
+        "bottom": "Bottom edge"
+      }
+    },
+    "brightness_mode": {
+      "options": {
+        "follow": "Follows the screen",
+        "fixed": "Fixed"
+      }
+    },
+    "dark_action": {
+      "options": {
+        "dim": "Dim to the dark-screen brightness (white)",
+        "off": "Turn the lights off",
+        "hold": "Keep the last colour"
+      }
+    },
+    "end_action": {
+      "options": {
+        "restore": "Restore the lights as they were",
+        "off": "Turn the lights off",
+        "leave": "Leave them as they are"
+      }
+    },
+    "on_off": {
+      "options": {
+        "control": "The sync switches lights on and off",
+        "respect": "Respect on/off set elsewhere (only lights that are on follow)"
+      }
+    }
+  },
+  "entity": {
+    "switch": {
+      "follow": {
+        "name": "Follow screen"
+      }
+    },
+    "binary_sensor": {
+      "streaming": {
+        "name": "Streaming"
+      }
+    },
+    "sensor": {
+      "screen_color": {
+        "name": "Screen colour"
+      },
+      "hyperion": {
+        "name": "Hyperion connection"
+      }
+    }
+  }
+}

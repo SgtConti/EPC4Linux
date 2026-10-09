@@ -1,4 +1,4 @@
-.TH EVNIA\-PRECISION\-CENTER 1 2026-09-27 "1.13.0-linux.3" "User Commands"
+.TH EVNIA\-PRECISION\-CENTER 1 2026-10-04 "1.13.0-linux.4" "User Commands"
 .SH NAME
 evnia\-precision\-center \- control centre for Philips Evnia monitors (unofficial offline port)
 .SH SYNOPSIS
@@ -13,7 +13,11 @@ and Ambiglow lighting.
 It reaches the monitor over its USB upstream cable (USB\-DDC bridge and
 Ambiglow controller) or, without that cable, over DDC/CI on the graphics
 card's i2c buses.
-The program makes no network connection.
+The program makes no network connection, except, when the user turns it on,
+the LAN colour sync of Ambiglow "Follow video": its colours are sent over plain
+HTTP to the one private IPv4 address entered for a Hubitat hub or a Home
+Assistant webhook (config.json
+.BR linuxLanSync ).
 .PP
 Only one instance runs per user; starting it again shows the running
 window.

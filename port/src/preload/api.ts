@@ -15,7 +15,7 @@
 //            {experimental: {get, setEneFrameBurst}} for the port's opt-in experiments: the Ambiglow page's
 //            "Fast LED upload (experimental)" checkbox (scripts/ui-patches.mjs FAST-LED-UPLOAD). get() is synchronous
 //            (the store snapshot of the bootstrap, so the first render is right) and follows config.json. Likewise
-//            {lanSync: {get, set}} for the Ambiglow page's "Send colours to Hubitat" row (LAN-COLOR-SYNC patch).
+//            {lanSync: {get, set}} for the Ambiglow page's "Send colours to Hubitat / Home Assistant" row (LAN-COLOR-SYNC patch).
 //   noop     the vendor defined it only in the isolated world, so the page's `.catch(window.noop)`
 //            swallowed nothing; exposing it makes those catches work as intended.
 //   electronLog  window.__electronLog {sendToMain, log, error, …}: the renderer's electron-log lines into
@@ -38,7 +38,12 @@ import {
   syntheticReply,
 } from '../main/shared/channels.ts';
 import { basename, join } from '../main/shared/posix-path.ts';
-import { LAN_SYNC_OFF, normalizeLanSyncSettings, type LanSyncSettings } from '../backend/ambiglow/lan-address.ts';
+import { LAN_SYNC_OFF, lanSyncAddressText, normalizeLanSyncSettings, type LanSyncSettings } from '../backend/ambiglow/lan-address.ts';
+
+/** window.__EVNIA__.lanSync's view of the setting: the setting plus the address field's text. */
+export type LanSyncState = LanSyncSettings & { address: string };
+
+const lanSyncState = (s: LanSyncSettings): LanSyncState => ({ ...s, address: lanSyncAddressText(s) });
 import {
   cloneJson,
   coerceForced,
@@ -113,10 +118,10 @@ export interface PreloadApi {
      * experimental; only the LAN-COLOR-SYNC patch of the Ambiglow page uses it.
      */
     lanSync: {
-      /** Synchronous: the saved setting {enabled, host, port} (off with host '' in other windows). */
-      get(): LanSyncSettings;
-      /** Change `enabled` and/or `address` ("192.168.1.20[:port]"); rejects with a text for the user for a bad address. */
-      set(change: LanSyncChange): Promise<LanSyncSettings>;
+      /** Synchronous: the saved setting {enabled, host, port, path} and the address field's text (off in other windows). */
+      get(): LanSyncState;
+      /** Change `enabled` and/or `address` (a Hubitat IP or a Home Assistant webhook URL); rejects with a text for the user for a bad address. */
+      set(change: LanSyncChange): Promise<LanSyncState>;
     };
   };
   noop: () => void;
@@ -346,7 +351,7 @@ export function createPreloadApi(ipcRenderer: IpcRendererLike, out: PreloadConso
 
   // The setting is config.json linuxLanSync; the main window reads it from its store snapshot like the experiments.
   const lanSync: PreloadApi['evnia']['lanSync'] = {
-    get: (): LanSyncSettings => (isMainWindow ? normalizeLanSyncSettings(getPath(snapshot, LAN_SYNC_KEY)) : { ...LAN_SYNC_OFF }),
+    get: (): LanSyncState => lanSyncState(isMainWindow ? normalizeLanSyncSettings(getPath(snapshot, LAN_SYNC_KEY)) : { ...LAN_SYNC_OFF }),
     async set(change) {
       if (change === null || typeof change !== 'object') throw new TypeError('lanSync.set expects {enabled?, address?}');
       const plain: LanSyncChange = {};
@@ -355,7 +360,7 @@ export function createPreloadApi(ipcRenderer: IpcRendererLike, out: PreloadConso
       const next = normalizeLanSyncSettings(await ipcRenderer.invoke(INTERNAL_CHANNELS.lanSyncSet, plain));
       // The snapshot now (main's broadcast of the same write may arrive after this reply).
       setPath(snapshot, LAN_SYNC_KEY, { ...next });
-      return next;
+      return lanSyncState(next);
     },
   };
 

@@ -1,8 +1,8 @@
 // The LAN colour sync setting in main (config.json "linuxLanSync", not a vendor key; impl-electron-shell "Persisted
-// settings"): {"enabled": boolean, "host": "192.168.1.20", "port": 39501}. While Follow Video runs, its colours also go
-// to a Hubitat hub on the local network (backend/ambiglow/lan-sync.ts; the hub side is hubitat/).
+// settings"): {"enabled": boolean, "host": "192.168.1.20", "port": 39501, "path": "/"}. While Follow Video runs, its colours also go
+// to a Hubitat hub or Home Assistant on the local network (backend/ambiglow/lan-sync.ts; receivers in hubitat/, home-assistant/).
 //
-// config.json is the one source of truth, like experimental.ts. The Ambiglow page's "Send colours to Hubitat" row (the
+// config.json is the one source of truth, like experimental.ts. The Ambiglow page's "Send colours to Hubitat / Home Assistant" row (the
 // LAN-COLOR-SYNC patch, scripts/ui-patches.mjs) writes it through window.__EVNIA__.lanSync → INTERNAL_CHANNELS.lanSyncSet
 // → ipc.ts (main window only) → set() here; whoever else changes the key (window.store, a hand-edited file before start)
 // is followed too. Every change
@@ -52,7 +52,8 @@ export class LanSyncController {
   }
 
   /**
-   * The Ambiglow page's row (ipc.ts checked the sender): `enabled` and/or `address` ("192.168.1.20[:port]"). An
+   * The Ambiglow page's row (ipc.ts checked the sender): `enabled` and/or `address` ("192.168.1.20[:port]" for Hubitat,
+   * "http://192.168.1.20:8123/api/webhook/<id>" for Home Assistant; lan-address.ts parseLanSyncAddress). An
    * invalid address throws (with a text for the user) and changes nothing; turning it on without an address throws
    * too. The same setting again writes nothing. Returns the new setting.
    */
@@ -66,20 +67,21 @@ export class LanSyncController {
         next.enabled = false;
       } else {
         const parsed = parseLanSyncAddress(change.address);
-        if ('error' in parsed) throw new Error(`Hubitat address not saved: ${parsed.error}`);
+        if ('error' in parsed) throw new Error(`Address not saved: ${parsed.error}`);
         next.host = parsed.host;
         next.port = parsed.port;
+        next.path = parsed.path;
       }
     }
     if (change.enabled !== undefined) {
       if (typeof change.enabled !== 'boolean') throw new TypeError('lanSync.set: enabled must be a boolean');
-      if (change.enabled && next.host === '') throw new Error('Enter the Hubitat hub\'s IP address first');
+      if (change.enabled && next.host === '') throw new Error('Enter the Hubitat IP address or the Home Assistant webhook URL first');
       next.enabled = change.enabled;
     }
     const current = this.settings;
-    if (next.enabled !== current.enabled || next.host !== current.host || next.port !== current.port) {
-      this.#o.log.info(`LAN colour sync ${next.enabled ? 'on' : 'off'}, hub ${describeLanTarget(next)} (config.json ${LAN_SYNC_KEY})`);
-      this.#o.store.set(LAN_SYNC_KEY, { enabled: next.enabled, host: next.host, port: next.port });
+    if (next.enabled !== current.enabled || next.host !== current.host || next.port !== current.port || next.path !== current.path) {
+      this.#o.log.info(`LAN colour sync ${next.enabled ? 'on' : 'off'}, target ${describeLanTarget(next)} (config.json ${LAN_SYNC_KEY})`);
+      this.#o.store.set(LAN_SYNC_KEY, { enabled: next.enabled, host: next.host, port: next.port, path: next.path });
     }
     return this.settings;
   }
@@ -91,7 +93,7 @@ export class LanSyncController {
     this.#applied = s;
     // Off is off: an address saved while the sync is off changes nothing for the guard or the backend.
     if (!s.enabled && !a.enabled) return;
-    if (s.enabled === a.enabled && s.host === a.host && s.port === a.port) return;
+    if (s.enabled === a.enabled && s.host === a.host && s.port === a.port && s.path === a.path) return;
     this.#o.allowPeers(s.enabled ? [s.host] : []);
     this.#o.backend.setLanSync(s);
   }

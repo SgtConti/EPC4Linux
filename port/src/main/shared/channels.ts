@@ -150,7 +150,7 @@ export const INTERNAL_CHANNELS = {
   experimentalSet: 'evnia:experimental-set',
   /**
    * invoke: (change: LanSyncChange) → LanSyncSettings. window.__EVNIA__.lanSync.set, the Ambiglow page's "Send colours
-   * to Hubitat" row (scripts/ui-patches.mjs LAN-COLOR-SYNC): main validates the address (a private IPv4 literal), stores
+   * to Hubitat / Home Assistant" row (scripts/ui-patches.mjs LAN-COLOR-SYNC): main validates the address (a private IPv4 literal), stores
    * config.json linuxLanSync, opens the egress guard for that address only and switches the backend. Main window only.
    */
   lanSyncSet: 'evnia:lan-sync-set',
@@ -173,7 +173,7 @@ export const EXPERIMENTAL_NONE: Readonly<ExperimentalState> = Object.freeze({ en
 /** window.__EVNIA__.lanSync.set(): what the Ambiglow page's row changes (either or both). */
 export interface LanSyncChange {
   enabled?: boolean;
-  /** "192.168.1.20" or "192.168.1.20:39501"; '' clears the address (and turns the sync off). */
+  /** "192.168.1.20[:39501]" (Hubitat) or "http://192.168.1.20:8123/api/webhook/<id>" (Home Assistant); '' clears it (and turns the sync off). */
   address?: string;
 }
 

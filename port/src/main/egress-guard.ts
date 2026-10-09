@@ -12,7 +12,7 @@
 //   - dns.lookup of any name but "localhost" (getaddrinfo), and every dns.resolve*/reverse query (c-ares
 //     sends those to the network itself), for the callback and promise APIs and dns.Resolver instances.
 // One opt-in exception: the LAN colour sync (backend/ambiglow/lan-sync.ts, main/lan-sync.ts) may open TCP connections to
-// the one private IPv4 address the user entered for their Hubitat hub (setAllowedLanPeers; RFC 1918 or link-local
+// the one private IPv4 address the user entered for their Hubitat hub or Home Assistant (setAllowedLanPeers; RFC 1918 or link-local
 // literals only, never a name, so still no DNS). Nothing else gets through, and the list is empty unless that setting is on.
 // Servers are not affected (the hub listens on 127.0.0.1; accepted sockets are not connect() calls), nor
 // are child processes (gdbus, xprop, parec) and Chromium's own networking.
@@ -79,7 +79,7 @@ export function isAllowedPeer(host: string): boolean {
 let lanPeers: ReadonlySet<string> = new Set();
 
 /**
- * Let TCP connections reach exactly these private IPv4 literals (the LAN colour sync's Hubitat hub), replacing the
+ * Let TCP connections reach exactly these private IPv4 literals (the LAN colour sync's Hubitat hub or Home Assistant), replacing the
  * previous list; [] closes it again. Anything that is not a private IPv4 literal is dropped (and logged). Returns the
  * list in effect. Applies whether or not the guard is installed yet.
  */

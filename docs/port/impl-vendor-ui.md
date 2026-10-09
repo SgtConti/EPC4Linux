@@ -128,7 +128,7 @@ Pinned files (1.13.0): `assets/styles-DAnQi2A8.js` (glob `assets/styles-*.js`), 
 | `ROUTE-BULB` | styles | `/bulb`, `/bulb/ambiScape` routes removed | 03 §4.11 |
 | `IMG-PATH`, `IMG-PATH-OVERVIEW` | styles | bundled product images resolve as `../<dir>/<model>.png` relative to `assets/`, not `../../../[out/renderer/]…` relative to the asar root | 02 §11.3 |
 | `FAST-LED-UPLOAD` | Ambiglow | **Port feature**, not a removal: the "Fast LED upload (experimental)" checkbox (below). Inserted between the Speed slider block (`onChange:ia`) and the StarCount block of the page's render | impl-usb-ene §2.2 deviation 20; impl-electron-shell "IPC" |
-| `LAN-COLOR-SYNC` | Ambiglow | **Port feature**: the "Send colours to Hubitat (LAN)" row (below), directly after the FAST-LED-UPLOAD row; its anchor is FAST-LED-UPLOAD's own output, so it must stay after it in the table | impl-ambiglow §11; impl-electron-shell "IPC" |
+| `LAN-COLOR-SYNC` | Ambiglow | **Port feature**: the "Send colours to Hubitat / Home Assistant (LAN)" row (below), directly after the FAST-LED-UPLOAD row; its anchor is FAST-LED-UPLOAD's own output, so it must stay after it in the table | impl-ambiglow §11; impl-electron-shell "IPC" |
 
 **`FAST-LED-UPLOAD`** (user request 2026-09-27) is the first of the two patches that add UI. It inserts one v-if block, in the vendor's own render style, into the setting column of the monitor Ambiglow page (Ambiglow-Dvqon39u.js:1435-1454 prettified):
 
@@ -148,8 +148,8 @@ c(Z)&&1===Ae.value&&window.__EVNIA__?.experimental ? (t=>(n(),u("div",{key:4,cla
 - **Tests:** `fast-led-upload.test.ts` evaluates the inserted expression with stand-ins for the page's helpers and state (visibility, bindings, the click, a refused call logged to the console and `window.__electronLog` without an unhandled rejection, no URL or `window.ipc`); the real-archive suite checks the patched chunk (once, after the Speed and before the StarCount block, key 4 free, the peripheral Ambiglow chunks untouched, the module still parses); the e2e walkthrough ticks it on the real page (impl-walkthrough §4).
 
 **`LAN-COLOR-SYNC`** (user request 2026-10-04) adds a second v-if row right after it, under the same condition (`c(Z)&&1===Ae.value`), when the preload offers `window.__EVNIA__.lanSync`. It has three parts:
-- the vendor `Checkbox` "Send colours to Hubitat (LAN)", bound to `get().enabled`; its `onChange` calls `lanSync.set({enabled})`;
-- a plain `<input type=text>` for the hub's address, showing `get()` as `host` or `host:port`. Its `change` event, fired on blur or Enter, calls `lanSync.set({address})`. An accepted address is written back in its normalized form. A refused one turns the border red, puts the reason into the tooltip, and logs it to the console and `window.__electronLog`, with Electron's `Error invoking remote method …` prefix removed;
+- the vendor `Checkbox` "Send colours to Hubitat / Home Assistant (LAN)", bound to `get().enabled`; its `onChange` calls `lanSync.set({enabled})`;
+- a plain `<input type=text>` for the address (a Hubitat IP or a Home Assistant webhook URL), showing `get().address`, the preload's normalized text. Its `change` event, fired on blur or Enter, calls `lanSync.set({address})`. An accepted address is written back in its normalized form. A refused one turns the border red, puts the reason into the tooltip, and logs it to the console and `window.__electronLog`, with Electron's `Error invoking remote method …` prefix removed;
 - a hint line, which is also the row's tooltip.
 
 Further details:

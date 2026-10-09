@@ -1,4 +1,4 @@
-// The LAN-COLOR-SYNC patch (scripts/ui-patches.mjs): the "Send colours to Hubitat (LAN)" row the port adds to the vendor's
+// The LAN-COLOR-SYNC patch (scripts/ui-patches.mjs): the "Send colours to Hubitat / Home Assistant (LAN)" row the port adds to the vendor's
 // Ambiglow page after the FAST-LED-UPLOAD row. As in fast-led-upload.test.ts, the inserted render expression is evaluated
 // with stand-ins for the page's Vue helpers and reactive state, so its logic is tested without the vendor archive: when it
 // shows, what it binds, and that it only talks to the preload's narrow window.__EVNIA__.lanSync API.
@@ -33,6 +33,9 @@ interface Settings {
   enabled: boolean;
   host: string;
   port: number;
+  path: string;
+  /** The address field's text (the preload's lanSyncAddressText). */
+  address: string;
 }
 
 interface Scope {
@@ -86,7 +89,7 @@ test('LAN-COLOR-SYNC: anchored on FAST-LED-UPLOAD\'s output, after it in the tab
 });
 
 test('LAN-COLOR-SYNC: only with the ENE, the Follow Video effect and the preload API', async () => {
-  const off = { enabled: false, host: '', port: 39501 };
+  const off = { enabled: false, host: '', port: 39501, path: '/', address: '' };
   assert.notEqual(await render({ api: api(off) }), null);
   assert.equal(await render({ ene: false, api: api(off) }), null);
   for (const effect of [2, 3, 4, 5, 6, 7]) assert.equal(await render({ effect, api: api(off) }), null, `effect ${effect}`);
@@ -94,29 +97,29 @@ test('LAN-COLOR-SYNC: only with the ENE, the Follow Video effect and the preload
 });
 
 test('LAN-COLOR-SYNC: a checkbox, an address field and a hint, bound to the stored setting', async () => {
-  const row = (await render({ api: api({ enabled: true, host: '192.168.1.20', port: 39501 }) }))!;
+  const row = (await render({ api: api({ enabled: true, host: '192.168.1.20', port: 39501, path: '/', address: '192.168.1.20' }) }))!;
   assert.equal(row.props!.key, 'evnia-lan-sync');
   assert.equal(row.props!.class, 'slider-item evnia-lan-sync');
   const [box, input, hint] = row.children!;
   assert.equal(box.comp, 'resolved:Checkbox');
-  assert.deepEqual([box.props!.modelValue, box.props!.label, box.props!.i18n], [true, 'Send colours to Hubitat (LAN)', false]);
+  assert.deepEqual([box.props!.modelValue, box.props!.label, box.props!.i18n], [true, 'Send colours to Hubitat / Home Assistant (LAN)', false]);
   assert.deepEqual([box.flag, box.dyn], [8, ['modelValue']]);
   assert.equal(input.tag, 'input');
   assert.deepEqual([input.props!.type, input.props!.value, input.flag, input.dyn], ['text', '192.168.1.20', 8, ['value']]);
   assert.equal(hint.props!.class, 'evnia-lan-sync-hint');
-  assert.match(hint.text!, /Hubitat/);
-  const port = (await render({ api: api({ enabled: false, host: '10.0.0.2', port: 8080 }) }))!.children![1];
-  assert.equal(port.props!.value, '10.0.0.2:8080', 'a non-default port is shown');
+  assert.match(hint.text!, /Hubitat.*Home Assistant/);
+  const ha = { enabled: false, host: '10.0.0.2', port: 8123, path: '/api/webhook/abc', address: 'http://10.0.0.2:8123/api/webhook/abc' };
+  assert.equal((await render({ api: api(ha) }))!.children![1].props!.value, ha.address, 'the preload\'s address text');
 });
 
 test('LAN-COLOR-SYNC: the checkbox and the field call lanSync.set; a refused address marks the field and is logged', async () => {
   const calls: unknown[] = [];
   const warned: unknown[][] = [];
   const answer = async (c: { enabled?: boolean; address?: string }): Promise<Settings> => {
-    if (c.address === 'bad') throw new Error("Error invoking remote method 'evnia:lan-sync-set': Error: Hubitat address not saved: nope");
-    return { enabled: false, host: '192.168.1.30', port: 39501 };
+    if (c.address === 'bad') throw new Error("Error invoking remote method 'evnia:lan-sync-set': Error: Address not saved: nope");
+    return { enabled: false, host: '192.168.1.30', port: 39501, path: '/', address: '192.168.1.30' };
   };
-  const row = (await render({ api: api({ enabled: false, host: '', port: 39501 }, calls, answer), warn: (...d) => warned.push(d) }))!;
+  const row = (await render({ api: api({ enabled: false, host: '', port: 39501, path: '/', address: '' }, calls, answer), warn: (...d) => warned.push(d) }))!;
   const [box, input] = row.children!;
   box.props!.onChange(true);
   const el = { value: ' 192.168.1.30 ', style: { borderColor: '' }, title: '' };
@@ -128,8 +131,8 @@ test('LAN-COLOR-SYNC: the checkbox and the field call lanSync.set; a refused add
   input.props!.onChange({ target: el });
   await new Promise((r) => setImmediate(r));
   assert.equal(el.style.borderColor, '#e5484d');
-  assert.equal(el.title, 'Hubitat address not saved: nope', 'the reason without Electron\'s prefix');
-  assert.deepEqual(warned, [['Hubitat address not saved: nope']]);
+  assert.equal(el.title, 'Address not saved: nope', 'the reason without Electron\'s prefix');
+  assert.deepEqual(warned, [['Address not saved: nope']]);
 });
 
 test('LAN-COLOR-SYNC: no URL, no network API, no window.ipc channel in the renderer', async () => {

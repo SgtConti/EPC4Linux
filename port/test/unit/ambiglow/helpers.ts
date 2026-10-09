@@ -244,6 +244,8 @@ export interface Rig {
   clock: VirtualClock;
   capture: FakeCaptureHost;
   idle: { seconds: number };
+  /** HostServices.shouldReleaseScreenCapture: the desktop's idle timeout is coming up (desktop-idle.ts). */
+  desktop: { release: boolean };
   mock: MockEneDevice | null;
   eneInfo: UsbDeviceInfo | null;
   services: ApiServices;
@@ -265,6 +267,7 @@ export async function rig(options: RigOptions = {}): Promise<Rig> {
   const timers = new ManualTimers();
   const capture = new FakeCaptureHost();
   const idle = { seconds: 0 };
+  const desktop = { release: false };
   const themes = new SyncThemeStore();
   const stored = options.stored === undefined ? defaultProfileContent() : options.stored;
   if (stored !== null) themes.contents.set('100000|PHL 34M2C8600', stored);
@@ -275,6 +278,7 @@ export async function rig(options: RigOptions = {}): Promise<Rig> {
     ...temp.host,
     ...(options.capture === false ? {} : { capture }),
     getIdleSeconds: () => idle.seconds,
+    shouldReleaseScreenCapture: () => desktop.release,
   };
   let display: PhlDisplay | null = null;
   let service: AmbiglowServiceImpl | null = null;
@@ -349,6 +353,7 @@ export async function rig(options: RigOptions = {}): Promise<Rig> {
     clock,
     capture,
     idle,
+    desktop,
     mock,
     eneInfo,
     services,

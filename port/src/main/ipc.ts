@@ -72,7 +72,7 @@ export interface IpcHost {
    */
   setEneFrameBurst(enabled: boolean): ExperimentalState;
   /**
-   * The Ambiglow page's "Send colours to Hubitat" row: validate and store config.json linuxLanSync, open the egress
+   * The Ambiglow page's "Send colours to Hubitat / Home Assistant" row: validate and store config.json linuxLanSync, open the egress
    * guard for that address and switch the backend's LAN colour sync (main/lan-sync.ts); the new setting.
    */
   setLanSync(change: LanSyncChange): LanSyncSettings;
@@ -284,7 +284,7 @@ export function registerIpcHandlers(h: IpcHost, electron: IpcElectron): void {
     }
     return h.setEneFrameBurst(enabled);
   });
-  // The Ambiglow page's "Send colours to Hubitat" row (window.__EVNIA__.lanSync.set, the LAN-COLOR-SYNC patch): the main
+  // The Ambiglow page's "Send colours to Hubitat / Home Assistant" row (window.__EVNIA__.lanSync.set, the LAN-COLOR-SYNC patch): the main
   // window only, a plain {enabled?: boolean, address?: string} only; main/lan-sync.ts validates the address.
   handle(INTERNAL_CHANNELS.lanSyncSet, (e, change) => {
     if (!isMainWindow(e)) {
@@ -298,7 +298,7 @@ export function registerIpcHandlers(h: IpcHost, electron: IpcElectron): void {
       Array.isArray(c) ||
       Object.keys(c).some((k) => k !== 'enabled' && k !== 'address') ||
       (c.enabled !== undefined && typeof c.enabled !== 'boolean') ||
-      (c.address !== undefined && (typeof c.address !== 'string' || c.address.length > 64))
+      (c.address !== undefined && (typeof c.address !== 'string' || c.address.length > 300))
     ) {
       log.warn(`IPC ${INTERNAL_CHANNELS.lanSyncSet} refused: expected {enabled?: boolean, address?: string}`);
       throw new TypeError(`${INTERNAL_CHANNELS.lanSyncSet}: expected {enabled?: boolean, address?: string}`);

@@ -104,7 +104,7 @@ private String sourceHelp() {
     String routed = dni.startsWith("ambient-color-sync-") ?
         "No PC address set: only the receiver's Hyperion pull and senders whose address matches its network id reach it." :
         "LAN messages from that address reach the receiver (network id ${dni})."
-    return "In EPC4Linux: Ambiglow → Follow Video → tick <b>Send colours to Hubitat (LAN)</b> and enter <b>${hubIp}</b>. " +
+    return "In EPC4Linux: Ambiglow → Follow Video → tick <b>Send colours to Hubitat / Home Assistant (LAN)</b> and enter <b>${hubIp}</b>. " +
         "The colours arrive on the hub's port 39501. ${routed} Give the PC a fixed (reserved) IP address in your router, " +
         "or enter its MAC address instead. Hyperion: open the receiver device and set the Hyperion server there, or let a " +
         "Hyperion client POST JSON \"color\" commands to http://${hubIp}:39501/."

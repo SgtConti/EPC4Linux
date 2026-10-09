@@ -159,7 +159,7 @@ describe('import-vendor-ui against the real 1.13.0 app.asar', { skip }, () => {
     const growth = (id: string) => table.patches.find((p) => p.id === id)!.replace.length - (table.patches.find((p) => p.id === id)!.find as string).length;
     assert.equal(patched.length - original.length, growth('FAST-LED-UPLOAD') + growth('LAN-COLOR-SYNC'));
     // LAN-COLOR-SYNC: its row once, right after the FAST-LED-UPLOAD row and before the StarCount slider.
-    assert.equal(patched.split('Send colours to Hubitat (LAN)').length - 1, 1);
+    assert.equal(patched.split('Send colours to Hubitat / Home Assistant (LAN)').length - 1, 1);
     const lan = patched.indexOf('evnia-lan-sync');
     assert.ok(box < lan && lan < stars, 'after the Fast LED upload row, before the StarCount slider');
     // The other Ambiglow chunks (peripheral pages) are not touched.

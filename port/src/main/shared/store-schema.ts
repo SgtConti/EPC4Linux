@@ -15,9 +15,9 @@
 //     Ambiglow page's "Fast LED upload (experimental)" checkbox. Typed as an object, no default: a file without it
 //     loads unchanged and means "off". The Windows app ignores it (electron-store keeps unknown keys, like the
 //     installer's languageTemp).
-//   - linuxLanSync (port-only): the LAN colour sync, {"enabled": boolean, "host": "192.168.1.20", "port": 39501} = the
-//     Ambiglow page's "Send colours to Hubitat" row (Follow Video colours to a hub on the local network). Typed as an
-//     object, no default: missing means off.
+//   - linuxLanSync (port-only): the LAN colour sync, {"enabled": boolean, "host": "192.168.1.20", "port": 39501,
+//     "path": "/"} = the Ambiglow page's "Send colours to Hubitat / Home Assistant" row (Follow Video colours to a hub on
+//     the local network). Typed as an object, no default: missing means off.
 
 export type StoreValueType = 'string' | 'number' | 'boolean' | 'object';
 
@@ -63,7 +63,7 @@ export const EXPERIMENTAL_KEY = 'linuxExperimental';
 /** The "Fast LED upload (experimental)" setting (ENE frame burst, impl-usb-ene §2.2): true = on; missing = off. */
 export const ENE_FRAME_BURST_KEY = `${EXPERIMENTAL_KEY}.eneFrameBurst`;
 
-/** config.json key of the LAN colour sync ({"enabled": boolean, "host": string, "port": number}); not a vendor key. */
+/** config.json key of the LAN colour sync ({"enabled": boolean, "host": string, "port": number, "path": string}); not a vendor key. */
 export const LAN_SYNC_KEY = 'linuxLanSync';
 
 /** Keys pinned to a fixed value on Linux: no self-updater and no cloud account exist. */

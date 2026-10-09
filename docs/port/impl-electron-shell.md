@@ -37,6 +37,7 @@ See "Integration status" at the end.
 | `port/src/main/drm-modes.ts` | Mode source c: libdrm through koffi (read-only KMS getters) |
 | `port/src/main/gvariant.ts` | Parser for the GVariant text that `gdbus call` prints |
 | `port/src/main/idle-time.ts` | `getIdleSeconds`: `powerMonitor` plus Mutter's idle monitor on GNOME Wayland |
+| `port/src/main/desktop-idle.ts` | `shouldReleaseScreenCapture`: the desktop's idle timeout and the other idle inhibitors, so that FollowVideo's capture does not keep the display awake |
 | `port/src/main/capture-host.ts`, `capture-slot.ts`, `capture-sources.ts` | `CaptureHost`: follow-video on a hidden window, start/stop sequencing, screen source selection |
 | `port/src/main/audio-monitor.ts`, `audio-level.ts` | Follow-audio: `parec` on the default sink's monitor, and the vendor FFT/level heuristic |
 | `port/src/main/display-watch.ts` | udev (`drm`, `i2c-dev`) and Mutter `MonitorsChanged` display-change sources |
@@ -94,6 +95,7 @@ The backend is created with the stored "Fast LED upload (experimental)" setting 
 | `resourcesDir` | `<app>/resources`: `MonitorInfo.json`, `PCenter_DeviceInfo.json`, `ENE/PCenter_AmbiglowInfo.json`, icons. In the `.deb` this is inside `app.asar`; Electron's `fs` reads it transparently. |
 | `capture` | `ElectronCaptureHost` (see "Capture host") |
 | `getIdleSeconds()` | Input idle seconds, like `GetLastInputInfo` (see "Idle time") |
+| `shouldReleaseScreenCapture()` | True when FollowVideo should close its screen capture so that the desktop can go idle (see "Desktop idle and the capture inhibitor"). Absent in mock mode. |
 | `getDisplayMode(monitor)` | 20-monitor-io §3.5, e.g. `{resolution:"3440x1440", frequency:"175Hz", orientation:"0°"}` (see "Display mode"). With `EVNIA_MOCK_MONITOR` it is the simulated monitor's mode, the user's `3440x1440`/`175Hz`/`0°`, as `serve.ts --mock` reports. |
 | `getForegroundAppPath()` | X11: exe of the active window (`xprop -spy`, then `/proc/<pid>/exe`); this app's own windows are ignored. Wayland, or no `xprop`: `null`. |
 | `getForegroundApp()` | The optional extension of backend `theme/app-binding.ts` (`ForegroundAppHost`): `{exe, wmClass, appId}` of the same window (see "Foreground app") |
@@ -141,6 +143,18 @@ This implements 20-monitor-io-linux-consolidation §3.5 exactly.
   - An active user costs one D-Bus call per ~55 s.
   - The lights go off within about a second of the threshold, and come back within about a second of the next input (the vendor polls every second as well).
 - Missing `gdbus` or no Mutter service disables the Mutter source (one info line). Other failures back off 30 s.
+
+### Desktop idle and the capture inhibitor (`desktop-idle.ts`)
+
+- Chromium holds a "prevent display sleep" wake lock while a desktop capture stream is open (reason "Native desktop capture"). On Linux it is an idle inhibitor of the session manager (`org.gnome.SessionManager.Inhibit`, flag 8; Cinnamon and MATE serve the same API), plus `XScreenSaverSuspend` on X11. While FollowVideo captured, the desktop never blanked, locked or suspended. Electron has no switch for this wake lock, and another process cannot remove it.
+- `shouldReleaseScreenCapture()` is polled every second by the backend's idle tick. It turns true when the input idle time (`idle-time.ts`) reaches the desktop's idle timeout less 15 s, and no other application inhibits idle. The ambiglow service then closes the capture session, and opens a new one at the next input (impl-ambiglow deviation 18).
+- The close comes before the timeout on purpose. The session manager re-arms its idle alarm when the inhibitor goes, and an alarm whose time has passed only fires after the next input.
+- The desktop's timeout is the shortest of the `gsettings` keys that apply, where 0 means never. It is read at start and once per idle stretch (from 20 s idle on), so an active user costs nothing.
+  - Cinnamon: `org.cinnamon.desktop.session idle-delay`, plus `org.cinnamon.settings-daemon.plugins.power sleep-display-ac` or `sleep-display-battery`.
+  - GNOME (also Unity, Budgie, Pantheon): `org.gnome.desktop.session idle-delay`.
+  - MATE: `org.mate.session idle-delay` (minutes), plus `org.mate.power-manager sleep-display-ac` or `sleep-display-battery`.
+  - Other desktops, or no `gsettings`: 5 minutes.
+- Other inhibitors are read from `org.gnome.SessionManager.GetInhibitors`, from 20 s before the release and every 10 s after that: `GetAppId` and `GetFlags` of each one. Our own (app id = `process.execPath`) does not count, and neither do inhibitors without the idle flag. Without that service, nothing else is assumed to inhibit.
 
 ### Foreground app (`foreground-app.ts`)
 
@@ -261,10 +275,10 @@ Listeners receive an empty event object instead of `IpcRendererEvent`. The vendo
 - The page cannot reach the channel through `window.ipc` (not in the allowlist) and the vendor bundle references no new channel.
 
 **`window.__EVNIA__.lanSync`** (user request 2026-10-04) is the narrow API of the LAN colour sync, used only by the LAN-COLOR-SYNC renderer patch (impl-vendor-ui §3, impl-ambiglow §11):
-- `get()` is synchronous: `{enabled, host, port}` from the store snapshot (`config.json linuxLanSync`), normalized by `lan-address.ts`. Other windows see it off.
+- `get()` is synchronous: `{enabled, host, port, path, address}` from the store snapshot (`config.json linuxLanSync`), normalized by `lan-address.ts`. `address` is the field's text: the Hubitat IP, or the full Home Assistant webhook URL. Other windows see it off.
 - `set({enabled?, address?})` invokes the internal channel `evnia:lan-sync-set`.
-  - Main (`ipc.ts`) accepts only calls from the main window's top frame with a plain object of exactly those keys: a boolean, and a string of at most 64 characters. Anything else is refused with a `TypeError` and logged.
-  - `LanSyncController.set` (`src/main/lan-sync.ts`) parses the address: a private IPv4 literal, with an optional port. A bad address, or `enabled: true` without an address, throws with a text for the user, and nothing is written.
+  - Main (`ipc.ts`) accepts only calls from the main window's top frame with a plain object of exactly those keys: a boolean, and a string of at most 300 characters. Anything else is refused with a `TypeError` and logged.
+  - `LanSyncController.set` (`src/main/lan-sync.ts`) parses the address: a private IPv4 literal, with an optional port and path (`parseLanSyncAddress`). A bad address, or `enabled: true` without an address, throws with a text for the user, and nothing is written.
   - Otherwise it stores a real change and returns the setting. The preload puts the setting into its snapshot at once.
 - `LanSyncController` follows every writer of `linuxLanSync`. On an effective change it opens or closes the egress guard's LAN exception (`setAllowedLanPeers`) and then calls `BackendHost.setLanSync`. An address saved while the sync is off changes neither.
 
@@ -313,7 +327,7 @@ The file uses the electron-store format: one tab-indented JSON object, schema de
 | `userInfo`, `email`, `password`, `latestSoftwareInfo` | Removed on load; writes are refused |
 | Invalid JSON | Moved to `config.json.invalid-<ts>`, then the app starts from defaults |
 | `linuxExperimental` (port-only) | The port's opt-in experiments: `{"eneFrameBurst": boolean}`, the Ambiglow page's "Fast LED upload (experimental)" checkbox (see "IPC"). Global, not per profile, and not in the backend's `Config/SoftConfig.data`. In the schema as an `object` **without a default**: a fresh file gets it only when the user ticks the checkbox, a missing key means off, and the user's Windows `config.json` loads unchanged. A non-object value is dropped on load. The Windows app ignores the key (electron-store keeps unknown keys, like the installer's `languageTemp`) |
-| `linuxLanSync` (port-only) | The LAN colour sync: `{"enabled": boolean, "host": "192.168.1.20", "port": 39501}`, the Ambiglow page's "Send colours to Hubitat (LAN)" row (see "IPC", impl-ambiglow §11). An `object` without a default, like `linuxExperimental`. A host that is not a private IPv4 literal makes it count as off. The Windows app ignores it |
+| `linuxLanSync` (port-only) | The LAN colour sync: `{"enabled": boolean, "host": "192.168.1.20", "port": 39501, "path": "/"}`, the Ambiglow page's "Send colours to Hubitat / Home Assistant (LAN)" row (path `/api/webhook/<id>` and port 8123 for Home Assistant) (see "IPC", impl-ambiglow §11). An `object` without a default, like `linuxExperimental`. A host that is not a private IPv4 literal makes it count as off. The Windows app ignores it |
 
 ## Network kill-switch (defence in depth)
 

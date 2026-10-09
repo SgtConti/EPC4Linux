@@ -29,6 +29,7 @@ import { appExitSteps, runExitSteps } from './exit.ts';
 import { isWaylandSession, X11ForegroundTracker } from './foreground-app.ts';
 import { PathGuard } from './fs-guard.ts';
 import { createHostServices } from './host-services.ts';
+import { DesktopIdleWatch } from './desktop-idle.ts';
 import { IdleTimeSource, useMutterIdle } from './idle-time.ts';
 import { type IpcHost, type RunConfig, registerIpcHandlers } from './ipc.ts';
 import { createLocalProtocolHandler, LOCAL_SCHEME } from './local-protocol.ts';
@@ -73,7 +74,7 @@ class EvniaApp implements IpcHost {
   readonly #appTempDir = defaultAppTempDir(process.env);
   /** The port's experiments (config.json linuxExperimental): the "Fast LED upload (experimental)" checkbox. */
   readonly #experimental: ExperimentalSettings;
-  /** The LAN colour sync (config.json linuxLanSync): Follow Video colours to a Hubitat hub, the egress exception for it. */
+  /** The LAN colour sync (config.json linuxLanSync): Follow Video colours to Hubitat or Home Assistant, the egress exception for it. */
   readonly #lanSync: LanSyncController;
   #language: string;
   #monitorConfig: MonitorJsonConfig | null = null;
@@ -144,6 +145,17 @@ class EvniaApp implements IpcHost {
         })
       : null;
     const idle = probe ? { seconds: () => probe.idleSeconds(() => idleSource.seconds()) } : idleSource;
+    // Chromium inhibits idle while FollowVideo captures the screen; this says when to close the capture.
+    const desktopIdle = probe
+      ? null
+      : new DesktopIdleWatch({
+          log: log.child('desktopIdle'),
+          run,
+          env,
+          idleSeconds: () => idleSource.seconds(),
+          onBattery: () => powerMonitor.isOnBatteryPower(),
+          selfExe: process.execPath,
+        });
     this.#backend = new BackendHost({
       host: createHostServices({
         log: backendLog,
@@ -151,6 +163,7 @@ class EvniaApp implements IpcHost {
         capture: this.#capture,
         foreground: this.#foreground,
         idle,
+        desktopIdle,
         displayModes: this.#displayModes,
         guard: this.guard,
       }),
@@ -162,7 +175,7 @@ class EvniaApp implements IpcHost {
       appTempDir: this.#appTempDir,
       // The Ambiglow page's "Fast LED upload (experimental)" checkbox, as stored: the backend starts with it.
       eneFrameBurst: () => this.#experimental.eneFrameBurst,
-      // The Ambiglow page's "Send colours to Hubitat" row, as stored (lan-sync.ts opened the egress exception already).
+      // The Ambiglow page's "Send colours to Hubitat / Home Assistant" row, as stored (lan-sync.ts opened the egress exception already).
       lanSync: () => this.#lanSync.settings,
     });
     // ...and follows every change of the stored setting (experimental.ts): config.json is the one source of truth.

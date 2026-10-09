@@ -6,7 +6,7 @@ This repository holds an unofficial, **offline, monitor-only Linux port** of the
 - It talks to the monitor over the monitor's USB-DDC bridge, DDC/CI (i2c) and the Ambiglow USB controller.
 - It targets GNOME on Wayland and X11 and is packaged as a `.deb`.
 - It was built for the Philips Evnia 34M2C8600.
-- It makes no network connection, and it has no firmware updates, accounts or peripheral support. The one exception is opt-in: Follow video can send its colours to a Hubitat hub on your local network ([`hubitat/`](hubitat/README.md)), off by default.
+- It makes no network connection, and it has no firmware updates, accounts or peripheral support. The one exception is opt-in: Follow video can send its colours to a Hubitat hub or Home Assistant on your local network ([`hubitat/`](hubitat/README.md), [`home-assistant/`](home-assistant/README.md)), off by default.
 
 ## Where things are
 
@@ -14,6 +14,7 @@ This repository holds an unofficial, **offline, monitor-only Linux port** of the
 |---|---|
 | [`BUILDING.md`](BUILDING.md) | Building the package from source: prerequisites, getting the vendor installer, build, tests, installation |
 | [`port/`](port/README.md) | The port: Electron main process, Node backend, build and packaging scripts, tests |
+| [`home-assistant/`](home-assistant/README.md) | Home Assistant custom integration ("Ambient Color Sync"): lights follow EPC4Linux's Follow video colours, or a Hyperion server |
 | [`hubitat/`](hubitat/README.md) | Hubitat app and driver ("Ambient Color Sync"): smart lights follow EPC4Linux's Follow video colours, or a Hyperion server |
 | [`docs/port/USER-GUIDE.md`](docs/port/USER-GUIDE.md) | Installing, using and troubleshooting the app |
 | [`docs/port/ARCHITECTURE.md`](docs/port/ARCHITECTURE.md) | Design of the port |
@@ -27,7 +28,7 @@ This repository holds an unofficial, **offline, monitor-only Linux port** of the
 Quick start:
 
 1. Build the package as described in [BUILDING.md](BUILDING.md). You need Docker and the vendor's Windows installer `evnia Setup 1.13.0.exe`, which you download yourself from Philips.
-2. Install it with `sudo apt install ./port/dist/evnia-precision-center_1.13.0-linux.3_amd64.deb`.
+2. Install it with `sudo apt install ./port/dist/evnia-precision-center_1.13.0-linux.4_amd64.deb`.
 3. Read the [user guide](docs/port/USER-GUIDE.md).
 
 ## Legal notice

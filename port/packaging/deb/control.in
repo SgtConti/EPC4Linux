@@ -16,7 +16,9 @@ Description: control centre for Philips Evnia monitors (unofficial offline port)
  .
  The application works entirely offline: firmware updates, cloud accounts,
  downloads and every other online feature are removed, and a network
- kill-switch blocks any remaining outbound request.
+ kill-switch blocks any remaining outbound request. The one opt-in
+ exception, off by default, sends the Ambiglow "Follow video" colours to a
+ Hubitat hub or Home Assistant at a private IP address on the local network.
  .
  Note: "Reset" of a profile and "Factory reset" in the settings also restore
  the monitor's own factory settings (DDC/CI VCP 0x04), like the Windows

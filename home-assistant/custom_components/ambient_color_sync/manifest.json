@@ -1,0 +1,13 @@
+{
+  "domain": "ambient_color_sync",
+  "name": "Ambient Color Sync",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": ["webhook", "network"],
+  "documentation": "https://github.com/SgtConti/EPC4Linux/tree/main/home-assistant",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/SgtConti/EPC4Linux/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

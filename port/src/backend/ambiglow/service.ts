@@ -135,7 +135,7 @@ export interface AmbiglowServiceOptions {
   eneFrameBurstForced?: boolean;
   /**
    * Port feature: the LAN colour sync setting at start (config.json linuxLanSync, lan-sync.ts): Follow Video colours to a
-   * Hubitat hub on the local network. Main passes the stored setting and changes it with setLanSync(). Default off.
+   * Hubitat hub or Home Assistant on the local network. Main passes the stored setting and changes it with setLanSync(). Default off.
    */
   lanSync?: LanSyncSettings;
   /** The LAN colour sync transport (tests); default an HTTP POST (lan-sync.ts httpPost). */
@@ -281,6 +281,8 @@ export class AmbiglowServiceImpl implements AmbiglowService {
       softConfig: () => this.#themes?.getSoftConfig() ?? { TurnOffLightsWhenIdle: false, TurnOffLightsWhenIdleDuration: 5 },
       idleSeconds: core.host.getIdleSeconds ? () => core.host.getIdleSeconds?.() ?? 0 : undefined,
       onChange: (idle) => this.#onIdle(idle),
+      releaseCapture: core.host.shouldReleaseScreenCapture ? () => core.host.shouldReleaseScreenCapture?.() ?? false : undefined,
+      onReleaseCapture: (release) => this.#onReleaseCapture(release),
       timers: this.#timers,
       intervalMs: options.idleIntervalMs,
     });
@@ -380,7 +382,7 @@ export class AmbiglowServiceImpl implements AmbiglowService {
 
   /**
    * The LAN colour sync setting (services.ts AmbiglowService.setLanSync; main passes config.json linuxLanSync): Follow
-   * Video colours to a Hubitat hub (lan-sync.ts). Applies to the next frame, without touching the capture or the LEDs;
+   * Video colours to a Hubitat hub or Home Assistant (lan-sync.ts). Applies to the next frame, without touching the capture or the LEDs;
    * turning it off or changing the address first tells the old hub that the stream ended. The same setting again is a
    * no-op. An invalid one (not a private IPv4 address) counts as off.
    */
@@ -1067,6 +1069,8 @@ export class AmbiglowServiceImpl implements AmbiglowService {
    * from the uploads (follow-video.ts): the session starts only when active, is kept while idle and while a lost
    * ENE may come back, and stops when FollowVideo is no longer the enabled effect, the display is detached or
    * the service stops; the uploads run only when active. `wake` gives a failed capture start one more try.
+   * Port addition: the session is also closed while the desktop's own idle timeout comes up (IdleMonitor
+   * captureReleased, src/main/desktop-idle.ts): an open screen capture keeps the desktop from going idle.
    * A Breathing effect whose sync state changed gets its ParameterSet again (mode 14 ↔ 7, OnBreathing's bool_3).
    */
   #checkSoftEffect(options: { wake?: boolean } = {}): void {
@@ -1078,7 +1082,7 @@ export class AmbiglowServiceImpl implements AmbiglowService {
     const effect = info?.CurrEffect.Value;
     const enabled = this.#started && display !== null && info !== null && info.EffectEnable;
     const active = enabled && eneMode && ene !== null && !this.#idle.idle;
-    const followVideo = enabled && effect === EFFECT.FollowVideo && ((eneMode && ene !== null) || this.#eneAway);
+    const followVideo = enabled && effect === EFFECT.FollowVideo && ((eneMode && ene !== null) || this.#eneAway) && !this.#idle.captureReleased;
     // The FollowVideo entry's Speed picks the cadence tier and its Brightness the host-side dimming (follow-video.ts;
     // deviation 17): set before a start, and a live session follows a change in place (Effect_SpeedChange,
     // Effect_BrightnessChange, a profile apply or theme switch). A missing entry (EffectDetail would be a fresh
@@ -1166,6 +1170,16 @@ export class AmbiglowServiceImpl implements AmbiglowService {
         if (!idle) this.#checkSoftEffect({ wake: true });
       })
       .catch((e: unknown) => this.#log.warn(`EffectEnableTemp failed: ${message(e)}`));
+  }
+
+  /**
+   * Port addition (IdleMonitor.onReleaseCapture): close FollowVideo's capture session before the desktop's idle
+   * timeout, so that Chromium's idle inhibitor goes with it and the desktop can blank, lock and sleep; open it
+   * again at the next input (one retry of a failed start, like a wake from idle).
+   */
+  #onReleaseCapture(release: boolean): void {
+    if (release && this.#video.state !== 'stopped') this.#log.info('FollowVideo: screen capture closed so that the desktop can go idle');
+    this.#checkSoftEffect(release ? {} : { wake: true });
   }
 
   // ───────────────────────────── internals: DDC idle lights-off ─────────────────────────────

@@ -1,21 +1,24 @@
-// LAN colour sync: Follow Video colours → a Hubitat hub on the local network (port feature, not in the vendor app;
-// docs/port/impl-ambiglow.md §11, hubitat/README.md).
+// LAN colour sync: Follow Video colours → a smart-home hub on the local network, Hubitat or Home Assistant (port feature,
+// not in the vendor app; docs/port/impl-ambiglow.md §11, hubitat/README.md, home-assistant/README.md).
 //
 // The FollowVideoEngine hands every captured 50×40 frame to this sender while the uploads run (not paused), and null
 // when the capture stops or pauses (idle lights-off, another effect, the service stopping). The sender reduces a frame
 // to five average colours — the whole screen and a left/right/top/bottom border band — and POSTs them as one small
-// JSON document to the hub's LAN endpoint (Hubitat: TCP 39501, delivered to the device whose network id is the sender's
-// IP or MAC address; the "Ambient Color Receiver" driver of hubitat/):
+// JSON document to the receiver (lan-address.ts): Hubitat's LAN port (TCP 39501, delivered to the device whose network
+// id is the sender's IP or MAC address; the "Ambient Color Receiver" driver of hubitat/) or a Home Assistant webhook
+// (the "Ambient Color Sync" integration of home-assistant/, /api/webhook/<id> on port 8123). "The hub" below is either.
 //
 //   {"source":"EPC4Linux","version":1,"seq":17,"active":true,"color":[r,g,b],
 //    "zones":{"left":[r,g,b],"right":[r,g,b],"top":[r,g,b],"bottom":[r,g,b]}}
 //   {"source":"EPC4Linux","version":1,"seq":18,"active":false}      (the stream ended: the hub may restore its lights)
 //
-// Pacing is the hub's, not the LEDs': smart bulbs (Zigbee, Z-Wave, cloud bridges) take a few commands per second at
-// best, so a document goes out only when a colour changed noticeably (LAN_SYNC_CHANGE_DELTA), at most every
-// LAN_SYNC_MIN_INTERVAL_MS, with a heartbeat every LAN_SYNC_HEARTBEAT_MS while the screen is static (the hub's
-// "source went away" timeout). One request at a time, newest colours win, nothing is queued. While the hub does not
-// answer, attempts slow to LAN_SYNC_FAILING_INTERVAL_MS and the failure is logged once (and its end once).
+// Pacing: a document goes out only when a colour changed noticeably (LAN_SYNC_CHANGE_DELTA), at most every
+// lanSyncMinInterval() — LAN_SYNC_MIN_INTERVAL_MS (20 per second) for Home Assistant, which paces each light itself
+// with backpressure, so the screen's own capture rate (the Follow Video Speed: 100 ms Normal, 40 ms High) is the limit;
+// LAN_SYNC_HUBITAT_INTERVAL_MS for Hubitat, whose hub parses every LAN message in its driver — and with a heartbeat every
+// LAN_SYNC_HEARTBEAT_MS while the screen is static (the receiver's "source went away" timeout). One request at a time,
+// newest colours win, nothing is queued; Home Assistant's connection is kept open between requests. While the hub does
+// not answer, attempts slow to LAN_SYNC_FAILING_INTERVAL_MS and the failure is logged once (and its end once).
 //
 // Nothing online (ARCHITECTURE rule 4): the destination must be a private IPv4 literal (RFC 1918 or link-local); host
 // names are refused (no DNS lookup ever happens), and main's egress guard lets the Node side reach exactly that one
@@ -29,8 +32,10 @@ import { realTimers, type EffectTimers } from './timers.ts';
 
 export * from './lan-address.ts';
 
-/** At most one document per this interval (5 per second): the hub app rate-limits each light further. */
-export const LAN_SYNC_MIN_INTERVAL_MS = 200;
+/** At most one document per this interval to Home Assistant (20 per second): the integration paces each light itself. */
+export const LAN_SYNC_MIN_INTERVAL_MS = 50;
+/** At most one document per this interval to Hubitat (5 per second): its driver parses each one on the hub. */
+export const LAN_SYNC_HUBITAT_INTERVAL_MS = 200;
 /** A document at least this often while active, even for a static screen (the hub's inactivity timeout is 15 s). */
 export const LAN_SYNC_HEARTBEAT_MS = 5000;
 /** Interval between attempts while the hub does not answer. */
@@ -103,20 +108,35 @@ export function lanSyncDocument(seq: number, zones: ColorZones | null): string {
 
 // ───────────────────────────── transport ─────────────────────────────
 
-/** POST `body` (JSON) to http://host:port/; resolves on any HTTP answer, rejects on a socket error or the timeout. */
-export type LanPost = (host: string, port: number, body: string, timeoutMs: number) => Promise<number>;
+/** The minimum interval between documents for a target: Hubitat (path '/') or a Home Assistant webhook (any other path). */
+export function lanSyncMinInterval(target: Pick<LanSyncSettings, 'path'>): number {
+  return target.path === '/' ? LAN_SYNC_HUBITAT_INTERVAL_MS : LAN_SYNC_MIN_INTERVAL_MS;
+}
 
-export const httpPost: LanPost = (host, port, body, timeoutMs) =>
+/** One kept-open connection for Home Assistant (aiohttp keeps it alive): no TCP handshake per document at 20 per second. */
+const keepAlive = new http.Agent({ keepAlive: true, maxSockets: 1, keepAliveMsecs: 10_000 });
+
+/**
+ * POST `body` (JSON) to http://host:port<path>; resolves on any HTTP answer, rejects on a socket error or the timeout.
+ * Hubitat (path '/') gets one connection per request, as its LAN port expects; a webhook reuses a kept-open one.
+ */
+export type LanPost = (host: string, port: number, path: string, body: string, timeoutMs: number) => Promise<number>;
+
+export const httpPost: LanPost = (host, port, path, body, timeoutMs) =>
   new Promise((resolve, reject) => {
     const req = http.request(
       {
         host,
         port,
         method: 'POST',
-        path: '/',
-        agent: false,
+        path,
+        agent: path === '/' ? false : keepAlive,
         timeout: timeoutMs,
-        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body), Connection: 'close' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(body),
+          ...(path === '/' ? { Connection: 'close' } : {}),
+        },
       },
       (res) => {
         res.resume();
@@ -186,7 +206,7 @@ export class LanColorSender {
   configure(next: LanSyncSettings, options: { quiet?: boolean } = {}): void {
     const s = normalizeLanSyncSettings(next);
     const old = this.#settings;
-    if (s.enabled === old.enabled && s.host === old.host && s.port === old.port) return;
+    if (s.enabled === old.enabled && s.host === old.host && s.port === old.port && s.path === old.path) return;
     if (this.#hubActive && old.enabled) void this.#attempt(old, lanSyncDocument(++this.#seq, null));
     this.#settings = s;
     this.#hubActive = false;
@@ -249,7 +269,7 @@ export class LanColorSender {
       return;
     }
     const now = this.#now();
-    const minGap = this.#failing ? LAN_SYNC_FAILING_INTERVAL_MS : LAN_SYNC_MIN_INTERVAL_MS;
+    const minGap = this.#failing ? LAN_SYNC_FAILING_INTERVAL_MS : lanSyncMinInterval(this.#settings);
     const since = now - this.#sentAt;
     const changed = !this.#hubActive || zonesDelta(zones, this.#sentZones) >= LAN_SYNC_CHANGE_DELTA;
     if (!changed && since < LAN_SYNC_HEARTBEAT_MS) {
@@ -279,7 +299,7 @@ export class LanColorSender {
   async #attempt(target: LanSyncSettings, body: string): Promise<void> {
     this.#sent++;
     try {
-      const status = await this.#post(target.host, target.port, body, LAN_SYNC_TIMEOUT_MS);
+      const status = await this.#post(target.host, target.port, target.path, body, LAN_SYNC_TIMEOUT_MS);
       if (target !== this.#settings) return;
       if (this.#failing) this.#log.info(`LAN colour sync: ${describeLanTarget(target)} answers again (HTTP ${status})`);
       else if (this.#sent === 1 || status >= 400) this.#log.info(`LAN colour sync: ${describeLanTarget(target)} answered HTTP ${status}`);

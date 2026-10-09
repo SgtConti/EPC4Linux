@@ -75,6 +75,7 @@ This is what `src/backend/compose.ts createDefaultServices` does (impl-integrati
 | `capture.setVideoInterval?(intervalMs)` | FollowVideo speed change | optional (appended to `CaptureHost`): retune the current session, running or still starting, to the new interval without a new session (no portal dialog); no-op while nothing is captured, never throws. Without it a speed change keeps the start's interval (logged once) and changes only the uploads |
 | `capture.startAudio(onLevel)` / `stopAudio()` | FollowAudio | a float level 0..255 every ~40 ms; the driver truncates it to a byte |
 | `getIdleSeconds()` | idle lights-off | whole seconds since the last input (`powerMonitor.getSystemIdleTime`); absent → never idle |
+| `shouldReleaseScreenCapture?()` | FollowVideo vs. the desktop's power management | port addition, polled on the idle tick: true while the capture session should be closed so that the desktop can blank, lock and sleep (deviation 18); absent → never |
 | `resourcesDir` | ENE layout table, menu regions, device records | `<resourcesDir>/ENE/PCenter_AmbiglowInfo.json` (or `data/ENE/…`), `<resourcesDir>/PCenter_DeviceInfo.json` |
 | `serveDataDir` | `Config/color.data` | |
 
@@ -239,6 +240,7 @@ With the vendor's six paced writes the upload, not the capture, limits High. It 
     - **UI:** no renderer patch for the sliders. The vendor's own Ambiglow Speed slider appears (Ambiglow-Dvqon39u.js:1059-1072). Its range starts at `MinBrightness` (a vendor bug), which is 1 for the FollowVideo item, so it shows exactly the three marks 1..3, Low/Normal/High. The vendor's Brightness slider (:1040-1058) shows the three marks 1..3, Bright/Brighter/Brightest (`menu.test.ts` replays both). `Effect_SpeedChange` and `Effect_BrightnessChange` store `EffectDetail.Speed` / `.Brightness` in the FollowVideo entry, as for every other effect, and send no ParameterSet (vendor :1088-1121). (The "Fast LED upload" checkbox next to them is a renderer patch, FAST-LED-UPLOAD, impl-vendor-ui §3.)
     - **Behaviour:** speed 1 Low = the vendor cadence, and with frame-driven sampling also the vendor's lag; 2 Normal (default) and 3 High are faster and event-driven (§4.2 table). A change retunes the running capture without a new session. While the uploads are paused (idle, the ENE away) the kept session runs at 1 fps in every tier. Brightness 3 Brightest (default) = the vendor's colours; 2 and 1 dim them to 2/3 and 1/3 on the host, live, the newest frame re-sent (§4.2).
     - **Compatibility:** a profile from Windows opens as Normal and Brightest, since `DisplayEffectInfo.Default` stores Speed 2 and Brightness 3 (the user's `Default.pcenter` has 2 and 3). A profile saved here with another FollowVideo speed or brightness still loads on Windows, where both values are ignored.
+18. **FollowVideo closes its capture before the desktop's idle timeout** (2026-10-09, user report: the display never went to sleep while the app ran). Chromium holds a "prevent display sleep" wake lock while a desktop capture stream is open (reason "Native desktop capture": an idle inhibitor, flag 8, of `org.gnome.SessionManager`, plus `XScreenSaverSuspend` on X11), and deviation 6 kept the session through idle, so the desktop's own blank/lock/suspend timeout never fired. Electron cannot drop that wake lock and no other process can remove it, so the port closes the session: `HostServices.shouldReleaseScreenCapture` (main `desktop-idle.ts`) turns true 15 s before the desktop's shortest idle timeout (Cinnamon `idle-delay` and `sleep-display-ac/-battery`, GNOME `idle-delay`, MATE `idle-delay` and `sleep-display-*`; 5 min where unknown), unless another application inhibits idle (a video player keeps the display on, and the lights keep following the picture). `IdleMonitor` polls it on the idle tick; `#checkSoftEffect` then treats FollowVideo as not wanted, and the next input starts a new session (with one retry of a failed start, like a wake). On GNOME Wayland that start is answered from the run's screen grant where the portal can restore it (impl-electron-shell "Capture host"), else the dialog appears once more. The vendor stops its capture thread on idle anyway (deviation 6), and Windows' screen capture holds no display wake lock.
 
 ---
 
@@ -327,32 +329,41 @@ The user asked for the experimental frame burst as a checkbox, and for a brightn
 
 ---
 
-## 11. LAN colour sync to Hubitat (2026-10-04, user request)
+## 11. LAN colour sync to Hubitat and Home Assistant (2026-10-04, user request)
 
-The user asked for Follow video to also drive smart lights through a Hubitat hub. This is a port feature with no vendor counterpart. The hub side is in [`hubitat/`](../../hubitat/README.md): the "Ambient Color Sync" app and the "Ambient Color Receiver" driver, which also accept Hyperion.
+The user asked for Follow video to also drive smart lights through a smart-home hub. This is a port feature with no vendor counterpart. There are two receivers, and both also accept Hyperion:
+- [`home-assistant/`](../../home-assistant/README.md): the "Ambient Color Sync" custom integration, which receives on a webhook;
+- [`hubitat/`](../../hubitat/README.md): the "Ambient Color Sync" app and the "Ambient Color Receiver" driver.
 
 **Data path.**
 - `FollowVideoEngine` gets a `frameSink` option.
   - It receives every captured frame while the uploads run (not paused), as captured, before the brightness gain.
   - It receives `null` once when the uploads pause or the capture stops or fails. This covers idle lights-off, another effect, the ENE away, a detach, and the service stopping.
   - The sink does not depend on the ENE being free. A throwing sink is logged and never stops the LEDs.
-- `LanColorSender` (`lan-sync.ts`) reduces a 50×40 frame to five averages: the whole screen, and bands of 20 % of the width or height on the left, right, top and bottom. It POSTs them as JSON to `http://<hub>:<port>/` (Hubitat's LAN port 39501). The format is in `hubitat/README.md`; `{"active": false}` ends a stream.
+- `LanColorSender` (`lan-sync.ts`) reduces a 50×40 frame to five averages: the whole screen, and bands of 20 % of the width or height on the left, right, top and bottom. It POSTs them as JSON to `http://<host>:<port><path>`: Hubitat's LAN port 39501 with path `/`, or a Home Assistant webhook `/api/webhook/<id>` on port 8123. The format is in either README; `{"active": false}` ends a stream.
 
 **Pacing.**
 - A document goes out when any channel of any zone has moved by at least 4. The first one after a start always goes out.
-- There is at most one document per 200 ms, and a heartbeat every 5 s on a static screen. The hub app's inactivity timeout is 15 s.
+- There is at most one document per 50 ms to Home Assistant, and per 200 ms to Hubitat (`lanSyncMinInterval`), and a heartbeat every 5 s on a static screen. The receivers' inactivity timeout is 15 s.
+  - At 50 ms the capture is the real limit (the Follow Video Speed: 100 ms on Normal, 40 ms on High).
+  - Home Assistant paces each light itself: one command in flight per light, newest wins.
+  - Hubitat's driver parses every message on the hub, hence its 200 ms.
+- Home Assistant's requests reuse one kept-open connection (an `http.Agent` with `keepAlive`, one socket). Hubitat gets one connection per request (`Connection: close`), as its LAN port expects.
 - One request is in flight at a time, the newest colours win, and nothing is queued.
 - An unreachable hub is retried every 2 s, logged once, and its recovery is logged once.
 - `close()` (from the service's `stop()`) sends the end of the stream and waits for it for at most 1 s.
 - Turning the sync off, or moving it to another address, first tells the old hub that the stream ended.
 
 **Setting.**
-- The setting is `config.json linuxLanSync = {enabled, host, port}`. `src/main/lan-sync.ts LanSyncController` owns it, like `experimental.ts`: `config.json` is the one source of truth.
+- The setting is `config.json linuxLanSync = {enabled, host, port, path}`. `src/main/lan-sync.ts LanSyncController` owns it, like `experimental.ts`: `config.json` is the one source of truth.
 - The Ambiglow page writes it with the LAN-COLOR-SYNC renderer patch (impl-vendor-ui §3) through `window.__EVNIA__.lanSync` (impl-electron-shell "IPC"). Every other writer is followed too.
 - On a change, the controller opens the egress exception first and then calls `BackendHost.setLanSync` → `AmbiglowService.setLanSync`. The backend is created with the stored value (`AmbiglowServiceOptions.lanSync`).
 - The rules for the setting are in `lan-address.ts`, a pure module shared by the preload, main and the backend.
   - The host must be a private IPv4 literal (RFC 1918 or 169.254/16). Host names are refused, so no DNS lookup ever happens.
   - The port must be 1–65535.
+  - The field takes a Hubitat IP (`192.168.1.20[:port]`, path `/`, port 39501) or a Home Assistant webhook URL (`http://192.168.1.20:8123/api/webhook/<id>`). A webhook path without a port means port 8123.
+  - The path is URL path characters only: no `..`, no query, at most 200 characters. `https://` is refused.
+  - `describeLanTarget` shortens a webhook id to four characters (`redactLanPath`), so the secret stays out of the logs.
   - Anything else counts as off.
 
 **Nothing online (ARCHITECTURE rule 4).**
@@ -368,5 +379,7 @@ The user asked for Follow video to also drive smart lights through a Hubitat hub
 | Electron main, preload, renderer | `src/main/lan-sync.ts`; `egress-guard.ts setAllowedLanPeers`/`isAllowedTcpPeer`; the store key `linuxLanSync`; the internal invoke channel `evnia:lan-sync-set`; `window.__EVNIA__.lanSync`; `BackendHost.setLanSync` and its `lanSync` option; the LAN-COLOR-SYNC patch |
 | Tests | `lan-sync.test.ts` (address rules, zones, document, pacing, end of stream, failure back-off, the frame sink, a real loopback POST), `ipc.test.ts`, `egress-guard.test.ts`, `store.test.ts`, the vendor-UI `lan-color-sync.test.ts` and the real-archive check |
 
-**Not verified:** a real Hubitat hub. `hubitat/test/run.sh` runs the Groovy app and driver under Groovy 2.4 against stand-ins of the hub's API (37 scenario checks), but they were not run on a hub. The e2e walkthrough has no step for the row yet.
+**Not verified:** a real hub and real bulbs.
+- The Home Assistant integration's tests (`home-assistant/tests`, 13) run against a real Home Assistant core (2026.2.3), with the light services mocked.
+- `hubitat/test/run.sh` runs the Groovy app and driver under Groovy 2.4 against stand-ins of the hub's API (37 scenario checks). The e2e walkthrough has no step for the row yet.
 

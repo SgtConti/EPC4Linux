@@ -1,5 +1,6 @@
 // HostServices (src/backend/types.ts) provided by the Electron main process.
 //   idle time        powerMonitor.getSystemIdleTime(), plus Mutter's idle monitor on GNOME Wayland (idle-time.ts)
+//   capture release  the desktop is about to go idle: FollowVideo closes its capture (desktop-idle.ts)
 //   display mode     20-monitor-io §3.5: Mutter / XRandR / libdrm snapshots (display-sources.ts); the
 //                    simulated monitor's mode in EVNIA_MOCK_MONITOR mode
 //   foreground app   X11 _NET_ACTIVE_WINDOW tracking, null on Wayland (foreground-app.ts), with the optional
@@ -15,6 +16,7 @@ import { MOCK_DISPLAY_MODE } from './display-mode.ts';
 import type { DisplayModeProvider } from './display-sources.ts';
 import type { X11ForegroundTracker } from './foreground-app.ts';
 import type { PathGuard } from './fs-guard.ts';
+import type { DesktopIdleWatch } from './desktop-idle.ts';
 import type { IdleTimeSource } from './idle-time.ts';
 import type { AppPaths } from './paths.ts';
 
@@ -26,6 +28,8 @@ export function createHostServices(o: {
   capture: CaptureHost;
   foreground: Pick<X11ForegroundTracker, 'current' | 'currentApp' | 'release'>;
   idle: Pick<IdleTimeSource, 'seconds'>;
+  /** null in mock mode: the simulated idle time never releases the capture. */
+  desktopIdle?: Pick<DesktopIdleWatch, 'shouldRelease'> | null;
   /** null in mock mode: the simulated monitor reports MOCK_DISPLAY_MODE. */
   displayModes: DisplayModeProvider | null;
   /** nodeApi's guard, which also holds the export-dialog write grants. */
@@ -39,6 +43,7 @@ export function createHostServices(o: {
     resourcesDir: o.paths.resourcesDir,
     capture: o.capture,
     getIdleSeconds: () => o.idle.seconds(),
+    ...(o.desktopIdle ? { shouldReleaseScreenCapture: () => o.desktopIdle?.shouldRelease() ?? false } : {}),
     getDisplayMode: (monitor) => (modes ? modes.get(monitor) : { ...MOCK_DISPLAY_MODE }),
     getForegroundAppPath: () => o.foreground.current(),
     getForegroundApp: () => o.foreground.currentApp(),

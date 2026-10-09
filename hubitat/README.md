@@ -2,9 +2,11 @@
 
 With this app, colour lights on a [Hubitat Elevation](https://hubitat.com/) hub follow your screen. The colours can come from:
 
-- **EPC4Linux**: the Ambiglow **Follow video** mode of this repository's Linux app. Tick *Send colours to Hubitat (LAN)* and the app pushes the screen colours to the hub over your local network.
+- **EPC4Linux**: the Ambiglow **Follow video** mode of this repository's Linux app. Tick *Send colours to Hubitat / Home Assistant (LAN)* and the app pushes the screen colours to the hub over your local network.
 - **Hyperion.ng**: the hub reads the LED colours of a Hyperion server. The receiver device asks for one snapshot per poll interval.
 - **Any Hyperion JSON client**: POST the Hyperion JSON commands `color` and `clear` to the hub.
+
+For Home Assistant, see [`../home-assistant/`](../home-assistant/README.md) instead.
 
 It has two parts:
 
@@ -31,7 +33,7 @@ You can add more instances, for example one per PC or per room. Each instance ge
 On the Ambiglow page, select **Follow video**. Below the Speed slider and the *Fast LED upload* box:
 
 1. Enter the **hub's IP address** in the address field, for example `192.168.1.20`. The app page also shows this address. Add `:port` only if you use something other than 39501.
-2. Tick **Send colours to Hubitat (LAN)**.
+2. Tick **Send colours to Hubitat / Home Assistant (LAN)**.
 
 The setting is saved in `~/.config/evnia/config.json` as `"linuxLanSync": {"enabled": true, "host": "192.168.1.20", "port": 39501}`.
 

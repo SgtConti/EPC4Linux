@@ -45,6 +45,9 @@
 // the kept session to FOLLOW_VIDEO_PAUSED_CAPTURE_MS (one frame per second; the same retune as a speed change, so
 // no portal dialog); resuming retunes it back to the tier's interval. The vendor stops and restarts its capture
 // thread in both cases (EffectEnableTemp → StopAllTimer, 09 §11), which costs nothing on Windows.
+// The service does end the session shortly before the desktop's own idle timeout (impl-ambiglow deviation 18):
+// Chromium inhibits the desktop's idle while a screen capture is open, so a kept session stopped the display
+// from ever blanking or sleeping.
 //
 // Deviations (docs/port/impl-ambiglow.md §5):
 //   - the speed tiers above (deviation 17): only Low keeps the vendor cadence;

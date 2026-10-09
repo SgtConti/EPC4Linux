@@ -7,7 +7,9 @@ audio, system settings, profiles, the dashboard overlay and Ambiglow
 lighting. Philips peripherals (mice, keyboards, headsets, lamps), firmware
 updates, accounts and every other online feature are removed. The program
 makes no network connection; a kill-switch blocks any request that is not
-local.
+local. The one exception is opt-in and off by default: Follow video can send
+its colours to a Hubitat hub or Home Assistant at a private IP address you
+enter (see below).
 
 Start it from the application menu ("Evnia Precision Center") or with the
 command evnia-precision-center. See evnia-precision-center(1).
@@ -77,6 +79,14 @@ Desktop notes
     six. The checkbox is untested on real monitors; untick it if the LEDs
     flicker or freeze (the setting is kept in ~/.config/evnia/config.json
     as "linuxExperimental").
+  * "Send colours to Hubitat / Home Assistant (LAN)" (below Fast LED upload,
+    off by default): while Follow video runs, its colours also go to smart
+    lights through a hub on your network. Enter the Hubitat hub's IP address
+    or the webhook URL of the Home Assistant "Ambient Color Sync"
+    integration; private IPv4 addresses and plain http only, no host names.
+    The hub side (app/driver, integration) is in the project's hubitat/ and
+    home-assistant/ folders. Kept in ~/.config/evnia/config.json as
+    "linuxLanSync".
   * Wayland: themes bound to an application do not switch automatically;
     the active window is only known on X11.
   * The tray icon needs a StatusNotifier host. On GNOME that is the

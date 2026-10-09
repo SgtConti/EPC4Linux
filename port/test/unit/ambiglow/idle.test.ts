@@ -403,3 +403,68 @@ test('DDC: a disabled Ambiglow is not switched on by the wake (vendor bug fixed)
     await r.cleanup();
   }
 });
+
+test('IdleMonitor: the capture release (desktop idle timeout) is polled on the same tick and reported once per change', () => {
+  const timers = new ManualTimers();
+  const soft = { TurnOffLightsWhenIdle: false, TurnOffLightsWhenIdleDuration: 5 };
+  let release = false;
+  const changes: boolean[] = [];
+  const m = new IdleMonitor({
+    log: createLogger('t', () => undefined),
+    softConfig: () => soft,
+    idleSeconds: () => 0,
+    onChange: () => assert.fail('the lights setting is off'),
+    releaseCapture: () => release,
+    onReleaseCapture: (r) => changes.push(r),
+    timers,
+  });
+  m.start();
+  timers.advance(2000);
+  release = true;
+  timers.advance(3000);
+  assert.equal(m.captureReleased, true);
+  release = false;
+  timers.advance(1000);
+  assert.deepEqual(changes, [true, false]);
+  m.stop();
+});
+
+test('ENE: the desktop\'s idle timeout coming up closes the capture session (Chromium inhibits idle while it is open); input opens it again', async () => {
+  const r = await rig();
+  try {
+    assert.equal(r.service.followVideo.state, 'running');
+    r.desktop.release = true;
+    r.timers.advance(1000);
+    await flush();
+    assert.equal(r.service.followVideo.state, 'stopped', 'closed: the desktop can blank and lock');
+    assert.equal(r.capture.videoStops, 1);
+    r.timers.advance(5000);
+    assert.equal(r.capture.videoStarts.length, 1, 'stays closed while the desktop is idle');
+    r.desktop.release = false;
+    r.timers.advance(1000);
+    await flush();
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS, NORMAL_MS], 'a new session at the tier interval');
+    assert.equal(r.service.followVideo.state, 'running');
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('ENE: lights-off idle first (kept session, paused), then the desktop timeout closes it; the wake opens it at the tier interval', async () => {
+  const r = await rig({ soft: IDLE_ON });
+  try {
+    await goIdle(r, true);
+    assert.equal(r.service.followVideo.state, 'running', 'kept, paused');
+    r.desktop.release = true;
+    r.timers.advance(1000);
+    await flush();
+    assert.equal(r.service.followVideo.state, 'stopped');
+    r.desktop.release = false;
+    await goIdle(r, false);
+    assert.equal(r.service.followVideo.state, 'running');
+    assert.equal(r.capture.videoStarts.at(-1), NORMAL_MS);
+    assert.equal(r.service.followVideo.paused, false);
+  } finally {
+    await r.cleanup();
+  }
+});

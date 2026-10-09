@@ -58,7 +58,7 @@ The app reaches the monitor in two ways. It prefers the first one.
 Download or build the package (see [Building from source](#building-from-source)), then install it with `apt`, which also installs the libraries it needs:
 
 ```sh
-sudo apt install ./evnia-precision-center_1.13.0-linux.3_amd64.deb
+sudo apt install ./evnia-precision-center_1.13.0-linux.4_amd64.deb
 ```
 
 - Keep the `./`. Without it, apt looks for a package of that name in the archive.
@@ -186,6 +186,7 @@ The delay is the wait for the next sample, plus Low's tick, plus the time the co
 
 - **High uses noticeably more CPU**, because the screen is captured and scaled 25 times per second. It keeps sending even while the screen does not change. If your computer is busy, or runs on battery, prefer Normal.
 - While the LEDs are off because you are away from the computer ("turn off lights when idle"), or while the Ambiglow controller is gone for a moment (monitor standby), the screen capture **slows to one sample per second** in every speed. It keeps running, so no new screen-sharing dialog appears when the lights come back.
+- **Screen blanking, locking and sleep still work while Follow video runs.** A running screen capture keeps the desktop awake (Chromium, which the app is built on, does this for every screen capture). So shortly before your desktop's power-management timeout (15 seconds before the screen would blank or lock), the app stops the screen capture. The LEDs keep the last colours, and the screen capture starts again at your next input. If another application is keeping the screen on (a video player, a browser playing a film), the capture keeps running and the lights keep following the picture. The timeout is read from the Cinnamon, GNOME or MATE settings; on other desktops the app assumes 5 minutes.
 - The change applies immediately, while Follow video keeps running. **On Wayland, changing the speed does not show the screen-sharing dialog again**: the running screen capture is kept.
 - The speed is saved in the current profile, like the speed of the other effects. Profiles copied from Windows start at Normal, because the Windows app saves Normal (and ignores the value).
 - Without the USB Ambiglow controller, the monitor itself runs Follow video (see [The Ambiglow controller is missing](#the-ambiglow-controller-is-missing)). The Speed slider on that page is the monitor's own, and it is disabled for Follow video, as in the Windows app.
@@ -215,21 +216,25 @@ Below the Speed slider, Follow video has a checkbox **Fast LED upload (experimen
 - The checkbox appears only with the USB Ambiglow controller and with Follow video selected, and it is greyed out while the effect is switched off.
 - If the app was started with `EVNIA_ENE_FRAME_BURST=1` in its environment (the older way to switch it on), the checkbox shows ticked and greyed out, with a note: the environment variable wins for that run. Start the app without it to decide with the checkbox again.
 
-#### Send colours to Hubitat (LAN)
+#### Send colours to Hubitat / Home Assistant (LAN)
 
-Below *Fast LED upload*, Follow video has a row **Send colours to Hubitat (LAN)**. It is off by default; the Windows app has none. With it on, the screen colours also go to a [Hubitat](https://hubitat.com/) hub on your network, so smart lights in the room can follow the screen. On the hub, install the *Ambient Color Sync* app and its receiver driver from [`hubitat/`](../../hubitat/README.md).
+Below *Fast LED upload*, Follow video has a row **Send colours to Hubitat / Home Assistant (LAN)**. It is off by default; the Windows app has none. With it on, the screen colours also go to a smart-home hub on your network, so smart lights in the room can follow the screen. Two hubs are supported:
 
-1. Enter the hub's IP address in the field, for example `192.168.1.20`. Add `:port` only if it is not 39501. The address is saved when you leave the field or press Enter. A red border means it was refused; the tooltip says why.
-2. Tick **Send colours to Hubitat (LAN)**.
+- **[Home Assistant](https://www.home-assistant.io/)**: install the *Ambient Color Sync* integration from [`home-assistant/`](../../home-assistant/README.md). It shows a webhook URL such as `http://192.168.1.20:8123/api/webhook/3f9a…`; paste that whole URL into the field.
+- **[Hubitat](https://hubitat.com/)**: install the *Ambient Color Sync* app and its receiver driver from [`hubitat/`](../../hubitat/README.md), and enter the hub's IP address, for example `192.168.1.20`. Add `:port` only if it is not 39501.
 
-- Only **private IPv4 addresses** are accepted (`10.x`, `172.16–31.x`, `192.168.x`, `169.254.x`), and no host names.
-  - This is the app's only network connection, and only while the box is ticked.
-  - The app makes it to exactly that address.
+1. Enter the address. It is saved when you leave the field or press Enter. A red border means it was refused; the tooltip says why.
+2. Tick **Send colours to Hubitat / Home Assistant (LAN)**.
+
+- **Addresses.** Only **private IPv4 addresses** are accepted (`10.x`, `172.16–31.x`, `192.168.x`, `169.254.x`).
+  - Host names such as `homeassistant.local` are refused, and so is `https://`.
+  - This is the app's only network connection, and only while the box is ticked. The app makes it to exactly that address.
+  - The webhook id is kept out of the log files.
 - **What is sent.** The PC sends the average colour of the whole screen and of its four edges.
-  - It sends at most 5 times per second, and only when the colours change noticeably.
+  - It sends only when the colours change noticeably: up to 20 times per second to Home Assistant, which paces each light itself, and up to 5 to Hubitat. The Speed slider sets how often the screen is looked at, about 10 times per second on Normal.
   - On a static screen it sends a heartbeat every 5 seconds.
   - When Follow video stops (another effect, Ambiglow off, idle lights-off, the app quitting), the hub is told, so it can restore its lights.
-- The choice is kept in `~/.config/evnia/config.json` as `"linuxLanSync": {"enabled": true, "host": "192.168.1.20", "port": 39501}`. The Windows app ignores that entry.
+- The choice is kept in `~/.config/evnia/config.json` as `"linuxLanSync": {"enabled": true, "host": "192.168.1.20", "port": 8123, "path": "/api/webhook/…"}`. For Hubitat, the path is `"/"` and the port 39501. The Windows app ignores that entry.
 - The row appears only with the USB Ambiglow controller and with Follow video selected.
 - If the hub does not answer, the backend log says `LAN colour sync: … not reachable` once, and the app retries every 2 seconds.
 
@@ -570,7 +575,7 @@ docker run --rm --network none -v "$PWD:/repo" -v "$HOME/Downloads:/installer:ro
   node scripts/extract-installer.mjs --installer "/installer/evnia Setup 1.13.0.exe"
 docker run --rm --network none -v "$PWD:/repo" -w /repo/port evnia-port-dev \
   bash -c 'npm run import-ui && npm run build && npm run dist:deb'
-# → port/dist/evnia-precision-center_1.13.0-linux.3_amd64.deb
+# → port/dist/evnia-precision-center_1.13.0-linux.4_amd64.deb
 ```
 
 These commands are for Linux and WSL2. Git Bash on Windows needs `export MSYS_NO_PATHCONV=1` and Windows paths for the volumes: `-v "$(pwd -W):/repo"` and `-v "$(cygpath -w "$HOME/Downloads"):/installer:ro"`. An installed 1.13.0 folder copied from Windows works instead of the installer. [BUILDING.md](../../BUILDING.md) explains both.

@@ -221,7 +221,7 @@ test('the "Fast LED upload" setting: the backend is created with the stored valu
 
 test('the LAN colour sync setting: the backend is created with it when on, and later changes reach its ambiglow service', async () => {
   const host = mainHost(dir);
-  const on = { enabled: true, host: '192.168.1.20', port: 39501 };
+  const on = { enabled: true, host: '192.168.1.20', port: 39501, path: '/' };
   assert.deepEqual(backendConfiguration({ host, mockMonitor: '34M2C8600', lanSync: on }).overrides, { ambiglow: { lanSync: on } });
   assert.deepEqual(backendConfiguration({ host, mockMonitor: '34M2C8600', eneFrameBurst: true, lanSync: on }).overrides, { ambiglow: { eneFrameBurst: true, lanSync: on } });
   assert.deepEqual(backendConfiguration({ host, mockMonitor: '34M2C8600', lanSync: { ...on, enabled: false } }).overrides, {}, 'off is the default');
