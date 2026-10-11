@@ -326,6 +326,7 @@ export async function rig(options: RigOptions = {}): Promise<Rig> {
     ene: { sleep: async () => undefined },
     timers,
     clock,
+    followVideoGamma: 1, // the byte-exact frame tests check the vendor's bytes; the correction has its own tests
     ...options.service,
   });
   const services: ApiServices = { ...core, themes, monitors, ambiglow: service };

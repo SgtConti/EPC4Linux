@@ -39,7 +39,7 @@ async function compose(mockMonitor: string) {
     {
       services: (core) => {
         manager = createMonitorManager(core, { themes }, { clock: new VirtualClock(), decimalSeparator: ',' });
-        ambiglow = createAmbiglowService(core, { themes, monitors: manager }, { ene: { sleep: async () => undefined }, timers });
+        ambiglow = createAmbiglowService(core, { themes, monitors: manager }, { ene: { sleep: async () => undefined }, timers, followVideoGamma: 1 });
         manager.bindAmbiglow(ambiglow);
         return { themes, monitors: manager, ambiglow };
       },

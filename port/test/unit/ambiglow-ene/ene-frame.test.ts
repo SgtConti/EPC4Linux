@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GRID_HEIGHT, GRID_WIDTH, burstFrameWrite, dimFrameWrites, planFrame, renderFrame, roundHalfEven } from '../../../src/backend/ambiglow/ene-frame.ts';
+import { GRID_HEIGHT, GRID_WIDTH, burstFrameWrite, dimFrameWrites, gammaFrameWrites, planFrame, renderFrame, roundHalfEven } from '../../../src/backend/ambiglow/ene-frame.ts';
 import { findModelLayout } from '../../../src/backend/ambiglow/ene-layout.ts';
 import { EneMode, EneRegion, EneSpeed, EneBrightness } from '../../../src/backend/ambiglow/ene-registers.ts';
 import type { EneParameterSet } from '../../../src/backend/ambiglow/ene-params.ts';
@@ -287,6 +287,28 @@ test('dimFrameWrites: every byte × gain, rounded to the nearest integer; gain 1
   for (const gain of [0, -1]) assert.deepEqual([...dimFrameWrites(writes, gain)[0].data], [0, 0, 0, 0, 0, 0, 0]);
   assert.deepEqual([...writes[0].data], [0, 1, 2, 3, 150, 151, 255], 'the input is not modified');
   assert.equal(dimFrameWrites(writes, 2 / 3)[0].reg, 0xe300);
+});
+
+test('gammaFrameWrites: screen values → LED drive levels, 255·(c/255)^gamma rounded; gamma 1 (or below, or NaN) unchanged', () => {
+  const writes = [{ reg: 0xe300, data: Uint8Array.of(0, 64, 128, 186, 230, 255) }];
+  assert.deepEqual([...gammaFrameWrites(writes, 2.2)[0].data], [0, 12, 56, 127, 203, 255]);
+  // An orange screen colour: the weaker channels drop much further than red, so the LEDs show orange, not peach.
+  assert.deepEqual([...gammaFrameWrites([{ reg: 0xe300, data: Uint8Array.of(230, 150, 80) }], 2.2)[0].data], [203, 79, 20]);
+  for (const gamma of [1, 0.5, Number.NaN]) assert.equal(gammaFrameWrites(writes, gamma)[0], writes[0], `gamma ${gamma}: the same write`);
+  assert.deepEqual([...writes[0].data], [0, 64, 128, 186, 230, 255], 'the input is not modified');
+  assert.equal(gammaFrameWrites(writes, 2.2)[0].reg, 0xe300);
+});
+
+test('writeVideoFrame gamma: the LEDs get the corrected bytes, the gain on top (a factor of the light); the mirror keeps the screen colours', async () => {
+  const rig = await openRig();
+  await rig.device.setEffect(followVideo);
+  const grid = { width: GRID_WIDTH, height: GRID_HEIGHT, data: new Uint8Array(GRID_WIDTH * GRID_HEIGHT * 3).map((_, i) => [230, 150, 80][i % 3]) };
+  assert.equal(await rig.device.writeVideoFrame(grid, { gamma: 2.2 }), true);
+  assert.deepEqual([...rig.mock.state().frame.subarray(0, 6)], [203, 79, 20, 203, 79, 20]);
+  assert.deepEqual([...rig.device.ledColors().subarray(0, 3)], [230, 150, 80], 'the preview shows what the screen shows');
+  assert.equal(await rig.device.writeVideoFrame(grid, { gamma: 2.2, gain: 1 / 3 }), true);
+  assert.deepEqual([...rig.mock.state().frame.subarray(0, 3)], [68, 26, 7], 'gamma first, then x 1/3');
+  assert.deepEqual([...rig.device.ledColors().subarray(0, 3)], [77, 50, 27], 'the mirror: the screen colours x 1/3');
 });
 
 test('writeVideoFrame gain: the six writes carry the dimmed bytes, the mirror too; with the burst the one transfer does', async () => {

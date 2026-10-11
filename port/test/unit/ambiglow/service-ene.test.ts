@@ -7,8 +7,9 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { serialize } from '../../../src/backend/core/json.ts';
+import { EneMode } from '../../../src/backend/ambiglow/ene-registers.ts';
 import { parameterSetWrites, toEneParameterSet } from '../../../src/backend/ambiglow/ene-params.ts';
-import { ENE_LOST_GRACE_MS, createAmbiglowService } from '../../../src/backend/ambiglow/service.ts';
+import { ENE_LOST_GRACE_MS, ENE_SETTLE_REAPPLY_MS, createAmbiglowService } from '../../../src/backend/ambiglow/service.ts';
 import { FOLLOW_VIDEO_CADENCES, FOLLOW_VIDEO_PAUSED_CAPTURE_MS } from '../../../src/backend/ambiglow/follow-video.ts';
 import { EventBus } from '../../../src/backend/core/events.ts';
 import type { CoreServices } from '../../../src/backend/index.ts';
@@ -508,6 +509,48 @@ test('an ENE away longer than the grace: DDC fallback, the capture session is ke
     await flush();
     assert.equal(r.capture.videoStops, 1);
     assert.equal(r.service.followVideo.state, 'stopped');
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('an ENE back from standby gets its effect again after ENE_SETTLE_REAPPLY_MS (deviation 20), the group modes it ran logged; a re-enumeration within the grace does not', async () => {
+  const { log, lines } = captureLogger();
+  const r = await rig({ log, service: { awayCaptureMs: 60_000 } });
+  try {
+    assert.deepEqual(ENE_SETTLE_REAPPLY_MS, [3000, 10_000]);
+    const usb = r.t.bundle.usb;
+    usb.detach(r.eneInfo!);
+    r.capture.frame(rgbaFrame(() => [1, 1, 1], 1));
+    r.timers.advance(100);
+    await flush();
+    r.timers.advance(ENE_LOST_GRACE_MS);
+    await r.service.settled();
+    await flush();
+    assert.equal(r.display.eneModel, '', 'away: DDC fallback');
+    const info = usb.attach(r.mock!.spec({ busNumber: 3, portNumbers: [2, 1], deviceAddress: 31 }));
+    r.display.setEneDevice(info);
+    await r.service.attach(r.display);
+    await flush();
+    assert.equal(r.display.eneModel, '34M2C8600');
+    // The monitor finishes starting up and puts its own effect on group 1.
+    r.mock!.registers[0xe021] = EneMode.StaticMode;
+    let m = r.eneMark();
+    r.timers.advance(3000);
+    await flush(10);
+    assert.deepEqual(writesOnly(r.eneSince(m)).filter((x) => !x.startsWith('40 80 0000 E3')), USER_FOLLOW_VIDEO, 'the effect again');
+    assert.equal(r.mock!.registers[0xe021], EneMode.UserDefine);
+    assert.ok(lines.some((l) => l.text === 'ENE 3000 ms after its return: group modes 1, 14, 14 instead of 14; effect sent again'), 'the reset is logged');
+    m = r.eneMark();
+    r.timers.advance(7000);
+    await flush(10);
+    assert.deepEqual(writesOnly(r.eneSince(m)).filter((x) => !x.startsWith('40 80 0000 E3')), USER_FOLLOW_VIDEO, 'and once more');
+    assert.ok(lines.some((l) => l.text === 'ENE 10000 ms after its return: group modes 14, 14, 14; effect sent again'));
+    m = r.eneMark();
+    r.timers.advance(30_000);
+    await flush(10);
+    assert.deepEqual(writesOnly(r.eneSince(m)).filter((x) => !x.startsWith('40 80 0000 E3')), [], 'nothing after that');
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS], 'the same capture session throughout');
   } finally {
     await r.cleanup();
   }

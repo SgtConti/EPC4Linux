@@ -52,6 +52,8 @@
 // Deviations (docs/port/impl-ambiglow.md §5):
 //   - the speed tiers above (deviation 17): only Low keeps the vendor cadence;
 //   - the brightness levels above (deviation 17): the vendor streams the frames as captured (Brightest keeps that);
+//   - the uploads are colour-corrected (FOLLOW_VIDEO_LED_GAMMA, deviation 19): the vendor's raw screen values look
+//     washed out on the LEDs;
 //   - a frame is uploaded once: the vendor's frame thread re-sends the same screenshot twice between captures
 //     (09 §16 quirk 3), which only doubles the USB traffic; after a pause the newest frame is sent again;
 //   - frames are skipped while the ENE is busy (a ParameterSet or the previous frame), never queued
@@ -78,6 +80,22 @@ export const FOLLOW_VIDEO_BUSY_RETRY_MS = 20;
  * ENE_AWAY_CAPTURE_MS): the kept session is slowed to one frame per second instead of the tier's 3.3 to 25.
  */
 export const FOLLOW_VIDEO_PAUSED_CAPTURE_MS = 1000;
+
+/**
+ * Colour correction of the uploads (impl-ambiglow deviation 19): screen values → LED drive levels, c ↦ 255·(c/255)^2.2
+ * (the sRGB curve). The vendor sends the grid's bytes as they are, which the linear LED PWM shows washed out towards
+ * white (an orange screen: pale peach LEDs, next to smart lights that took the same colour as hue and saturation).
+ */
+export const FOLLOW_VIDEO_LED_GAMMA = 2.2;
+/** Environment override of FOLLOW_VIDEO_LED_GAMMA: a number from 1 (off, the vendor's colours) to 3. */
+export const FOLLOW_VIDEO_GAMMA_ENV = 'EVNIA_FOLLOW_VIDEO_GAMMA';
+
+/** FOLLOW_VIDEO_LED_GAMMA, or the environment's value when it is a number from 1 to 3. */
+export function followVideoGammaFromEnv(env: Readonly<Record<string, string | undefined>> = process.env): number {
+  const raw = env[FOLLOW_VIDEO_GAMMA_ENV]?.trim();
+  const v = raw ? Number(raw) : Number.NaN;
+  return Number.isFinite(v) && v >= 1 && v <= 3 ? v : FOLLOW_VIDEO_LED_GAMMA;
+}
 
 /** EffectDetail.Speed of the FollowVideo entry as the Speed slider sets it (menu.ts: 1..3, marks Low/Normal/High). */
 export type FollowVideoSpeed = 1 | 2 | 3;
@@ -209,6 +227,8 @@ export interface FollowVideoOptions {
   speed?: number;
   /** Initial EffectDetail.Brightness (default 3, full); the owner follows the profile with setBrightness(). */
   brightness?: number;
+  /** The colour correction of the uploads (default followVideoGammaFromEnv(): FOLLOW_VIDEO_LED_GAMMA); 1 = none. */
+  gamma?: number;
   /**
    * Port feature (LAN colour sync, lan-sync.ts): every captured frame while the uploads run (not paused), as captured
    * (before the brightness gain), and null once when they stop or pause (capture stopped or failed, idle, ENE away).
@@ -229,6 +249,7 @@ export class FollowVideoEngine {
   #sinkActive = false;
   #cadence: FollowVideoCadence;
   #brightness: FollowVideoBrightness;
+  readonly #gamma: number;
   #state: State = 'stopped';
   #session = 0;
   /** Speed Low: the fixed upload tick. */
@@ -256,6 +277,7 @@ export class FollowVideoEngine {
     this.#sink = options.frameSink;
     this.#cadence = followVideoCadence(options.speed);
     this.#brightness = followVideoBrightness(options.brightness);
+    this.#gamma = options.gamma ?? followVideoGammaFromEnv();
   }
 
   /** 'running' while frames are requested; 'failed' after a start the host refused (until setWanted(false)). */
@@ -525,7 +547,7 @@ export class FollowVideoEngine {
     this.#uploads++;
     this.#inFlight = true;
     ene
-      .writeVideoFrame(frame, { gain: this.gain })
+      .writeVideoFrame(frame, { gain: this.gain, gamma: this.#gamma })
       .catch((e: unknown) => {
         this.#log.debug(`FollowVideo: frame upload failed: ${e instanceof Error ? e.message : String(e)}`);
       })

@@ -8,6 +8,7 @@ import type { CommandResult } from '../../../src/main/child-process.ts';
 import {
   DESKTOP_IDLE_FALLBACK_S,
   DESKTOP_IDLE_MARGIN_S,
+  DESKTOP_IDLE_MIN_S,
   DesktopIdleWatch,
   desktopIdleKeys,
   parseTimeout,
@@ -83,6 +84,68 @@ test('Cinnamon (display off after 5 min): released 15 s before the shortest time
   assert.equal(await until(400), 300 - DESKTOP_IDLE_MARGIN_S, 'our own inhibitor does not count');
   s.idle = 0;
   assert.equal(w.shouldRelease(), false, 'input: the capture opens again');
+});
+
+test('X11: released at the minimum idle time, since the close restarts the desktop\'s idle count; a desktop that never idles is left alone', async () => {
+  const x11 = { ...CINNAMON, XDG_SESSION_TYPE: 'x11' };
+  const { w, s, until } = watch({ settings: USER_CINNAMON, inhibitors: {} }, x11);
+  await tick();
+  assert.equal(await until(60), DESKTOP_IDLE_MIN_S, 'the display then blanks about 30 s after the desktop\'s 300 s, not after 585 s');
+  s.idle = 0;
+  s.now += 1000;
+  assert.equal(w.shouldRelease(), false, 'input: the capture opens again');
+  const never = watch({ settings: { 'org.cinnamon.desktop.session idle-delay': 'uint32 0', 'org.cinnamon.settings-daemon.plugins.power sleep-display-ac': '0' }, inhibitors: {} }, x11);
+  await tick();
+  assert.equal(await never.until(400), null);
+  const other = watch({ settings: USER_CINNAMON, inhibitors: { '/i/2': ['firefox', 8] } }, x11);
+  await tick();
+  assert.equal(await other.until(400), null, 'a film playing keeps the capture open');
+});
+
+test('closing the capture resets the X idle counter: the release holds through the reset, and real input ends it', async () => {
+  const d: Desktop = { settings: USER_CINNAMON, inhibitors: { '/i/1': [SELF, 8] } };
+  const { w, s, until } = watch(d);
+  await tick();
+  assert.equal(await until(285), 285);
+  // The close: the X server's idle counter starts again from 0 (Cinnamon X11, 2026-10-10: 285006 ms → 168 ms).
+  delete d.inhibitors!['/i/1'];
+  s.idle = 0;
+  for (let i = 0; i < 600; i++) {
+    s.now += 1000;
+    s.idle += 1;
+    assert.equal(w.shouldRelease(), true, `still released ${i + 1} s after the close`);
+    await tick();
+  }
+  // Input: the counter falls behind the time since the close.
+  s.now += 1000;
+  s.idle = 0;
+  assert.equal(w.shouldRelease(), false, 'input after the close opens the capture again');
+  // ...and the next stretch releases again at 285 s.
+  assert.equal(await until(400), 285);
+});
+
+test('a release delayed by a slow close still holds; another application inhibiting after the release opens the capture', async () => {
+  const d: Desktop = { settings: USER_CINNAMON, inhibitors: {} };
+  const { w, s, until } = watch(d);
+  await tick();
+  assert.equal(await until(285), 285);
+  s.now += 3000; // the stream ended 3 s after the release
+  s.idle = 0;
+  for (let i = 0; i < 30; i++) {
+    s.now += 1000;
+    s.idle += 1;
+    assert.equal(w.shouldRelease(), true);
+    await tick();
+  }
+  d.inhibitors!['/i/2'] = ['/usr/bin/totem', 8];
+  let opened = false;
+  for (let i = 0; i < 12 && !opened; i++) {
+    s.now += 1000;
+    s.idle += 1;
+    opened = !w.shouldRelease();
+    await tick();
+  }
+  assert.ok(opened, 'a film started without input: the lights follow it again');
 });
 
 test('another application inhibiting idle (a video playing) keeps the capture open; when it stops, the release follows', async () => {

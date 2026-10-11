@@ -17,6 +17,8 @@ import {
   FOLLOW_VIDEO_CAPTURE_MS,
   FOLLOW_VIDEO_DEFAULT_BRIGHTNESS,
   FOLLOW_VIDEO_DEFAULT_SPEED,
+  FOLLOW_VIDEO_GAMMA_ENV,
+  FOLLOW_VIDEO_LED_GAMMA,
   FOLLOW_VIDEO_PAUSED_CAPTURE_MS,
   FOLLOW_VIDEO_SEND_MS,
   FollowVideoEngine,
@@ -24,6 +26,7 @@ import {
   followVideoBrightness,
   followVideoCadence,
   followVideoGain,
+  followVideoGammaFromEnv,
   frameLedColors,
   ledLayout,
   mapFrameToLeds,
@@ -103,7 +106,7 @@ async function engineRig(options: { capture?: FakeCaptureHost | null; speed?: nu
   await ene.device.setEffect(followVideoSet);
   const timers = new ManualTimers();
   const capture = options.capture === undefined ? new FakeCaptureHost() : options.capture;
-  const engine = new FollowVideoEngine({ log: silentLog, capture: capture ?? undefined, target: () => ene.device, timers, speed: options.speed });
+  const engine = new FollowVideoEngine({ log: silentLog, capture: capture ?? undefined, target: () => ene.device, timers, speed: options.speed, gamma: 1 });
   return { ene, timers, capture, engine };
 }
 
@@ -655,6 +658,23 @@ test('brightness levels: 1 Bright = x 1/3, 2 Brighter = x 2/3, 3 Brightest = the
   const engine = new FollowVideoEngine({ log: silentLog, target: () => null });
   assert.deepEqual([engine.brightness, engine.gain], [3, 1], 'default: full');
   assert.equal(new FollowVideoEngine({ log: silentLog, target: () => null, brightness: 1 }).gain, 1 / 3);
+});
+
+test('colour correction (deviation 19): gamma 2.2 by default, EVNIA_FOLLOW_VIDEO_GAMMA from 1 (the vendor\'s bytes) to 3 overrides it; the uploads carry it', async () => {
+  assert.equal(FOLLOW_VIDEO_LED_GAMMA, 2.2);
+  assert.equal(followVideoGammaFromEnv({}), 2.2);
+  assert.equal(followVideoGammaFromEnv({ [FOLLOW_VIDEO_GAMMA_ENV]: ' 1 ' }), 1);
+  assert.equal(followVideoGammaFromEnv({ [FOLLOW_VIDEO_GAMMA_ENV]: '1.8' }), 1.8);
+  for (const bad of ['', 'abc', '0.5', '4', 'Infinity']) assert.equal(followVideoGammaFromEnv({ [FOLLOW_VIDEO_GAMMA_ENV]: bad }), 2.2, `"${bad}"`);
+  const ene = await openRig();
+  await ene.device.setEffect(followVideoSet);
+  const capture = new FakeCaptureHost();
+  const engine = new FollowVideoEngine({ log: silentLog, capture, target: () => ene.device, timers: new ManualTimers(), gamma: 2.2 });
+  engine.setWanted(true);
+  await flush();
+  capture.frame(rgbaFrame(() => [230, 150, 80], 1));
+  await flush();
+  assert.deepEqual([...ene.mock.state().frame.subarray(0, 3)], [203, 79, 20]);
 });
 
 test('brightness on the real driver: the mapped LED colours x level/3, rounded to the nearest integer; the mirror holds the dimmed colours; six writes as before', async () => {

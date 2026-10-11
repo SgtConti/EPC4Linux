@@ -14,6 +14,17 @@
 // before the timeout matters: the session manager re-arms its idle alarm when the inhibitor goes, and an
 // alarm whose time has passed only fires after the next input.
 //
+// Closing the capture resets the X server's idle counter itself (seen on Cinnamon X11: 285 s → 0 the moment
+// the stream ends), so after a release a short idle time is no sign of input. The release holds while the idle
+// time keeps up with the time since the release (less DESKTOP_IDLE_RESET_SLACK_S); input after the close makes
+// it fall behind, and only that opens the capture again. Taking the drop for input reopened the capture a
+// second later, every 285 s, and the display never slept. The desktop's own timeout then counts from the close,
+// so on X11 a release at timeout less the margin blanked the display only after about twice the timeout (285 s
+// + 300 s; 2026-10-10, user away 5 min and the display stayed on). On X11 the release therefore comes at
+// DESKTOP_IDLE_MIN_S of idle time, and the display blanks about that much after the desktop's timeout. On
+// Wayland the release stays at timeout less the margin: the reset is an X server's, and there an early release
+// could bring the screen-share dialog back after every short pause.
+//
 // Desktop timeout (the shortest of the keys that apply; 0 = never):
 //   Cinnamon  org.cinnamon.desktop.session idle-delay (s), org.cinnamon.settings-daemon.plugins.power
 //             sleep-display-ac / sleep-display-battery (s)
@@ -33,7 +44,7 @@ import { parseGVariant } from './gvariant.ts';
 
 /** How long before the desktop's timeout the capture is closed. */
 export const DESKTOP_IDLE_MARGIN_S = 15;
-/** Never earlier than this much idle time, whatever the desktop says. */
+/** Never earlier than this much idle time, whatever the desktop says; on X11 the release comes at this. */
 export const DESKTOP_IDLE_MIN_S = 30;
 /** The timeout assumed where the desktop's is unknown (KDE, Xfce, …): the common 5 min screen-off default. */
 export const DESKTOP_IDLE_FALLBACK_S = 300;
@@ -42,6 +53,8 @@ export const DESKTOP_IDLE_STRETCH_S = 20;
 /** The inhibitor list is read from this long before the release and every DESKTOP_IDLE_RECHECK_MS after that. */
 export const DESKTOP_IDLE_LOOKAHEAD_S = 20;
 export const DESKTOP_IDLE_RECHECK_MS = 10_000;
+/** After a release: input counts once the idle time falls this far behind the time since the release. */
+export const DESKTOP_IDLE_RESET_SLACK_S = 5;
 /** org.gnome.SessionManager inhibit flag: "Inhibit the session being marked as idle". */
 export const INHIBIT_IDLE = 8;
 
@@ -98,10 +111,15 @@ export class DesktopIdleWatch {
   #others: boolean | null = null;
   #nextInhibitorRead = 0;
   #inflight = false;
+  /** now() of the release that holds, null while the capture may be open. */
+  #releasedAt: number | null = null;
+  /** The close resets the idle count the desktop's timeout runs on (X11): release early. */
+  readonly #early: boolean;
 
   constructor(o: DesktopIdleOptions) {
     this.#o = o;
     this.#now = o.now ?? Date.now;
+    this.#early = o.env.XDG_SESSION_TYPE === 'x11';
     void this.#readTimeout();
   }
 
@@ -119,6 +137,16 @@ export class DesktopIdleWatch {
     } catch {
       // no idle source yet
     }
+    if (this.#releasedAt !== null) {
+      // The close reset the idle counter: only idle time shorter than the time since then is input.
+      const since = (this.#now() - this.#releasedAt) / 1000;
+      if (idle >= since - DESKTOP_IDLE_RESET_SLACK_S) {
+        this.#readInhibitors();
+        if (this.#others !== true) return true;
+      }
+      this.#releasedAt = null;
+      if (idle >= DESKTOP_IDLE_STRETCH_S) return false; // another application inhibits now: open, same stretch
+    }
     if (idle < DESKTOP_IDLE_STRETCH_S) {
       this.#stretch = false;
       this.#others = null;
@@ -131,10 +159,12 @@ export class DesktopIdleWatch {
     }
     const timeout = this.#timeout;
     if (timeout === null || timeout === undefined) return false;
-    const at = Math.max(DESKTOP_IDLE_MIN_S, timeout - DESKTOP_IDLE_MARGIN_S);
+    const at = this.#early ? DESKTOP_IDLE_MIN_S : Math.max(DESKTOP_IDLE_MIN_S, timeout - DESKTOP_IDLE_MARGIN_S);
     if (idle < at - DESKTOP_IDLE_LOOKAHEAD_S) return false;
     this.#readInhibitors();
-    return idle >= at && this.#others !== true;
+    if (idle < at || this.#others === true) return false;
+    this.#releasedAt = this.#now();
+    return true;
   }
 
   async #readTimeout(): Promise<void> {

@@ -92,6 +92,12 @@ export const DYNAMIC_LIGHTING_UNAVAILABLE = -1;
 
 /** How long a lost ENE may take to come back before the display is told it is gone (01 §9 USBChange window). */
 export const ENE_LOST_GRACE_MS = 2000;
+/**
+ * An ENE that comes back after being away (monitor standby) gets its effect again this long after the return
+ * (deviation 20): the ParameterSet sent at the return can come while the monitor is still starting up, and then the
+ * LEDs ignore the frames until the effect is sent again (2026-10-10: LEDs stuck after a wake, the hub following).
+ */
+export const ENE_SETTLE_REAPPLY_MS: readonly number[] = [3000, 10_000];
 
 /**
  * How long a FollowVideo capture session is kept (uploads paused) after the ENE went away, so that a monitor
@@ -140,10 +146,14 @@ export interface AmbiglowServiceOptions {
   lanSync?: LanSyncSettings;
   /** The LAN colour sync transport (tests); default an HTTP POST (lan-sync.ts httpPost). */
   lanPost?: LanPost;
+  /** The colour correction of the Follow Video uploads (follow-video.ts FOLLOW_VIDEO_LED_GAMMA; 1 = the vendor's bytes). */
+  followVideoGamma?: number;
   idleIntervalMs?: number;
   lostGraceMs?: number;
   /** ENE_AWAY_CAPTURE_MS. */
   awayCaptureMs?: number;
+  /** ENE_SETTLE_REAPPLY_MS. */
+  settleReapplyMs?: readonly number[];
   /** DDC_WAKE_RETRY_MS. */
   ddcWakeRetryMs?: readonly number[];
   /** STOP_RESTORE_TIMEOUT_MS. */
@@ -231,6 +241,8 @@ export class AmbiglowServiceImpl implements AmbiglowService {
   #ene: EneDevice | null = null;
   #eneOwner: string | null = null;
   #lostTimer: unknown = null;
+  /** ENE_SETTLE_REAPPLY_MS timers of the last return of an away ENE. */
+  #settleTimers: unknown[] = [];
   /** Incremented on every ENE loss; a reconcile that started before the last loss says nothing about it. */
   #lostEpoch = 0;
   /** The ENE went away and may come back (keeps a FollowVideo capture session alive, paused). */
@@ -262,6 +274,7 @@ export class AmbiglowServiceImpl implements AmbiglowService {
       target,
       timers: this.#timers,
       frameSink: (frame) => this.#lan.push(frame),
+      gamma: options.followVideoGamma,
     });
     this.#frameBurstSetting = options.eneFrameBurst === true;
     this.#frameBurstForced = options.eneFrameBurstForced ?? eneFrameBurstFromEnv();
@@ -315,6 +328,7 @@ export class AmbiglowServiceImpl implements AmbiglowService {
     // The hub is told the stream ended (it may restore its lights); at most a second's wait.
     await this.#lan.close();
     this.#cancelLostTimer();
+    this.#cancelSettle();
     this.#clearAway();
     this.#cancelDdcRetry();
     await this.#lifecycle.run(() => this.#closeEne());
@@ -711,7 +725,10 @@ export class AmbiglowServiceImpl implements AmbiglowService {
       }
     }
     // An ENE that is back ends the "away" state; one that is still gone keeps it until ENE_AWAY_CAPTURE_MS.
-    if (model !== '' && epoch === this.#lostEpoch) this.#clearAway();
+    if (model !== '' && epoch === this.#lostEpoch) {
+      if (this.#eneAway) this.#settleAfterReturn(display);
+      this.#clearAway();
+    }
     try {
       await display.exclusive(async () => {
         const d = profileOf(display);
@@ -738,6 +755,7 @@ export class AmbiglowServiceImpl implements AmbiglowService {
   async #detach(next: DisplayDevice | null = null): Promise<void> {
     this.#stopEngines();
     this.#cancelLostTimer();
+    this.#cancelSettle();
     this.#clearAway();
     this.#cancelDdcRetry();
     this.#display = null;
@@ -874,6 +892,34 @@ export class AmbiglowServiceImpl implements AmbiglowService {
       }, grace);
     }
     this.#checkSoftEffect();
+  }
+
+  /** Send the effect of an ENE that came back again after ENE_SETTLE_REAPPLY_MS (see there), logging what it ran. */
+  #settleAfterReturn(display: DisplayDevice): void {
+    this.#cancelSettle();
+    const ene = this.#eneFor(display);
+    if (!ene) return;
+    this.#settleTimers = (this.#opts.settleReapplyMs ?? ENE_SETTLE_REAPPLY_MS).map((ms) =>
+      this.#timers.setTimeout(() => {
+        if (!this.#started || this.#eneFor(display) !== ene) return;
+        display
+          .exclusive(async () => {
+            const data = profileOf(display);
+            if (this.#eneFor(display) !== ene || !data?.ENEEffectEnable) return;
+            const applied = ene.applied?.mode;
+            const modes = await ene.readGroupModes();
+            const reset = applied !== undefined && modes.some((m) => m !== applied);
+            this.#log.info(`ENE ${ms} ms after its return: group modes ${modes.join(', ')}${reset ? ` instead of ${applied}` : ''}; effect sent again`);
+            await this.#push(display, data);
+          })
+          .catch((e: unknown) => this.#log.warn(`ENE effect re-send failed: ${message(e)}`));
+      }, ms),
+    );
+  }
+
+  #cancelSettle(): void {
+    for (const t of this.#settleTimers) this.#timers.clearTimeout(t);
+    this.#settleTimers = [];
   }
 
   #cancelLostTimer(): void {

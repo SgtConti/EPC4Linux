@@ -206,6 +206,13 @@ With the Ambiglow controller connected over USB, the Ambiglow page also shows a 
 - The level is saved in the current profile, like the brightness of the other effects. Profiles copied from Windows start at Brightest, because the Windows app saves Brightest.
 - Without the USB Ambiglow controller there is no such slider for Follow video; the monitor itself decides.
 
+#### Follow video colours
+
+With the USB Ambiglow controller, Follow video converts the screen colours for the LEDs before it sends them (the Windows app sends them unchanged). LEDs show raw screen values washed out towards white, so a warm orange picture used to light them a pale peach; now they show the orange you see on the screen. Mid-tones and dark scenes are a little dimmer than before.
+
+- To compare with the old look, start the app with `EVNIA_FOLLOW_VIDEO_GAMMA=1` in its environment (`EVNIA_FOLLOW_VIDEO_GAMMA=1 evnia-precision-center`). Values between 1 and 3 are accepted: higher gives deeper, darker colours. The default is 2.2.
+- The preview on the page and the colours sent to Hubitat / Home Assistant are not converted.
+
 #### Fast LED upload (experimental)
 
 Below the Speed slider, Follow video has a checkbox **Fast LED upload (experimental)**, off by default (the Windows app has none). The Ambiglow controller normally takes each LED update as six small USB writes of about 65 ms in total, as in the Windows app, which limits Speed High to about 15 updates per second. With the checkbox ticked, each update is **one USB transfer** of about 11 ms, which lets High reach its 25 updates per second.

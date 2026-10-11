@@ -147,6 +147,26 @@ export function dimFrameWrites(writes: readonly FrameWrite[], gain: number): Fra
   return writes.map((w) => ({ reg: w.reg, data: w.data.map((c) => Math.round(c * f)) }));
 }
 
+const gammaTables = new Map<number, Uint8Array>();
+
+/**
+ * Screen values → LED drive levels (the port's FollowVideo colour correction, impl-ambiglow deviation 19): every
+ * colour byte c becomes round(255 · (c / 255)^gamma). The grid holds gamma-encoded screen values, but the LEDs' PWM
+ * is linear in light, so raw values lift the weaker channels and wash colours out towards white (an orange screen lit
+ * the LEDs a pale peach). A gamma of 1 or less (or not a number) returns the writes unchanged (the same objects).
+ */
+export function gammaFrameWrites(writes: readonly FrameWrite[], gamma: number): FrameWrite[] {
+  if (!(gamma > 1)) return [...writes];
+  let table = gammaTables.get(gamma);
+  if (!table) {
+    table = new Uint8Array(256);
+    for (let c = 0; c < 256; c++) table[c] = Math.round(255 * (c / 255) ** gamma);
+    gammaTables.set(gamma, table);
+  }
+  const t = table;
+  return writes.map((w) => ({ reg: w.reg, data: w.data.map((c) => t[c]) }));
+}
+
 /**
  * Sample a grid into the plan's frame-buffer writes. The grid must be exactly 50×40 (the vendor's
  * fixed CalcRGBs(50, 40) size; it rejects smaller grids and ignores anything beyond 50×40).

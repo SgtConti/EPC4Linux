@@ -19,7 +19,7 @@ import { Mutex } from '../core/events.ts';
 import { UsbError } from '../usb/errors.ts';
 import { isSameEnumeration } from '../usb/ids.ts';
 import { findModelLayout, type EneModelLayout } from './ene-layout.ts';
-import { burstFrameWrite, dimFrameWrites, planFrame, renderFrame, type EneLedCounts, type FramePlan, type FrameWrite, type VideoGrid } from './ene-frame.ts';
+import { burstFrameWrite, dimFrameWrites, gammaFrameWrites, planFrame, renderFrame, type EneLedCounts, type FramePlan, type FrameWrite, type VideoGrid } from './ene-frame.ts';
 import {
   audioLevelByte,
   audioLevelWrites,
@@ -36,9 +36,12 @@ import {
   ENE_MODEL_NAME_MAX,
   ENE_PRODUCT_ID,
   ENE_VENDOR_ID,
+  EneField,
   EneMode,
   EneReg,
   EneRegion,
+  groupReg,
+  type EneGroup,
 } from './ene-registers.ts';
 import { EneError, EneTransport, type EneTransportOptions } from './ene-transport.ts';
 
@@ -88,6 +91,13 @@ export interface VideoFrameOptions {
    * ledColors() mirror holds the dimmed colours, i.e. what the LEDs were told to show.
    */
   gain?: number;
+  /**
+   * Colour correction (impl-ambiglow deviation 19): screen values → LED drive levels, c ↦ 255 · (c / 255)^gamma
+   * (ene-frame.ts gammaFrameWrites), before the gain, so the gain stays a factor of the light. Default 1: the grid's
+   * bytes as they are (the vendor's). The ledColors() mirror is not corrected: the preview shows the colours on a
+   * screen, which applies the same curve itself.
+   */
+  gamma?: number;
 }
 
 /** Environment switch for EneDeviceOptions.frameBurst ("1" = on). */
@@ -380,6 +390,16 @@ export class EneDevice {
     });
   }
 
+  /** The mode register of each LED group in use (diagnostics: what the firmware runs now, whoever set it). */
+  async readGroupModes(): Promise<number[]> {
+    return this.#op(async () => {
+      const modes: number[] = [];
+      const groups = Math.min(this.identity.ledGroups, ENE_MAX_LED_GROUPS);
+      for (let g = 1; g <= groups; g++) modes.push(await this.#t.readReg(groupReg(g as EneGroup, EneField.MODE)));
+      return modes;
+    });
+  }
+
   /**
    * Stream one follow-video frame (50×40 RGB/RGBA grid) into the frame buffer: six paced writes on
    * the 34M2C8600. Frames only take effect in mode 14 (UserDefine, or 11); in any other mode —
@@ -391,17 +411,22 @@ export class EneDevice {
    * writes. The switch is read when the frame's turn comes. A failed burst rejects like a failed segment write (the
    * next frame is the retry); see #writeBurst.
    *
-   * `options.gain` dims the mapped colours on the host (VideoFrameOptions; the FollowVideo Brightness slider).
+   * `options.gamma` turns the screen values into LED drive levels and `options.gain` dims them on the host
+   * (VideoFrameOptions; the FollowVideo colour correction and Brightness slider).
    */
   async writeVideoFrame(grid: VideoGrid, options: VideoFrameOptions = {}): Promise<boolean> {
-    const writes = dimFrameWrites(renderFrame(this.#plan, grid), options.gain ?? 1);
+    const mapped = renderFrame(this.#plan, grid);
+    const gain = options.gain ?? 1;
+    const gamma = options.gamma ?? 1;
+    const shown = dimFrameWrites(mapped, gain);
+    const writes = gamma > 1 ? dimFrameWrites(gammaFrameWrites(mapped, gamma), gain) : shown;
     return this.#op(async () => {
       const mode = this.#applied?.mode;
       if (mode !== EneMode.UserDefine && mode !== EneMode.FollowVideo) return false;
       const burst = this.frameBurst ? this.#burstOf(writes) : null;
       if (burst) await this.#writeBurst(burst);
       else await this.#write(writes.map((w) => ({ ...w, paced: true })));
-      for (const w of writes) {
+      for (const w of shown) {
         const offset = w.reg - EneReg.FRAME_BUFFER;
         const room = this.#mirror.length - offset;
         if (room > 0) this.#mirror.set(w.data.subarray(0, room), offset);
