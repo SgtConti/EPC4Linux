@@ -140,7 +140,7 @@ docker run --rm --network none -v "$REPO_DIR:/repo" -v "$INSTALLER_DIR:/installe
 # 4. Import and patch the vendor UI, build the app, package it (no network)
 docker run --rm --network none -v "$REPO_DIR:/repo" -w /repo/port evnia-port-dev \
   bash -c 'npm run import-ui && npm run build && npm run dist:deb'
-# -> port/dist/evnia-precision-center_1.13.0-linux.4_amd64.deb
+# -> port/dist/evnia-precision-center_1.13.0-linux.5_amd64.deb
 ```
 
 An `evnia-port-dev` image built from an older checkout may lack tools that the current `Dockerfile.dev` installs, for example 7-Zip. Run step 1 again after every pull that changes `port/docker/Dockerfile.dev`. Docker reuses what did not change.
@@ -193,7 +193,7 @@ Expected results:
 On the Debian or Ubuntu machine the monitor is connected to:
 
 ```sh
-sudo apt install ./port/dist/evnia-precision-center_1.13.0-linux.4_amd64.deb
+sudo apt install ./port/dist/evnia-precision-center_1.13.0-linux.5_amd64.deb
 ```
 
 Keep the `./`: without it, apt looks for a package of that name in the archive. apt also installs the libraries the package depends on.

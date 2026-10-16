@@ -28,7 +28,7 @@ This repository holds an unofficial, **offline, monitor-only Linux port** of the
 Quick start:
 
 1. Build the package as described in [BUILDING.md](BUILDING.md). You need Docker and the vendor's Windows installer `evnia Setup 1.13.0.exe`, which you download yourself from Philips.
-2. Install it with `sudo apt install ./port/dist/evnia-precision-center_1.13.0-linux.4_amd64.deb`.
+2. Install it with `sudo apt install ./port/dist/evnia-precision-center_1.13.0-linux.5_amd64.deb`.
 3. Read the [user guide](docs/port/USER-GUIDE.md).
 
 ## Legal notice

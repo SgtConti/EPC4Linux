@@ -248,6 +248,12 @@ export class AmbiglowServiceImpl implements AmbiglowService {
   /** The ENE went away and may come back (keeps a FollowVideo capture session alive, paused). */
   #eneAway = false;
   #awayTimer: unknown = null;
+  /**
+   * The ENE went away and has not come back yet: its return gets the ENE_SETTLE_REAPPLY_MS re-sends. Unlike
+   * #eneAway it outlasts ENE_AWAY_CAPTURE_MS, as a monitor standby often does (2026-10-14: LEDs dark after
+   * standbys of 14 to 18 minutes, no re-send logged).
+   */
+  #eneReturnPending = false;
   #ddcSuspension: DdcSuspension | null = null;
   #ddcRetryTimer: unknown = null;
   #lastBreathingSync: boolean | null = null;
@@ -726,7 +732,7 @@ export class AmbiglowServiceImpl implements AmbiglowService {
     }
     // An ENE that is back ends the "away" state; one that is still gone keeps it until ENE_AWAY_CAPTURE_MS.
     if (model !== '' && epoch === this.#lostEpoch) {
-      if (this.#eneAway) this.#settleAfterReturn(display);
+      if (this.#eneReturnPending) this.#settleAfterReturn(display);
       this.#clearAway();
     }
     try {
@@ -930,6 +936,7 @@ export class AmbiglowServiceImpl implements AmbiglowService {
   /** The ENE went away: a FollowVideo capture session is kept (paused) for ENE_AWAY_CAPTURE_MS. */
   #markAway(): void {
     this.#eneAway = true;
+    this.#eneReturnPending = true;
     if (this.#awayTimer !== null) this.#timers.clearTimeout(this.#awayTimer);
     this.#awayTimer = this.#timers.setTimeout(() => {
       this.#awayTimer = null;
@@ -940,6 +947,7 @@ export class AmbiglowServiceImpl implements AmbiglowService {
 
   #clearAway(): void {
     this.#eneAway = false;
+    this.#eneReturnPending = false;
     if (this.#awayTimer !== null) this.#timers.clearTimeout(this.#awayTimer);
     this.#awayTimer = null;
   }

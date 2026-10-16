@@ -58,7 +58,7 @@ The app reaches the monitor in two ways. It prefers the first one.
 Download or build the package (see [Building from source](#building-from-source)), then install it with `apt`, which also installs the libraries it needs:
 
 ```sh
-sudo apt install ./evnia-precision-center_1.13.0-linux.4_amd64.deb
+sudo apt install ./evnia-precision-center_1.13.0-linux.5_amd64.deb
 ```
 
 - Keep the `./`. Without it, apt looks for a package of that name in the archive.
@@ -582,7 +582,7 @@ docker run --rm --network none -v "$PWD:/repo" -v "$HOME/Downloads:/installer:ro
   node scripts/extract-installer.mjs --installer "/installer/evnia Setup 1.13.0.exe"
 docker run --rm --network none -v "$PWD:/repo" -w /repo/port evnia-port-dev \
   bash -c 'npm run import-ui && npm run build && npm run dist:deb'
-# → port/dist/evnia-precision-center_1.13.0-linux.4_amd64.deb
+# → port/dist/evnia-precision-center_1.13.0-linux.5_amd64.deb
 ```
 
 These commands are for Linux and WSL2. Git Bash on Windows needs `export MSYS_NO_PATHCONV=1` and Windows paths for the volumes: `-v "$(pwd -W):/repo"` and `-v "$(cygpath -w "$HOME/Downloads"):/installer:ro"`. An installed 1.13.0 folder copied from Windows works instead of the installer. [BUILDING.md](../../BUILDING.md) explains both.

@@ -556,6 +556,52 @@ test('an ENE back from standby gets its effect again after ENE_SETTLE_REAPPLY_MS
   }
 });
 
+test('an ENE back from a standby longer than ENE_AWAY_CAPTURE_MS still gets its effect again after ENE_SETTLE_REAPPLY_MS (2026-10-14)', async () => {
+  const { log, lines } = captureLogger();
+  const r = await rig({ log, service: { awayCaptureMs: 60_000 } });
+  try {
+    const usb = r.t.bundle.usb;
+    usb.detach(r.eneInfo!);
+    r.capture.frame(rgbaFrame(() => [1, 1, 1], 1));
+    r.timers.advance(100);
+    await flush();
+    r.timers.advance(ENE_LOST_GRACE_MS);
+    await r.service.settled();
+    await flush();
+    assert.equal(r.display.eneModel, '', 'away: DDC fallback');
+    // The standby outlasts the away window: the kept capture session ends.
+    r.timers.advance(60_000);
+    await flush();
+    assert.equal(r.service.followVideo.state, 'stopped');
+    const info = usb.attach(r.mock!.spec({ busNumber: 3, portNumbers: [2, 1], deviceAddress: 32 }));
+    r.display.setEneDevice(info);
+    await r.service.attach(r.display);
+    await flush();
+    assert.equal(r.display.eneModel, '34M2C8600');
+    // The monitor finishes starting up and puts its own effect on group 1.
+    r.mock!.registers[0xe021] = EneMode.StaticMode;
+    let m = r.eneMark();
+    r.timers.advance(3000);
+    await flush(10);
+    assert.deepEqual(writesOnly(r.eneSince(m)).filter((x) => !x.startsWith('40 80 0000 E3')), USER_FOLLOW_VIDEO, 'the effect again');
+    assert.equal(r.mock!.registers[0xe021], EneMode.UserDefine);
+    assert.ok(lines.some((l) => l.text === 'ENE 3000 ms after its return: group modes 1, 14, 14 instead of 14; effect sent again'), 'the reset is logged');
+    m = r.eneMark();
+    r.timers.advance(7000);
+    await flush(10);
+    assert.deepEqual(writesOnly(r.eneSince(m)).filter((x) => !x.startsWith('40 80 0000 E3')), USER_FOLLOW_VIDEO, 'and once more');
+    // A later attach without a loss in between (a profile apply) is no return.
+    await r.service.attach(r.display);
+    await flush();
+    m = r.eneMark();
+    r.timers.advance(30_000);
+    await flush(10);
+    assert.deepEqual(writesOnly(r.eneSince(m)).filter((x) => !x.startsWith('40 80 0000 E3')), [], 'nothing after that');
+  } finally {
+    await r.cleanup();
+  }
+});
+
 test('a load identifies the ENE once: the first attach keeps the device checkEne opened for that display', async () => {
   // Found by the e2e walkthrough: the first attach() treated the display as a new one and closed the ENE that
   // the load's checkEne() (method_14) had just opened for it, so #syncDisplay opened and identified it again.
