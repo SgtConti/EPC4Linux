@@ -57,6 +57,23 @@ export const INVOCATION_FAILED = 'Exception has been thrown by the target of an 
  */
 export const CHECK_ENE_TIMEOUT_MS = 5000;
 
+/**
+ * The NotifyUIDisplayEffectChange payload. The vendor's Tag is a ValueTuple, serialized as `Item1..3`
+ * (CDevice_PHLDisplay.cs:786-792, 851-857), which the renderer cannot read (Monitor-D4qz4RBn.js:85-91 tests
+ * `a.ENEEnable`). The port sends the named keys the renderer reads first, then the vendor's tuple keys with
+ * the same values (12 §7 port plan item 7; 20-backend-host-tail §2.4 row 3, §2.5).
+ */
+export function effectNotification(data: T_PHLDisplay_Profile): Record<string, unknown> {
+  return {
+    ENEEnable: data.ENEEffectEnable,
+    EffectInfo: data.EffectInfo,
+    ModuleAmbiglow: data.ModuleAmbiglow,
+    Item1: data.ENEEffectEnable,
+    Item2: data.EffectInfo,
+    Item3: data.ModuleAmbiglow,
+  };
+}
+
 /** Enum values the driver compares against (catalog names, never literals from memory). */
 const HDR_OFF = enumValue('SmartImageHDR_E', 'HDROff');
 const SDR_OFF = enumValue('SmartImage_E2', 'SmartImage_Off');
@@ -317,21 +334,9 @@ export class PhlDisplay implements DisplayDevice, ProfileParticipant {
     });
   }
 
-  /**
-   * NotifyUIDisplayEffectChange. The vendor's Tag is a ValueTuple, serialized as `Item1..3`
-   * (CDevice_PHLDisplay.cs:786-792, 851-857), which the renderer cannot read (Monitor-D4qz4RBn.js:85-91 tests
-   * `a.ENEEnable`). The port sends the named keys the renderer reads first, then the vendor's tuple keys with
-   * the same values (12 §7 port plan item 7; 20-backend-host-tail §2.4 row 3, §2.5).
-   */
+  /** NotifyUIDisplayEffectChange (effectNotification). */
   #notifyEffect(data: T_PHLDisplay_Profile): void {
-    this.#notifier.notify(NOTIFY_EFFECT, {
-      ENEEnable: data.ENEEffectEnable,
-      EffectInfo: data.EffectInfo,
-      ModuleAmbiglow: data.ModuleAmbiglow,
-      Item1: data.ENEEffectEnable,
-      Item2: data.EffectInfo,
-      Item3: data.ModuleAmbiglow,
-    });
+    this.#notifier.notify(NOTIFY_EFFECT, effectNotification(data));
   }
 
   /**

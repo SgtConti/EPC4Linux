@@ -245,6 +245,31 @@ Below *Fast LED upload*, Follow video has a row **Send colours to Hubitat / Home
 - The row appears only with the USB Ambiglow controller and with Follow video selected.
 - If the hub does not answer, the backend log says `LAN colour sync: … not reachable` once, and the app retries every 2 seconds.
 
+#### Switching the effect from the command line (mpv)
+
+The Ambiglow effect can be switched from a script, for example so that Follow video runs only while a video player is open (the Windows app has no such option). It needs the USB Ambiglow controller.
+
+```sh
+evnia-precision-center --ambiglow=FollowVideo   # or FollowAudio, ColorShift, ColorWave, Breathing, StarryNight, Static
+evnia-precision-center --ambiglow=off           # Ambiglow off (on: back on, same effect)
+evnia-precision-center --ambiglow=restore       # the effect from before the first --ambiglow
+```
+
+- If the app is running, the command goes to it and returns at once. **No window opens.** If the app is not running, it starts hidden in the tray and applies the command once the monitor is found (up to 30 seconds).
+- `restore` puts back the effect and the on/off state from before the first `--ambiglow` since the app started. If you changed the effect yourself in between (on the Ambiglow page, or with a profile), your choice is kept.
+- The Ambiglow page shows the change at once.
+- The command prints nothing. Its outcome is in the main log, `~/.config/evnia/logs/` (look for `--ambiglow`).
+- On Wayland, the first Follow video after each app start shows the screen-sharing dialog. Later switches in the same run usually reuse that choice without a dialog.
+
+**mpv:** the package ships an mpv script that switches to Follow video when a video starts and runs `restore` when mpv quits. Audio-only files and cover art are left alone.
+
+```sh
+mkdir -p ~/.config/mpv/scripts
+cp /usr/share/doc/evnia-precision-center/examples/mpv-ambiglow.lua ~/.config/mpv/scripts/
+```
+
+To choose another effect, put `effect=FollowAudio` (or any other `--ambiglow` value) in `~/.config/mpv/script-opts/mpv-ambiglow.conf`. From a source checkout, the script is `port/packaging/deb/examples/mpv-ambiglow.lua`.
+
 ### Ambiglow "Follow audio"
 
 Follow audio makes the LEDs react to what your computer plays. It records the **monitor of the default output device** (the playback signal), never a microphone.

@@ -1163,3 +1163,43 @@ test('a burst the ENE refuses falls back to the six writes in the driver (logged
     await r.cleanup();
   }
 });
+
+test('setRemoteEffect (--ambiglow, main/ambiglow-remote.ts): Effect_Change/Effect_Enable as the page does them, the renderer told once per change', async () => {
+  const r = await rig();
+  try {
+    assert.deepEqual(await r.service.remoteEffect(), { enabled: true, effect: 1 });
+    assert.deepEqual(await r.service.setRemoteEffect({ effect: 7 }), { enabled: true, effect: 7 });
+    assert.equal(r.service.followVideo.state, 'stopped');
+    assert.equal(r.capture.videoStops, 1);
+    const notes = r.notifier.named(NOTIFY_EFFECT);
+    assert.equal(notes.length, 1);
+    assert.equal((notes[0].tag as { ENEEnable: boolean }).ENEEnable, true);
+    assert.equal((notes[0].tag as { EffectInfo: DisplayEffectInfo }).EffectInfo.CurrEffect.Value, 7);
+    assert.match(r.themes.contents.get('100000|PHL 34M2C8600')!, /"CurrEffect":\{"Name":"Static","Text":"恒亮模式","Value":7\}/);
+
+    assert.deepEqual(await r.service.setRemoteEffect({ enabled: false }), { enabled: false, effect: 7 });
+    assert.deepEqual(await r.service.setRemoteEffect({ effect: 1, enabled: true }), { enabled: true, effect: 1 });
+    assert.equal(r.service.followVideo.state, 'running');
+    assert.deepEqual(r.capture.videoStarts, [NORMAL_MS, NORMAL_MS]);
+    assert.equal(r.notifier.named(NOTIFY_EFFECT).length, 3);
+    // The state already set: nothing sent, nobody told.
+    const m = r.eneMark();
+    assert.deepEqual(await r.service.setRemoteEffect({ effect: 1, enabled: true }), { enabled: true, effect: 1 });
+    assert.deepEqual(writesOnly(r.eneSince(m)), []);
+    assert.equal(r.notifier.named(NOTIFY_EFFECT).length, 3);
+  } finally {
+    await r.cleanup();
+  }
+});
+
+test('remoteEffect / setRemoteEffect without an ENE (DDC-only): null, and a set throws without touching the monitor', async () => {
+  const r = await rig({ ene: false });
+  try {
+    assert.equal(await r.service.remoteEffect(), null);
+    const m = r.ddcMark();
+    await assert.rejects(r.service.setRemoteEffect({ effect: 1 }), /no display with an Ambiglow controller/);
+    assert.deepEqual(r.ddcSince(m), []);
+  } finally {
+    await r.cleanup();
+  }
+});

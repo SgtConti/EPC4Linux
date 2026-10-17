@@ -16,6 +16,7 @@ import { createLogger, type LogLevel } from '../backend/core/log.ts';
 import { defaultAppTempDir } from '../backend/theme/paths.ts';
 import type { Logger } from '../backend/types.ts';
 import { LibusbBackend } from '../backend/usb/libusb-backend.ts';
+import { AmbiglowRemote, parseAmbiglowCommand, type AmbiglowCommand } from './ambiglow-remote.ts';
 import { applyAutostart, autostartDir } from './autostart.ts';
 import { BackendHost, mockMonitorFromEnv } from './backend-host.ts';
 import { ElectronCaptureHost } from './capture-host.ts';
@@ -61,7 +62,9 @@ class EvniaApp implements IpcHost {
   readonly hubToken = generateHubToken();
   main!: MainWindowController;
   notice!: NoticeWindowController;
-  readonly #openAsHidden = process.argv.includes('--openAsHidden');
+  /** `--ambiglow=…` of this launch (ambiglow-remote.ts): applied once the monitor is loaded; the window starts hidden. */
+  readonly #startCommand = ambiglowCommandOf(process.argv, indexLog);
+  readonly #openAsHidden = process.argv.includes('--openAsHidden') || this.#startCommand !== null;
   readonly #isFirstRun: boolean;
   readonly #tray: TrayController;
   readonly #backend: BackendHost;
@@ -76,6 +79,8 @@ class EvniaApp implements IpcHost {
   readonly #experimental: ExperimentalSettings;
   /** The LAN colour sync (config.json linuxLanSync): Follow Video colours to Hubitat or Home Assistant, the egress exception for it. */
   readonly #lanSync: LanSyncController;
+  /** `--ambiglow=…` of this and later launches (ambiglow-remote.ts). */
+  readonly #ambiglow: AmbiglowRemote;
   #language: string;
   #monitorConfig: MonitorJsonConfig | null = null;
   #appReady = false;
@@ -192,13 +197,22 @@ class EvniaApp implements IpcHost {
       allowPeers: (hosts) => void setAllowedLanPeers(hosts, lanLog),
       log: lanLog,
     });
+    this.#ambiglow = new AmbiglowRemote({
+      start: () => this.#backend.ensureStarted(),
+      effects: () => this.#backend.backend?.services.ambiglow ?? null,
+      log: log.child('ambiglowRemote'),
+    });
     if (mockMonitor) log.info(`EVNIA_MOCK_MONITOR=${mockMonitor}: simulated monitor, no hardware access`);
   }
 
   run(): void {
-    app.on('second-instance', () => {
+    app.on('second-instance', (_e, argv) => {
       this.log.info('On second-instance');
-      this.#showMainWindow();
+      // `evnia-precision-center --ambiglow=…` from a script changes the effect without bringing up the window.
+      const command = parseAmbiglowCommand(argv);
+      if (command === null) this.#showMainWindow();
+      else if (typeof command === 'string') this.log.warn(command);
+      else void this.#ambiglow.run(command);
     });
     app.on('render-process-gone', (_e, wc, details) => this.log.error('Render progress gone', wc.id, details));
     app.on('child-process-gone', (_e, details) => this.log.error('Child progress gone', details));
@@ -208,7 +222,10 @@ class EvniaApp implements IpcHost {
       void this.exitApp();
     });
     app.whenReady().then(
-      () => this.#onReady(),
+      async () => {
+        await this.#onReady();
+        if (this.#startCommand) void this.#ambiglow.run(this.#startCommand);
+      },
       (e: unknown) => this.log.error('App failed to start', e),
     );
   }
@@ -481,6 +498,14 @@ class EvniaApp implements IpcHost {
     if (name === 'USBChange') this.#backend.hotplug('usb');
     else if (name === 'displayChange') this.#backend.hotplug('display');
   }
+}
+
+/** The `--ambiglow=…` command of a command line (ambiglow-remote.ts); a bad value is logged and ignored. */
+function ambiglowCommandOf(argv: readonly string[], log: Logger): AmbiglowCommand | null {
+  const command = parseAmbiglowCommand(argv);
+  if (typeof command !== 'string') return command;
+  log.warn(command);
+  return null;
 }
 
 // ───────────── bootstrap (01 §3.1) ─────────────

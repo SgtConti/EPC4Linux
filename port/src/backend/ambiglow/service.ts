@@ -35,7 +35,7 @@ import { realClock, type DdcClock } from '../ddc/channel.ts';
 import { UsbError } from '../usb/errors.ts';
 import { isSameEnumeration } from '../usb/ids.ts';
 import { LibusbBackend } from '../usb/libusb-backend.ts';
-import { INVOCATION_FAILED } from '../monitor/display.ts';
+import { INVOCATION_FAILED, NOTIFY_EFFECT, effectNotification } from '../monitor/display.ts';
 import { DisplayEffectInfo, rgb, type RGB } from '../monitor/model/effect.ts';
 import { enumItem, memberOf, type EnumItem } from '../monitor/model/enum-items.ts';
 import { asInt32, isJsonObject, member } from '../monitor/model/json-populate.ts';
@@ -200,6 +200,12 @@ function ddcModeOn(data: T_PHLDisplay_Profile): number | null {
   if (!module.EffectEnable || !attr.IsAvailable || attr.Value === null) return null;
   const mode = asInt32(attr.Value);
   return mode === AMBIGLOW_OFF ? null : mode;
+}
+
+/** The display's ENE effect as the command line sees it (remoteEffect, setRemoteEffect): on/off and the EffectType value. */
+export interface AmbiglowRemoteState {
+  enabled: boolean;
+  effect: number;
 }
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -664,6 +670,43 @@ export class AmbiglowServiceImpl implements AmbiglowService {
       this.#checkSoftEffect();
       return succ(data.EffectInfo);
     });
+  }
+
+  // ───────────────────────────── port: command line (src/main/ambiglow-remote.ts) ─────────────────────────────
+
+  /**
+   * The ENE effect of the connected display for `evnia-precision-center --ambiglow=…`: on/off and the effect type,
+   * or null while there is no display with an ENE (none loaded yet, or a DDC-only monitor).
+   */
+  async remoteEffect(): Promise<AmbiglowRemoteState | null> {
+    const display = this.driverFor(DEVICE_TYPE_DISPLAY);
+    if (!display) return null;
+    await display.ready();
+    const data = profileOf(display);
+    const info = data?.ENEEffectEnable && this.#eneModelOf(display) !== '' ? data.EffectInfo : null;
+    return info ? { enabled: info.EffectEnable, effect: info.CurrEffect.Value } : null;
+  }
+
+  /**
+   * Set what `target` names of the display's ENE effect, the way the Ambiglow page does (Effect_Change, then
+   * Effect_Enable: ParameterSet, capture, sync, save), and tell the renderer (NotifyUIDisplayEffectChange), which did
+   * not ask for the change and would otherwise show the old effect. Resolves with the new state; throws without a
+   * display with an ENE or when a step fails.
+   */
+  async setRemoteEffect(target: Partial<AmbiglowRemoteState>): Promise<AmbiglowRemoteState> {
+    const current = await this.remoteEffect();
+    const display = this.driverFor(DEVICE_TYPE_DISPLAY);
+    if (!current || !display) throw new Error('no display with an Ambiglow controller (ENE)');
+    const steps: (() => Promise<JsonResult>)[] = [];
+    if (target.effect !== undefined && target.effect !== current.effect) steps.push(() => this.effectChange(display, target.effect!));
+    if (target.enabled !== undefined && target.enabled !== current.enabled) steps.push(() => this.effectEnable(display, target.enabled!));
+    for (const step of steps) {
+      const r = await step();
+      if (r.err_code !== 0) throw new Error(r.err_msg || 'effect change failed');
+    }
+    const data = profileOf(display);
+    if (steps.length > 0 && data) this.#core.notifier.notify(NOTIFY_EFFECT, effectNotification(data));
+    return (await this.remoteEffect()) ?? { ...current, ...target };
   }
 
   // ───────────────────────────── API: global effect functions ─────────────────────────────

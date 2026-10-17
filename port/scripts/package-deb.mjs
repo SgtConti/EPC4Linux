@@ -16,7 +16,7 @@
 //                and the koffi/usb packages unpacked, dev dependencies pruned; then the executable's
 //                fuses: RunAsNode, NODE_OPTIONS and --inspect off (scripts/lib/fuses.ts)
 // 4. deb tree    /opt/evnia-precision-center, /usr/bin symlink, .desktop, hicolor icons, udev rules,
-//                modules-load.d, man page, README.Debian, copyright, changelog, lintian overrides,
+//                modules-load.d, man page, README.Debian, the mpv example, copyright, changelog, lintian overrides,
 //                DEBIAN/{control,md5sums,postinst,postrm}; modes normalized (the source tree may come
 //                from a Windows bind mount where everything is 0777)
 // 5. shlibs      every shared object the shipped ELF files need is shipped or comes from a package in
@@ -407,6 +407,7 @@ async function debTree(appPath, version, maintainer) {
   await place(join(packagingDir, 'copyright'), join(doc, 'copyright'));
   await placeData(gzip9n(Buffer.from(debianChangelog(version, maintainer))), join(doc, 'changelog.Debian.gz'));
   await placeData(gzip9n(await readFile(join(packagingDir, 'README.Debian'))), join(doc, 'README.Debian.gz'));
+  await place(join(packagingDir, 'examples', 'mpv-ambiglow.lua'), join(doc, 'examples', 'mpv-ambiglow.lua'));
   await placeData(gzip9n(await readFile(join(packagingDir, `${APP_NAME}.1`))), join(root, 'usr', 'share', 'man', 'man1', `${APP_NAME}.1.gz`));
 
   let overrides = await readFile(join(packagingDir, 'lintian-overrides'), 'utf8');

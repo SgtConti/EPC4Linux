@@ -87,6 +87,11 @@ Desktop notes
     The hub side (app/driver, integration) is in the project's hubitat/ and
     home-assistant/ folders. Kept in ~/.config/evnia/config.json as
     "linuxLanSync".
+  * The Ambiglow effect can be switched from scripts with
+    "evnia-precision-center --ambiglow=FollowVideo" (any effect name, on,
+    off, restore); see the man page. examples/mpv-ambiglow.lua in this
+    directory is an mpv script that runs Follow video while mpv plays a
+    video: copy it to ~/.config/mpv/scripts/.
   * Wayland: themes bound to an application do not switch automatically;
     the active window is only known on X11.
   * The tray icon needs a StatusNotifier host. On GNOME that is the

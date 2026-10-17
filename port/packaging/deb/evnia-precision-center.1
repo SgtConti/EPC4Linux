@@ -4,6 +4,7 @@ evnia\-precision\-center \- control centre for Philips Evnia monitors (unofficia
 .SH SYNOPSIS
 .B evnia\-precision\-center
 .RB [ \-\-openAsHidden ]
+.RB [ \-\-ambiglow=\fIvalue\fP ]
 .SH DESCRIPTION
 .B evnia\-precision\-center
 is an unofficial, offline Linux port of Evnia Precision Center 1.13.0.
@@ -20,7 +21,9 @@ Assistant webhook (config.json
 .BR linuxLanSync ).
 .PP
 Only one instance runs per user; starting it again shows the running
-window.
+window, or, with
+.BR \-\-ambiglow ,
+passes that command to it.
 .SH OPTIONS
 .TP
 .B \-\-openAsHidden
@@ -28,6 +31,36 @@ Start without showing the window, reachable from the tray icon.
 The login autostart entry uses it.
 Without a tray host (for example GNOME without the AppIndicator
 extension) the window is shown anyway.
+.TP
+.BI \-\-ambiglow= value
+Switch the Ambiglow effect (needs the monitor's USB Ambiglow controller).
+.I value
+is an effect
+.RB ( FollowVideo ,
+.BR FollowAudio ,
+.BR ColorShift ,
+.BR ColorWave ,
+.BR Breathing ,
+.BR StarryNight ,
+.BR Static ;
+case, \- and _ do not matter), which is also switched on;
+.B on
+or
+.BR off ;
+or
+.BR restore ,
+which puts back the effect and on/off state from before the first
+.B \-\-ambiglow
+since the program started, unless the effect was changed in between
+by other means.
+A running instance takes the command without showing its window, and the
+command returns at once; otherwise the program starts as with
+.B \-\-openAsHidden
+and applies it once the monitor is found (up to 30 seconds).
+Nothing is printed; the outcome is logged in
+.IR ~/.config/evnia/logs/ .
+.I /usr/share/doc/evnia\-precision\-center/examples/mpv\-ambiglow.lua
+is an mpv script that uses it to run Follow video while mpv plays a video.
 .SH ENVIRONMENT
 .TP
 .B EVNIA_ENE_FRAME_BURST
