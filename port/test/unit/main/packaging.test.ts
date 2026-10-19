@@ -19,7 +19,7 @@ test('udev: uaccess for exactly the VIA DDC bridge and the ENE Ambiglow MCU, not
   const usb = rules().filter((l) => l.includes('SUBSYSTEM=="usb"'));
   assert.deepEqual(
     usb.map((l) => /idVendor}=="(\w+)".*idProduct}=="(\w+)"/.exec(l)?.slice(1).join(':')),
-    ['2109:8884', '0cf2:a201'],
+    ['2109:8884', '0cf2:a201', '0cf2:b205'],
   );
   for (const l of usb) {
     assert.match(l, /ENV\{DEVTYPE\}=="usb_device"/);
@@ -30,12 +30,12 @@ test('udev: uaccess for exactly the VIA DDC bridge and the ENE Ambiglow MCU, not
 });
 
 test('udev: the VIA DDC bridge is kept out of USB autosuspend (20-consolidation §2.9, 08 §8.5)', () => {
-  const [via, ene] = rules().filter((l) => l.includes('SUBSYSTEM=="usb"'));
+  const [via, ...enes] = rules().filter((l) => l.includes('SUBSYSTEM=="usb"'));
   assert.equal(
     via,
     'SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="2109", ATTR{idProduct}=="8884", TAG+="uaccess", ATTR{power/control}="on"',
   );
-  assert.doesNotMatch(ene, /power\/control/, 'the ENE rule is as specified');
+  for (const ene of enes) assert.doesNotMatch(ene, /power\/control/, 'the ENE rules are as specified');
 });
 
 test('udev: i2c-dev nodes of display adapters only (ddcutil approach)', () => {

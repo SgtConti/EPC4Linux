@@ -22,6 +22,7 @@ case "$1" in
       udevadm control --reload-rules >/dev/null 2>&1 || true
       udevadm trigger --action=change --subsystem-match=usb --attr-match=idVendor=2109 --attr-match=idProduct=8884 >/dev/null 2>&1 || true
       udevadm trigger --action=change --subsystem-match=usb --attr-match=idVendor=0cf2 --attr-match=idProduct=a201 >/dev/null 2>&1 || true
+      udevadm trigger --action=change --subsystem-match=usb --attr-match=idVendor=0cf2 --attr-match=idProduct=b205 >/dev/null 2>&1 || true
       udevadm trigger --action=change --subsystem-match=i2c-dev >/dev/null 2>&1 || true
     fi
     ;;

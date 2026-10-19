@@ -34,7 +34,7 @@ import {
   ENE_FW_VERSION_LENGTH,
   ENE_MAX_LED_GROUPS,
   ENE_MODEL_NAME_MAX,
-  ENE_PRODUCT_ID,
+  ENE_PRODUCT_IDS,
   ENE_VENDOR_ID,
   EneField,
   EneMode,
@@ -114,11 +114,11 @@ export function eneFrameBurstFromEnv(env: Readonly<Record<string, string | undef
 }
 
 export function isEneDevice(info: Pick<UsbDeviceInfo, 'vendorId' | 'productId'>): boolean {
-  return info.vendorId === ENE_VENDOR_ID && info.productId === ENE_PRODUCT_ID;
+  return info.vendorId === ENE_VENDOR_ID && ENE_PRODUCT_IDS.has(info.productId);
 }
 
 /**
- * Candidate Ambiglow controllers. Only 0cf2:a201 is probed — EneEc.dll has no VID/PID filter
+ * Candidate Ambiglow controllers. Only the known Ambiglow PIDs (ENE_PRODUCT_IDS) are probed — EneEc.dll has no VID/PID filter
  * (it opens whatever advertises its WinUSB interface GUIDs, 09 §3.2), but unrelated ENE devices
  * must not be poked (09 plan A.2).
  */

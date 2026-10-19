@@ -320,6 +320,7 @@ check_udev_rules() {
   # uaccess only, exactly the two USB functions and display-adapter i2c buses; applied before 73-seat-late.
   grep -q 'ATTR{idVendor}=="2109", ATTR{idProduct}=="8884", TAG+="uaccess", ATTR{power/control}="on"' "$RULES" || { echo "FAIL VIA bridge rule"; fail=1; }
   grep -q 'ATTR{idVendor}=="0cf2", ATTR{idProduct}=="a201", TAG+="uaccess"' "$RULES" || { echo "FAIL ENE rule"; fail=1; }
+  grep -q 'ATTR{idVendor}=="0cf2", ATTR{idProduct}=="b205", TAG+="uaccess"' "$RULES" || { echo "FAIL ENE 32M2N8900 rule"; fail=1; }
   [ "$(grep -c 'SUBSYSTEM=="i2c-dev".*TAG+="uaccess"' "$RULES")" = 2 ] || { echo "FAIL i2c-dev rules"; fail=1; }
   ! grep -Eq '^[^#]*(MODE=|GROUP=|OWNER=|RUN)' "$RULES" || { echo "FAIL rules must grant access through uaccess only"; fail=1; }
   [ -f /usr/lib/udev/rules.d/73-seat-late.rules ] && echo "73-seat-late.rules (uaccess) sorts after 70-$PKG.rules"

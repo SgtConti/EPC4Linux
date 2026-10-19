@@ -128,12 +128,15 @@ test('permission errors from the USB layer propagate with the udev hint', async 
   assert.deepEqual(usb.transfers, [], 'nothing was sent');
 });
 
-test('findEneDevices returns only 0cf2:a201', async () => {
+test('findEneDevices returns only the Ambiglow PIDs (0cf2:a201, 0cf2:b205)', async () => {
   const usb = new FakeUsbBackend();
   const bridge = { controlIn: () => new Uint8Array(0), controlOut: () => undefined };
   usb.attach({ vendorId: 0x2109, productId: 0x8884, handler: bridge });
   usb.attach({ vendorId: 0x0cf2, productId: 0x1234, handler: bridge });
+  usb.attach({ vendorId: 0x0cf2, productId: 0xa202, handler: bridge });
   const ene = usb.attach(new MockEneDevice().spec());
-  assert.deepEqual((await findEneDevices(usb)).map((d) => d.id), [ene.id]);
+  const ene32 = usb.attach({ ...new MockEneDevice().spec(), productId: 0xb205 });
+  assert.deepEqual((await findEneDevices(usb)).map((d) => d.id).sort(), [ene.id, ene32.id].sort());
   assert.equal(isEneDevice({ vendorId: 0x0cf2, productId: 0xa201 }), true);
+  assert.equal(isEneDevice({ vendorId: 0x0cf2, productId: 0xb205 }), true);
 });

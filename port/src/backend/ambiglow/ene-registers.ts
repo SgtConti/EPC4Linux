@@ -3,7 +3,14 @@
 // All registers are addressed with wValue = reg >> 16 (always 0 here) and wIndex = reg & 0xFFFF.
 
 export const ENE_VENDOR_ID = 0x0cf2;
+/** The 34M2C8600's controller; the mock ENE uses it. */
 export const ENE_PRODUCT_ID = 0xa201;
+/**
+ * Product IDs under which the Ambiglow MCU enumerates: 0xa201 (34M2C8600), 0xb205 (32M2N8900).
+ * identifyEne() still requires chip id 0x7730. Other 0cf2 devices (e.g. 0xa202, a PowerSensor2) are
+ * never probed (09 plan A.2).
+ */
+export const ENE_PRODUCT_IDS: ReadonlySet<number> = new Set([ENE_PRODUCT_ID, 0xb205]);
 
 /** ENEIC_E.ENE_0x7730: the only chip id CUSBENE6K7732.Plug() accepts (CUSBENE6K7732.cs:91-92). */
 export const ENE_CHIP_ID = 0x7730;

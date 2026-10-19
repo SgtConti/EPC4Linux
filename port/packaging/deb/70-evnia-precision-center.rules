@@ -5,7 +5,8 @@
 # USB: the app talks to exactly two USB functions of the monitor, both with vendor control
 # transfers on endpoint 0 (docs/re/08 §4, docs/re/09 §3):
 #   2109:8884  VIA Labs USB-DDC bridge inside the Evnia hub (DDC/CI over USB)
-#   0cf2:a201  ENE Technology Ambiglow LED controller
+#   0cf2:a201  ENE Technology Ambiglow LED controller (34M2C8600)
+#   0cf2:b205  the same controller in the 32M2N8900
 # VIA Labs (2109) is a hub-silicon vendor: the same vendor ID covers ordinary USB 2/3 hubs and their
 # billboard/hub-controller functions in countless docks and monitors. Tagging 2109:* would let any
 # seat user send raw control requests (port power, reset, firmware-update commands) to every such
@@ -14,6 +15,7 @@
 # to "auto"), which would stall or fail the first transfer after an idle period (08 §8.5).
 SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="2109", ATTR{idProduct}=="8884", TAG+="uaccess", ATTR{power/control}="on"
 SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="0cf2", ATTR{idProduct}=="a201", TAG+="uaccess"
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="0cf2", ATTR{idProduct}=="b205", TAG+="uaccess"
 
 # I2C: DDC/CI fallback over the graphics card's i2c buses (/dev/i2c-N from the i2c-dev module).
 # Like ddcutil's 60-ddcutil-i2c.rules, only buses that belong to a display adapter are tagged

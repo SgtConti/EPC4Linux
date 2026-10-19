@@ -28,7 +28,7 @@ import { fileURLToPath } from 'node:url';
 import { createDefaultBackend, type DefaultBackend, type DefaultCompositionOptions } from '../../src/backend/index.ts';
 import type { MockHardware } from '../../src/backend/monitor/manager.ts';
 import type { DisplayModeInfo, HostServices } from '../../src/backend/types.ts';
-import { ENE_PRODUCT_ID, ENE_VENDOR_ID } from '../../src/backend/ddc/discovery.ts';
+import { ENE_PRODUCT_IDS, ENE_VENDOR_ID } from '../../src/backend/ddc/discovery.ts';
 import { EXT_BASE } from '../../src/backend/ddc/codec.ts';
 import { captureLogger, type LogLine } from '../unit/rpc/helpers.ts';
 import { USER_34M2C8600, USER_MONITOR_SERIAL } from '../fixtures/user-monitor.ts';
@@ -125,7 +125,7 @@ export async function composeMockBackend(options: ComposeOptions = {}): Promise<
 
 /** ENE MCUs present on the simulated USB bus. */
 export async function mockEnes(c: ComposedBackend): Promise<number> {
-  return (await c.hardware().usb.list((d) => d.vendorId === ENE_VENDOR_ID && d.productId === ENE_PRODUCT_ID)).length;
+  return (await c.hardware().usb.list((d) => d.vendorId === ENE_VENDOR_ID && ENE_PRODUCT_IDS.has(d.productId))).length;
 }
 
 /** A VCP write the simulated monitor received: standard code or TPV extended 0xE2A0xx, and the value. */

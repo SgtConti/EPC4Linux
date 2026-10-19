@@ -44,7 +44,7 @@ export class UsbError extends Error {
 
 /** What to tell the user when libusb reports LIBUSB_ERROR_ACCESS (08 §8.5, 09 plan A.1). */
 export const USB_PERMISSION_HINT =
-  'install the Evnia Precision Center udev rules (TAG+="uaccess" for 2109:8884 and 0cf2:a201), ' +
+  'install the Evnia Precision Center udev rules (TAG+="uaccess" for 2109:8884, 0cf2:a201 and 0cf2:b205), ' +
   'run "sudo udevadm control --reload && sudo udevadm trigger", then re-plug the monitor\'s USB upstream cable';
 
 // libusb_error (negative) → code, name

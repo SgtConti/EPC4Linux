@@ -202,7 +202,7 @@ The package sets up device access, so the app needs no root and no group members
 
 - **udev rules** (`/usr/lib/udev/rules.d/70-evnia-precision-center.rules`) give the user at the local seat (`TAG+="uaccess"`) access to:
   - the monitor's VIA USB-DDC bridge `2109:8884`;
-  - the ENE Ambiglow controller `0cf2:a201`;
+  - the ENE Ambiglow controller `0cf2:a201` (`0cf2:b205` on the 32M2N8900);
   - the display adapters' i2c buses, for the DDC/CI fallback.
 - **`i2c-dev`** is loaded at once and at every boot (`/usr/lib/modules-load.d/evnia-precision-center-i2c.conf`).
 - The rules are re-applied to connected devices, so no reboot is needed.

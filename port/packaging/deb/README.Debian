@@ -38,7 +38,7 @@ How the monitor is reached, and permissions
 
 The program talks to the monitor over the USB-C/USB upstream cable (the
 monitor's built-in hub has a USB-DDC bridge, VIA Labs 2109:8884, and an
-Ambiglow controller, ENE 0cf2:a201). Without the USB cable it falls back to
+Ambiglow controller, ENE 0cf2:a201 or 0cf2:b205). Without the USB cable it falls back to
 DDC/CI over the graphics card's i2c buses (/dev/i2c-N).
 
 The package installs what the logged-in user needs for this; no group
@@ -46,7 +46,7 @@ membership and no root access are required:
 
   /usr/lib/udev/rules.d/70-evnia-precision-center.rules
       TAG+="uaccess" (access for the user at the local seat) for exactly
-      2109:8884 and 0cf2:a201, and for the i2c buses of display adapters
+      2109:8884, 0cf2:a201 and 0cf2:b205, and for the i2c buses of display adapters
       (not for the graphics card's SMBus and "AMDGPU SMU" buses, which
       stay root-only). The USB-DDC bridge is also kept out of USB autosuspend.
   /usr/lib/modules-load.d/evnia-precision-center-i2c.conf

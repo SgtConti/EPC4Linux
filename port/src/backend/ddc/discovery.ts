@@ -8,7 +8,7 @@
 //      2): VCP C8, ModelName, pairing with a display's EDID name (MonitorUtil.smethod_6/8, 08 §3.7),
 //      then the USB-DDC probe (08 §3.6).
 //   3. Merge by the EDID serial (20 D6; GClass3.method_3/4) and attach the ENE Ambiglow controller
-//      (0cf2:a201, 09 §3, 20 §6) by USB topology.
+//      (0cf2:a201 or 0cf2:b205, 09 §3, 20 §6) by USB topology.
 // Everything runs under a process-wide "display scan" lock, and every bus access holds the lock of
 // that bridge or bus (and of the monitor once it is known), shared with the driver's channels and
 // with other processes (20 §2.3/§2.4, locks.ts). A rescan can therefore run while the driver polls.
@@ -25,10 +25,10 @@ import { readFactorySerial, readScalerIc, readTpvString } from './identity.ts';
 import { type ProcessLock, resolveProcessLock, withExclusiveAccess } from './locks.ts';
 import { I2cDevTransport, type I2cSyscalls, i2cTransportId, linuxI2cSyscalls, readEdidOverI2c } from './transports/i2cdev.ts';
 import { VIA_DDC_BRIDGE_PID, VIA_VENDOR_ID, ViaUsbTransport } from './transports/via.ts';
+import { ENE_PRODUCT_IDS, ENE_VENDOR_ID } from '../ambiglow/ene-registers.ts';
 import { USB_CLASS_HUB, formatVidPid, usbDeviceClass } from '../usb/ids.ts';
 
-export const ENE_VENDOR_ID = 0x0cf2;
-export const ENE_PRODUCT_ID = 0xa201;
+export { ENE_PRODUCT_ID, ENE_PRODUCT_IDS, ENE_VENDOR_ID } from '../ambiglow/ene-registers.ts';
 
 /** VIA hub PIDs seen on the user's machine (08 §2.3, 20 §6.1); used only when neither the descriptor nor sysfs can tell. */
 const KNOWN_VIA_HUB_PIDS = new Set([0x0211, 0x0817, 0x2817, 0x2211]);
@@ -469,7 +469,7 @@ async function identifyBridge(
 }
 
 async function attachEne(usb: UsbBackend, candidates: Candidate[], log: Logger | undefined): Promise<void> {
-  const enes = await usb.list((d) => d.vendorId === ENE_VENDOR_ID && d.productId === ENE_PRODUCT_ID);
+  const enes = await usb.list((d) => d.vendorId === ENE_VENDOR_ID && ENE_PRODUCT_IDS.has(d.productId));
   for (const ene of enes) {
     const free = candidates.filter((c) => !c.ene);
     let best: Candidate | undefined;

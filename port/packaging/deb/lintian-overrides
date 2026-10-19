@@ -8,7 +8,7 @@ evnia-precision-center: unstripped-binary-or-object *
 # koffi's loader module starts with a shebang but is only ever require()d.
 evnia-precision-center: script-not-executable *
 # The udev rules grant the logged-in user access to the monitor's own USB functions (2109:8884,
-# 0cf2:a201) for this program. The package is installed from a local file, never from an archive
+# 0cf2:a201, 0cf2:b205) for this program. The package is installed from a local file, never from an archive
 # whose AppStream catalogue could advertise it for that hardware, so it ships no metainfo.
 evnia-precision-center: appstream-metadata-missing-modalias-provide *
 # Prebuilt upstream binaries (Electron, usb and koffi prebuilds) are shipped unmodified, as their
